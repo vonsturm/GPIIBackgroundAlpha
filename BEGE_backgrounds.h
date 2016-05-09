@@ -8,28 +8,10 @@
 #define __BAT__BEGE_BACKGROUNDS__H
 
 // C/C++ includes
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <math.h>
 #include <vector>
 
 // ROOT includes
-#include "TChain.h"
-#include "TROOT.h"
-#include "TCanvas.h"
-#include "TStyle.h"
-#include "TTree.h"
-#include "TString.h"
-#include "TH1.h"
-#include "TFile.h"
-#include "TColor.h"
-#include "TF1.h"
-#include "TLegend.h"
-#include "TParameter.h"
-#include "TObject.h"
-#include "TNtuple.h"
-#include "TMath.h"
+#include "TH1D.h"
 
 // BAT includes
 #include <BAT/BCModel.h>
@@ -58,7 +40,7 @@ class BEGE_backgrounds : public BCModel
 
       // my own methods
       void SetHistogramParameters(int hnumbins, double hemin, double hemax);
-      int ReadData();
+      int ReadData( std::string meta_filename = "" );
       int FillDataArray();
       int ReadMC();
       int AddMC(std::string name);

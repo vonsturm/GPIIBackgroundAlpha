@@ -4,121 +4,154 @@
 // BAT can be downloaded from http://www.mppmu.mpg.de/bat
 // ***************************************************************
 
-#include "BEGE_backgrounds.h"
+// C/C++ includes
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <math.h>
 
+// ROOT includes
+#include "TChain.h"
+#include "TROOT.h"
+#include "TCanvas.h"
+#include "TStyle.h"
+#include "TTree.h"
+#include "TString.h"
+#include "TH1D.h"
+#include "TFile.h"
+#include "TColor.h"
+#include "TF1.h"
+#include "TLegend.h"
+#include "TParameter.h"
+#include "TObject.h"
+#include "TNtuple.h"
+#include "TMath.h"
+
+// BAT includes
 #include <BAT/BCMath.h>
 #include <BAT/BCParameter.h>
+
+// gerda-ada includes
+#include "FileMap.h"
+#include "DataLoader.h"
+
+// own includes
+#include "BEGE_backgrounds.h"
 
 using namespace std;
 
 // ---------------------------------------------------------
 BEGE_backgrounds::BEGE_backgrounds() : BCModel()
 {
-  f_ndets = 29; // 30 without GD02D
-  DefineParameters();
+	f_ndets = 29; // 30 without GD02D
+	DefineParameters();
 };
 
 // ---------------------------------------------------------
 BEGE_backgrounds::BEGE_backgrounds(const char * name) : BCModel(name)
 {
-  f_ndets = 29; // 30 without GD02D
-  DefineParameters();
+	f_ndets = 29; // 30 without GD02D
+	DefineParameters();
 };
 
 // ---------------------------------------------------------
 BEGE_backgrounds::~BEGE_backgrounds()
 {
-  f_hdata.clear();
-  f_MC.clear();
-  f_MCname.clear();
-  f_vdata.clear();
-  f_lowerlimits.clear();
-  f_upperlimits.clear();
-  f_vMC.clear();
+	for( auto i : f_hdata ) delete i;
+	f_hdata.clear();
+
+	for( auto i : f_MC ) delete i;
+	f_MC.clear();
+
+	f_MCname.clear();
+	f_vdata.clear();
+	f_lowerlimits.clear();
+	f_upperlimits.clear();
+	f_vMC.clear();
 };
 
 // ---------------------------------------------------------
 void BEGE_backgrounds::DefineParameters()
 {
-  // Add all MC histograms as fit parameters
-
-  for(int iMC = 0; iMC < (int)f_MC.size(); iMC++)
-    {
-      	AddParameter(Form("par_%d",iMC), 0., 100.);
-    }
+	// Add all MC histograms as fit parameters
+	for(int iMC = 0; iMC < (int)f_MC.size(); iMC++)
+	{
+		AddParameter( Form("par_%d",iMC), 0., 100. );
+	}
 }
 
 // ---------------------------------------------------------
 void BEGE_backgrounds::SetHistogramParameters( int hnumbins, double hemin, double hemax )
 {
-  f_hnumbins = hnumbins;
-  f_hemin = hemin;
-  f_hemax = hemax;
+	f_hnumbins = hnumbins;
+	f_hemin = hemin;
+	f_hemax = hemax;
 }
 
 // ---------------------------------------------------------
-int BEGE_backgrounds::ReadData()
+int BEGE_backgrounds::ReadData( string meta_filename )
 {
-  // Here the data loader could be included...
+	string GERDA_PHASEII_DATA = getenv("GERDA_PHASEII_DATA");
+	string GERDA_META_DATA = getenv("GERDA_META_DATA");
 
-  TChain* chain = new TChain("outTree");
+	string META_FILE = GERDA_META_DATA;
+	if( meta_filename.size() > 2 )
+		META_FILE += "/" + meta_filename;
+	else
+	{
+		cout << "No meta data filename given. Running default data set run0060-phy-analysis-tmp.txt" << endl;
+		META_FILE += "/" + "run0060-phy-analysis-tmp.txt";
+	}
 
-  chain->AddFile("/raid4/gerda/hemmer/dataFiles_fullSetup/background/tier3_unblinded/run35.tier3.root");
-  chain->AddFile("/raid4/gerda/hemmer/dataFiles_fullSetup/background/tier3_unblinded/run36.tier3.root");
-  chain->AddFile("/raid4/gerda/hemmer/dataFiles_fullSetup/background/tier3_unblinded/run37.tier3.root");
-  chain->AddFile("/raid4/gerda/hemmer/dataFiles_fullSetup/background/tier3_unblinded/run38.tier3.root");
-  chain->AddFile("/raid4/gerda/hemmer/dataFiles_fullSetup/background/tier3_unblinded/run39a.tier3.root");
-  chain->AddFile("/raid4/gerda/hemmer/dataFiles_fullSetup/background/tier3_unblinded/run39b.tier3.root");
-  chain->AddFile("/raid4/gerda/hemmer/dataFiles_fullSetup/background/tier3_unblinded/run40.tier3.root");
-  chain->AddFile("/raid4/gerda/hemmer/dataFiles_fullSetup/background/tier3_unblinded/run41.tier3.root");
-  chain->AddFile("/raid4/gerda/hemmer/dataFiles_fullSetup/background/tier3_unblinded/run42.tier3.root");
-  chain->AddFile("/raid4/gerda/hemmer/dataFiles_fullSetup/background/tier3_unblinded/run43.tier3.root");
-  chain->AddFile("/raid4/gerda/hemmer/dataFiles_fullSetup/background/tier3_unblinded/run44a.tier3.root");
-  chain->AddFile("/raid4/gerda/hemmer/dataFiles_fullSetup/background/tier3_unblinded/run44.tier3.root");
-  chain->AddFile("/raid4/gerda/hemmer/dataFiles_fullSetup/background/tier3_unblinded/run45.tier3.root");
-  chain->AddFile("/raid4/gerda/hemmer/dataFiles_fullSetup/background/tier3_unblinded/run46a.tier3.root");
-  chain->AddFile("/raid4/gerda/hemmer/dataFiles_fullSetup/background/tier3_unblinded/run46b.tier3.root");
+	// Here the data loader could be included...
+	gada::FileMap myMap;
+	myMap.SetRootDir( GERDA_PHASEII_DATA );
+	myMap.BuildFromListOfKeys( META_FILE );
 
-  int nentries = chain->GetEntries();
+	gada::DataLoader l;
+	l.AddFileMap(&myMap);
+	l.BuildTier3();
 
-  cout << "There are " << nentries << " events in the chain!" <<endl;
+	TChain * chain = l.GetMasterChain();
+	int nentries = chain->GetEntries();
+
+	cout << "There are " << nentries << " events in the chain!" <<endl;
   
-  // fill the data in histograms
+	// fill the data in histograms
+	const int nchannels_tot = 40;
 
-  const int nchannels_tot = 40;
+	int eventChannelNumber;
+	int isvetoed;
+	int isvetoedInTime;
+	int isTP;
+	int firedChannels;
+	double ch[nchannels_tot];
+	int firedFlag[nchannels_tot];
 
-  int eventChannelNumber;
-  int isvetoed;
-  int isvetoedInTime;
-  int isTP; 
-  int firedChannels;
-  double ch[nchannels_tot];
-  int firedFlag[nchannels_tot];
-
-  chain -> SetBranchAddress("eventChannelNumber", &eventChannelNumber);
-  chain -> SetBranchAddress("isVetoed",&isvetoed);
-  chain -> SetBranchAddress("isVetoedInTime",&isvetoedInTime);
-  chain -> SetBranchAddress("firedFlag", firedFlag);
-  chain -> SetBranchAddress("multiplicity",&firedChannels);
-  chain -> SetBranchAddress("energy",ch);
-  chain -> SetBranchAddress("isTP",&isTP);
+	chain -> SetBranchAddress("eventChannelNumber", &eventChannelNumber);
+	chain -> SetBranchAddress("isVetoed",&isvetoed);
+	chain -> SetBranchAddress("isVetoedInTime",&isvetoedInTime);
+	chain -> SetBranchAddress("firedFlag", firedFlag);
+	chain -> SetBranchAddress("multiplicity",&firedChannels);
+	chain -> SetBranchAddress("energy",ch);
+	chain -> SetBranchAddress("isTP",&isTP);
 
 
-  // Modify all this part in order to read only BEGe data
-  // Maybe using the ChannelMapping file we also use in MaGe
+	// Modify all this part in order to read only BEGe data
+	// Maybe using the ChannelMapping file we also use in MaGe
 
-  const int firstBEGE = 3;
+	const int firstBEGE = 3;
 
-  for(int icha = firstBEGE; icha < firstBEGE + f_ndets; icha++)
+	for(int icha = firstBEGE; icha < firstBEGE + f_ndets; icha++)
     {
-      TH1D* henergy = new TH1D(Form("henergy_%d",icha),
-			       Form("Energy channel %d, mult==1, no veto",icha),
-			       f_hnumbins, f_hemin, f_hemax);
+		TH1D* henergy = new TH1D(Form("henergy_%d",icha),
+				Form("Energy channel %d, mult == 1, no veto",icha),
+				f_hnumbins, f_hemin, f_hemax);
 
-      f_hdata.push_back(henergy);
+		f_hdata.push_back(henergy);
     }
 
-  f_hdataSum = new TH1D("henergySum",
+	f_hdataSum = new TH1D("henergySum",
 			"Energy channels 9-12, mult==1, no veto",
 			f_hnumbins, f_hemin, f_hemax);
 
