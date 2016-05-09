@@ -8,6 +8,8 @@
 #ifndef DETECTORPHASEII_H_
 #define DETECTORPHASEII_H_
 
+#include <string>
+
 class DetectorPhaseII
 {
 public:
@@ -34,7 +36,7 @@ public:
 	//
 	int CheckFlags( int verbose = 0 );
 
-	void PrintInfo();
+	std::string PrintInfo();
 
 
 private:

@@ -6,6 +6,7 @@
  */
 
 
+#include <iostream>
 
 #include "DetectorPhaseII.h"
 
@@ -18,8 +19,8 @@ DetectorPhaseII::DetectorPhaseII()
 };
 
 DetectorPhaseII::DetectorPhaseII( string DetectorName, string DetectorType,
-			uint DataChannel, uint MCChannel, bool OnlyACFlag = false,
-			bool SwitchedOffFlag = false )
+			uint DataChannel, uint MCChannel, bool OnlyACFlag,
+			bool SwitchedOffFlag )
 {
 	SetDetectorAttributes( DetectorName, DetectorType, DataChannel, MCChannel,
 			OnlyACFlag, SwitchedOffFlag );
@@ -30,7 +31,7 @@ DetectorPhaseII::~DetectorPhaseII(){};
 
 // set parameters
 void DetectorPhaseII::SetDetectorAttributes( string DetectorName, string DetectorType,
-			uint DataChannel, uint MCChannel, bool OnlyACFlag = 0, bool SwitchedOffFlag = 0 )
+			uint DataChannel, uint MCChannel, bool OnlyACFlag, bool SwitchedOffFlag )
 {
 	fDetectorName = DetectorName;
 	fDetectorType = DetectorType;
@@ -81,10 +82,12 @@ int DetectorPhaseII::CheckFlags( int verbose )
 }
 
 
-void DetectorPhaseII::PrintInfo()
+string DetectorPhaseII::PrintInfo()
 {
-	cout << fDetectorName << " " << fDetectorType << " " << fDataChannel << " " << fMCChannel;
-	cout << " " << fAnalysisFlag << fOnlyACFlag << fSwitchedOffFlag;
+	string detinfo = fDetectorName;
+	detinfo += " "; detinfo += fDetectorType; detinfo += " "; detinfo += fDataChannel; detinfo += " ";
+	detinfo += fMCChannel; detinfo	+= " "; detinfo += fAnalysisFlag; detinfo += fOnlyACFlag;
+	detinfo += fSwitchedOffFlag;
 
-	return;
+	return detinfo;
 }

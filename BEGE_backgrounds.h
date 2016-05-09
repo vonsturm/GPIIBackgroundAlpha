@@ -12,6 +12,7 @@
 
 // ROOT includes
 #include "TH1D.h"
+#include "TChain.h"
 
 // BAT includes
 #include <BAT/BCModel.h>

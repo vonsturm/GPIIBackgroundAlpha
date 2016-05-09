@@ -95,12 +95,13 @@ int BEGE_backgrounds::ReadData( string meta_filename )
 	string GERDA_META_DATA = getenv("GERDA_META_DATA");
 
 	string META_FILE = GERDA_META_DATA;
+
 	if( meta_filename.size() > 2 )
 		META_FILE += "/" + meta_filename;
 	else
 	{
 		cout << "No meta data filename given. Running default data set run0060-phy-analysis-tmp.txt" << endl;
-		META_FILE += "/" + "run0060-phy-analysis-tmp.txt";
+		META_FILE += "/run0060-phy-analysis-tmp.txt";
 	}
 
 	// Here the data loader could be included...

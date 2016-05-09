@@ -12,6 +12,8 @@
 #include <BAT/BCH1D.h>
 #include <BAT/BCModelOutput.h>
 
+#include "TStyle.h"
+
 #include "BEGE_backgrounds.h"
 
 using namespace std;

@@ -6,6 +6,8 @@
  */
 
 
+#include <iostream>
+#include <cstdlib>
 #include <fstream>
 #include <string>
 
@@ -65,7 +67,7 @@ void RunPhaseII::AddDetector( string DetectorName, string DetectorType,
 			return;
 		}
 
-	DetectorPhaseII * det = DetectorPhaseII( DetectorName, DetectorType, DataChannel, MCChannel,
+	DetectorPhaseII * det = new DetectorPhaseII( DetectorName, DetectorType, DataChannel, MCChannel,
 			OnlyACFlag, SwitchedOffFlag );
 
 	fDetectors.push_back( det );
@@ -85,7 +87,6 @@ int RunPhaseII::ParseDetectorStatusFile()
 	ifstream detectorStatusFile( fGERDA_META_DATA + "/" + fDetectorStatusFile );
 	string line, DetectorName, DetectorType;
 	uint DataChannel, MCChannel;
-	bool OnlyACFlag, SwitchedOffFlag;
 
 	getline(detectorStatusFile, line);
 
@@ -97,7 +98,7 @@ int RunPhaseII::ParseDetectorStatusFile()
 	{
 		AddDetector( DetectorName, DetectorType, DataChannel, MCChannel, 0, 1 );
 	}
-	else if( line.at( (int)line.end() - 2 )  == '1' )
+	else if( line.at( line.size() - 2 )  == '1' )
 	{
 		AddDetector( DetectorName, DetectorType, DataChannel, MCChannel, 1, 0 );
 	}
