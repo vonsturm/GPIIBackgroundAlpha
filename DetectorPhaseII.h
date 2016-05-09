@@ -16,19 +16,17 @@ public:
 
 	DetectorPhaseII();
 	DetectorPhaseII( std::string DetectorName, std::string DetectorType,
-			uint DataChannel, uint MCChannel, bool OnlyACFlag = 0, bool SwitchedOffFlag = 0 );
+			uint DataChannel, uint MCChannel, std::string DetectorAnalysisStatus = "ON" );
 	~DetectorPhaseII();
 
 	void SetDetectorAttributes( std::string DetectorName, std::string DetectorType,
-			uint DataChannel, uint MCChannel, bool OnlyACFlag = 0, bool SwitchedOffFlag = 0 );
+			uint DataChannel, uint MCChannel, std::string DetectorAnalysisStatus = "ON" );
 
 	// Getters and Setters
 	std::string GetDetectorName(){ return fDetectorName; };
 	std::string GetDetectorType(){ return fDetectorType; };
 
-	bool GetAnalysisFlag(){ return fAnalysisFlag; };
-	bool GetOnlyACFlag(){ return fOnlyACFlag; };
-	bool GetSwitchedOffFlag(){ return fSwitchedOffFlag; };
+	std::string GetDetectorAnalysisStatus(){ return fDetectorAnalysisStatus; };
 
 	uint GetDataChannel(){ return fDataChannel; };
 	uint GetMCChannel(){ return fMCChannel; };
@@ -44,9 +42,7 @@ private:
 	std::string fDetectorName;
 	std::string fDetectorType;
 
-	bool fAnalysisFlag;
-	bool fOnlyACFlag;
-	bool fSwitchedOffFlag;
+	std::string fDetectorAnalysisStatus;
 
 	uint fDataChannel;
 	uint fMCChannel;

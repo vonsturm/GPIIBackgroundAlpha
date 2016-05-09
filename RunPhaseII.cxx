@@ -58,7 +58,7 @@ RunPhaseII::~RunPhaseII()
 
 
 void RunPhaseII::AddDetector( string DetectorName, string DetectorType,
-		uint DataChannel, uint MCChannel, bool OnlyACFlag, bool SwitchedOffFlag )
+		uint DataChannel, uint MCChannel, string DetectorAnalysisStatus )
 {
 	for( auto det : fDetectors )
 		if( det->GetDetectorName() == DetectorName )
@@ -68,7 +68,7 @@ void RunPhaseII::AddDetector( string DetectorName, string DetectorType,
 		}
 
 	DetectorPhaseII * det = new DetectorPhaseII( DetectorName, DetectorType, DataChannel, MCChannel,
-			OnlyACFlag, SwitchedOffFlag );
+			DetectorAnalysisStatus );
 
 	fDetectors.push_back( det );
 
@@ -85,24 +85,15 @@ int RunPhaseII::ParseDetectorStatusFile()
 	}
 
 	ifstream detectorStatusFile( fGERDA_META_DATA + "/" + fDetectorStatusFile );
-	string line, DetectorName, DetectorType;
+	string line, DetectorName, DetectorType, DetectorAnalysisStatus;
 	uint DataChannel, MCChannel;
 
 	getline(detectorStatusFile, line);
 
-	detectorStatusFile >> DetectorName >> DetectorType >> DataChannel >> MCChannel;
+	detectorStatusFile >> DetectorName >> DetectorType >> DataChannel;
+	detectorStatusFile >> MCChannel >> DetectorAnalysisStatus;
 
-	detectorStatusFile >> line;
-
-	if( line.back() == '1' )
-	{
-		AddDetector( DetectorName, DetectorType, DataChannel, MCChannel, 0, 1 );
-	}
-	else if( line.at( line.size() - 2 )  == '1' )
-	{
-		AddDetector( DetectorName, DetectorType, DataChannel, MCChannel, 1, 0 );
-	}
-	else AddDetector( DetectorName, DetectorType, DataChannel, MCChannel);
+	AddDetector( DetectorName, DetectorType, DataChannel, MCChannel, DetectorAnalysisStatus );
 
 	return 0;
 }

@@ -38,7 +38,7 @@ public:
 
 	//
 	void AddDetector( std::string DetectorName, std::string DetectorType,
-			uint DataChannel, uint MCChannel, bool OnlyACFlag = 0, bool SwitchedOffFlag = 0 );
+			uint DataChannel, uint MCChannel, std::string DetectorAnalysisStatus = "ON" );
 	int ParseDetectorStatusFile();
 	int PrintDetectorStatusFile();
 
