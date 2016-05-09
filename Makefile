@@ -42,7 +42,7 @@ GLIBS       += -L$(CUBA_BASE_DIR)/lib -lcuba
 
 
 # add GERDA-ADA flags
-CXXFLAGS    += -I$(GERDA_BASE_DIR)/include
+CXXFLAGS    += -I$(GERDA_BASE_DIR)/include/gerda-ada/
 
 LIBS        += -L$(GERDA_BASE_DIR)/lib -lgerda-ada
 GLIBS       += -L$(GERDA_BASE_DIR)/lib -lgerda-ada
