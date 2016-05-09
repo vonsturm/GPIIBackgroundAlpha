@@ -22,10 +22,10 @@ ROOTGLIBS    := $(shell root-config --glibs)
 #ROOTLIBS     += -lRooFitCore -lRooFit -lRooStats -lFoam -lMathMore
 
 # compiler and flags
-CXX          = g++
-CXXFLAGS     =  -g -Wall -fPIC -Wno-deprecated -O2
-LD           = g++
-LDFLAGS      =  -L$(CUBA_BASE_DIR)/lib -g -O2
+CXX          = g++ 
+CXXFLAGS     = -g -Wall -fPIC -Wno-deprecated -O2
+LD           = g++ 
+LDFLAGS      = -g -O2
 SOFLAGS      = -shared
 
 # standard commands
@@ -35,10 +35,18 @@ ECHO         = echo
 CINT         = rootcint
 
 # add ROOT flags
-CXXFLAGS    += $(ROOTCFLAGS) -I$(CUBA_BASE_DIR)/lib
+CXXFLAGS    += $(ROOTCFLAGS) -I$(CUBA_BASE_DIR)/include
 
 LIBS        += -L$(CUBA_BASE_DIR)/lib -lcuba
 GLIBS       += -L$(CUBA_BASE_DIR)/lib -lcuba
+
+
+# add GERDA-ADA flags
+CXXFLAGS    += -I$(GERDA_BASE_DIR)/include
+
+LIBS        += -L$(GERDA_BASE_DIR)/lib -lgerda-ada
+GLIBS       += -L$(GERDA_BASE_DIR)/lib -lgerda-ada
+
 
 # ----------------------------------------------------------------------
 # The following definitions depend on the setup of the system where
@@ -54,7 +62,7 @@ GLIBS       += $(ROOTGLIBS) -L$(shell bat-config --prefix)/lib -lBAT -lBATmodels
 # Add classes to the end. Backslash indicates continuation
 # on the next line
 CXXSRCS      = \
-        BEGE_backgrounds.cxx
+        BEGE_backgrounds.cxx RunPhaseII.cxx DetectorPhaseII.cxx
 
 # ----------------------------------------------------------------------
 # don't change lines below unless you know what you're doing
