@@ -1,0 +1,16 @@
+*.o
+*.d
+*.txt
+
+*_article*
+
+alpha_timeDistribution.C
+
+RA_PoiStat.C
+RA_PoiStat.h
+
+Plot_BEGE.C
+
+files
+
+runBEGE_backgrounds
