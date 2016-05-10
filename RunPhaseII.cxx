@@ -110,7 +110,13 @@ int RunPhaseII::ParseDetectorStatusFile()
 	detectorStatusFile >> DetectorName >> DetectorType >> DataChannel;
 	detectorStatusFile >> MCChannel >> DetectorAnalysisStatus;
 
-	AddDetector( DetectorName, DetectorType, DataChannel, MCChannel, DetectorAnalysisStatus );
+	while( !detectorStatusFile.eof() )
+	{
+		AddDetector( DetectorName, DetectorType, DataChannel, MCChannel, DetectorAnalysisStatus );
+
+		detectorStatusFile >> DetectorName >> DetectorType >> DataChannel;
+		detectorStatusFile >> MCChannel >> DetectorAnalysisStatus;
+	}
 
 	return 0;
 }
