@@ -71,13 +71,13 @@ CXXSRCS      = \
 CXXOBJS      = $(patsubst %.cxx,%.o,$(CXXSRCS))
 EXEOBJS      =
 MYPROGS     = \
-        runBEGE_backgrounds
+        runBEGE_backgrounds test_classes
 
 GARBAGE      = $(CXXOBJS) $(EXEOBJS) *.o *~ link.d $(MYPROGS)
 
 
 # targets
-all : project
+all : project project_test
 
 link.d : $(patsubst %.cxx,%.h,$(CXXSRCS))
 	$(CXX) -MM $(CXXFLAGS) $(CXXSRCS) > link.d;
@@ -93,6 +93,10 @@ clean :
 project : runBEGE_backgrounds.cxx $(CXXOBJS)
 	$(CXX) $(CXXFLAGS) -c $<
 	$(CXX) $(LDFLAGS) $(LIBS) runBEGE_backgrounds.o $(CXXOBJS) -o runBEGE_backgrounds
+
+project_test : test_classes.cxx $(CXXOBJS)
+	$(CXX) $(CXXFLAGS) -c $<
+	$(CXX) $(LDFLAGS) $(LIBS) test_classes.o $(CXXOBJS) -o test_classes
 
 print :
    echo compiler  : $(CXX)
