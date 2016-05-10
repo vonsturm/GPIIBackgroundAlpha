@@ -1,0 +1,47 @@
+#detector	type	dataCH	MCCH	anaFlag
+GD91A	enrBEGe	0	3	ON
+GD35B	enrBEGe	1	4	ON
+GD02B	enrBEGe	2	5	ON
+GD00B	enrBEGe	3	6	AC-only
+GD61A	enrBEGe	4	7	ON
+GD89B	enrBEGe	5	8	ON
+GD02D	enrBEGe	6	9	AC-only
+GD91C	enrBEGe	7	10	ON
+
+ANG5	enrCoax	8	11	AC-only
+RGI		enrCoax	9	12	OFF
+ANG3	enrCoax	10	13	ON
+	
+GD02A   enrBEGe	11	14	ON
+GD32B   enrBEGe	12	15	AC-only
+GD32A   enrBEGe 13	16	ON
+GD32C   enrBEGe 14	17	ON
+GD89C   enrBEGe 15	18	ON
+GD61C   enrBEGe 16	19	ON
+GD76B   enrBEGe 17	20	ON
+GD00C   enrBEGe 18	21	AC-only
+
+GD35C   enrBEGe 19	22	ON
+GD76C   enrBEGe 20	23	ON
+GD89D   enrBEGe 21	24	ON
+GD00D   enrBEGe 22	25	ON
+GD79C   enrBEGe 23	26	ON
+GD35A   enrBEGe 24	27	ON
+GD91B   enrBEGe 25	28	AC-only
+GD61B   enrBEGe 26	29	ON
+
+ANG2	enrCoax	27	30	AC-only
+RGII	enrCoax	28	31	AC-only
+ANG4   	enrCoax	29	32	ON
+
+GD00A   enrBEGe	30	33	ON
+GD02C   enrBEGe	31	34	AC-only
+GD79B   enrBEGe	32	35	ON
+GD91D   enrBEGe	33	36	AC-only
+GD32D   enrBEGe	34	37	ON
+GD89A   enrBEGe	35	38	ON
+ANG1	enrCoax	36	39	ON
+
+GTF112	natCoax	37	0	AC-only
+GTF32	natCoax	38	1	AC-only
+GTF45	natCoax	39	2	AC-only
