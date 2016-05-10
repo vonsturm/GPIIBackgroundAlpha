@@ -58,8 +58,7 @@ RunPhaseII::~RunPhaseII()
 
 
 void RunPhaseII::AddDetector( string DetectorName, string DetectorType,
-		uint DataChannel, uint MCChannel, string DetectorAnalysisStatus,
-		double TotalMass, double ActiveVolumeFraction )
+		uint DataChannel, uint MCChannel, string DetectorAnalysisStatus )
 {
 	for( auto det : fDetectors )
 		if( det->GetDetectorName() == DetectorName )
@@ -69,7 +68,7 @@ void RunPhaseII::AddDetector( string DetectorName, string DetectorType,
 		}
 
 	DetectorPhaseII * det = new DetectorPhaseII( DetectorName, DetectorType, DataChannel, MCChannel,
-			DetectorAnalysisStatus, TotalMass, ActiveVolumeFraction );
+			DetectorAnalysisStatus );
 
 	cout << "******************" << endl;
 	cout << "Added detector " << DetectorName << " to Run " << fRunNumber << endl;
@@ -107,7 +106,6 @@ int RunPhaseII::ParseDetectorStatusFile()
 
 	string line, DetectorName, DetectorType, DetectorAnalysisStatus;
 	uint DataChannel, MCChannel;
-	double TotalMass, ActiveVolumeFraction;
 
 	getline(detectorStatusFile, line);
 
@@ -117,14 +115,12 @@ int RunPhaseII::ParseDetectorStatusFile()
 	{
 		detectorStatusFile >> DetectorName >> DetectorType >> DataChannel;
 		detectorStatusFile >> MCChannel >> DetectorAnalysisStatus;
-		detectorStatusFile >> TotalMass >> ActiveVolumeFraction;
 
 		if( DetectorAnalysisStatus == "ON" ) counterON++;
 		else if( DetectorAnalysisStatus == "OFF" ) counterOFF++;
 		else if( DetectorAnalysisStatus == "AC-only" ) counterAConly++;
 
-		AddDetector( DetectorName, DetectorType, DataChannel, MCChannel, DetectorAnalysisStatus,
-				TotalMass, ActiveVolumeFraction );
+		AddDetector( DetectorName, DetectorType, DataChannel, MCChannel, DetectorAnalysisStatus );
 	}
 
 	cout << "******************" << endl;
@@ -136,17 +132,25 @@ int RunPhaseII::ParseDetectorStatusFile()
 }
 
 
-int RunPhaseII::PrintDetectorStatusFile()
+int RunPhaseII::PrintDetectorStatusFile( string filename )
 {
-	string outputFilename = fGERDA_META_DATA;
-	outputFilename += Form( "/run%04d-phy-detStatus.txt", fRunNumber );
+	ifstream test( filename );
+	if( test.is_open() )
+	{
+		cout << "ERROR: File exists " << filename << endl;
+		return 1;
+	}
+	else
+		test.close();
 
-	ofstream detectorStatusFile( fGERDA_META_DATA + "/" );
+	ofstream detectorStatusFile( filename );
 	cout << "Creating file in current directory." << endl;
 
-	detectorStatusFile << "Detector Type DataCh MCCh AnalysisFlags" << endl;
+	detectorStatusFile << "Detector Type DataCh MCCh AnalysisFlags Mass fAV ActiveMass" << endl;
 
 	for( auto det : fDetectors ) detectorStatusFile << det->PrintInfo() << endl;
+
+	detectorStatusFile.close();
 
 	return 0;
 }

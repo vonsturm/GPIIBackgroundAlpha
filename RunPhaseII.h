@@ -42,10 +42,9 @@ public:
 
 	//
 	void AddDetector( std::string DetectorName, std::string DetectorType,
-			uint DataChannel, uint MCChannel, std::string DetectorAnalysisStatus = "ON",
-			double TotalMass, double ActiveVolumeFraction );
+			uint DataChannel, uint MCChannel, std::string DetectorAnalysisStatus = "ON" );
 	int ParseDetectorStatusFile();
-	int PrintDetectorStatusFile();
+	int PrintDetectorStatusFile( std::string filename );
 
 private:
 
