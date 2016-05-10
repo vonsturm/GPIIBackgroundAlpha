@@ -15,24 +15,22 @@ using namespace std;
 // constructor
 DetectorPhaseII::DetectorPhaseII()
 {
-	SetDetectorAttributes( "default", "default", 100, 100, "OFF", 0, 0 );
+	SetDetectorAttributes( "default", "default", 100, 100, "OFF" );
 };
 
 DetectorPhaseII::DetectorPhaseII( string DetectorName, string DetectorType,
-			uint DataChannel, uint MCChannel, string DetectorAnalysisStatus,
-			double TotalMass, double ActiveVolumeFraction )
+			uint DataChannel, uint MCChannel, string DetectorAnalysisStatus )
 {
-	SetDetectorAttributes( DetectorName, DetectorType, DataChannel, MCChannel, DetectorAnalysisStatus,
-			TotalMass, ActiveVolumeFraction );
+	SetDetectorAttributes( DetectorName, DetectorType, DataChannel, MCChannel, DetectorAnalysisStatus );
+	ReadParametersFromDatabase();
 };
 
 // destructor
 DetectorPhaseII::~DetectorPhaseII(){};
 
-// set parameters
+// set parameters that can change with each run
 void DetectorPhaseII::SetDetectorAttributes( string DetectorName, string DetectorType,
-			uint DataChannel, uint MCChannel, string DetectorAnalysisStatus,
-			double TotalMass, double ActiveVolumeFraction )
+			uint DataChannel, uint MCChannel, string DetectorAnalysisStatus )
 {
 	fDetectorName = DetectorName;
 	fDetectorType = DetectorType;
@@ -42,10 +40,41 @@ void DetectorPhaseII::SetDetectorAttributes( string DetectorName, string Detecto
 	fDataChannel = DataChannel;
 	fMCChannel = MCChannel;
 
-	fMass = TotalMass;
-	fAVfraction = ActiveVolumeFraction;
-	fActiveMass = TotalMass * ActiveVolumeFraction;
+	return;
 }
+
+// Read detector parameters which cannot change like mass and active volume fraction
+void DetectorPhaseII::ReadParametersFromDatabase()
+{
+	string DETECTOR_DATABASE;
+
+	if( getenv("DETECTOR_DATABASE") )
+		DETECTOR_DATABASE = getenv("DETECTOR_DATABASE");
+	else
+	{
+		cout << "ERROR: DETECTOR_DATABASE environment variable not set." << endl;
+		return;
+	}
+
+	ifstream file( DETECTOR_DATABASE );
+
+	if( !file.is_open() )
+	{
+		cout << "ERROR: Detector Database File not found " << DETECTOR_DATABASE << endl;
+	}
+
+	string dummy = "";
+
+	while( dummy != fDetectorName ) file >> dummy;
+
+	file >> fMass;
+	file >> fAVfraction;
+
+	fActiveMass = fMass * fAVfraction;
+
+	return;
+}
+
 
 string DetectorPhaseII::PrintInfo()
 {
