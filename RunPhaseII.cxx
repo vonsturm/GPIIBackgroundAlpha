@@ -70,6 +70,11 @@ void RunPhaseII::AddDetector( string DetectorName, string DetectorType,
 	DetectorPhaseII * det = new DetectorPhaseII( DetectorName, DetectorType, DataChannel, MCChannel,
 			DetectorAnalysisStatus );
 
+	cout << "******************" << endl;
+	cout << "Added detector " << DetectorName << " to Run " << fRunNumber << endl;
+	cout << "******************" << endl;
+	cout <<  DetectorType << " " << DataChannel << " " << MCChannel << " " << DetectorAnalysisStatus << endl;
+
 	fDetectors.push_back( det );
 
 	return;
