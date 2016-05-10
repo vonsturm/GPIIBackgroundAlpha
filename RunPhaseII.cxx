@@ -58,7 +58,7 @@ RunPhaseII::~RunPhaseII()
 
 
 void RunPhaseII::AddDetector( string DetectorName, string DetectorType,
-		uint DataChannel, uint MCChannel, string DetectorAnalysisStatus )
+		uint DataChannel, uint MCChannel, string DetectorAnalysisStatus, int verbose )
 {
 	for( auto det : fDetectors )
 	{
@@ -69,19 +69,22 @@ void RunPhaseII::AddDetector( string DetectorName, string DetectorType,
 		}
 	}
 
-	cout << "******************" << endl;
-	cout << "Adding detector " << DetectorName << " to Run " << fRunNumber << endl;
-	cout << "******************" << endl;
-	cout << "Type: " << DetectorType << endl;
-	cout << "DataCH: " << DataChannel << " MCCH: " << MCChannel << endl;
-	cout << "Analysis Status: " << DetectorAnalysisStatus << endl;
+	if( verbose > 0 )
+	{
+		cout << "******************" << endl;
+		cout << "Adding detector " << DetectorName << " to Run " << fRunNumber << endl;
+		cout << "******************" << endl;
+		cout << "Type: " << DetectorType << endl;
+		cout << "DataCH: " << DataChannel << " MCCH: " << MCChannel << endl;
+		cout << "Analysis Status: " << DetectorAnalysisStatus << endl;
+	}
 
 	DetectorPhaseII * det = new DetectorPhaseII( DetectorName, DetectorType, DataChannel, MCChannel,
 			DetectorAnalysisStatus );
 
 	fDetectors.push_back( det );
 
-	cout << "******************" << endl;
+	if( verbose > 0 ) cout << "******************" << endl;
 
 	return;
 }
