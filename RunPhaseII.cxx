@@ -61,21 +61,23 @@ void RunPhaseII::AddDetector( string DetectorName, string DetectorType,
 		uint DataChannel, uint MCChannel, string DetectorAnalysisStatus )
 {
 	for( auto det : fDetectors )
+	{
 		if( det->GetDetectorName() == DetectorName )
 		{
 			cout << "WARNING: Detector already added " << DetectorName << endl;
 			return;
 		}
-
-	DetectorPhaseII * det = new DetectorPhaseII( DetectorName, DetectorType, DataChannel, MCChannel,
-			DetectorAnalysisStatus );
+	}
 
 	cout << "******************" << endl;
-	cout << "Added detector " << DetectorName << " to Run " << fRunNumber << endl;
+	cout << "Adding detector " << DetectorName << " to Run " << fRunNumber << endl;
 	cout << "******************" << endl;
 	cout << "Type: " << DetectorType << endl;
 	cout << "DataCH: " << DataChannel << " MCCH: " << MCChannel << endl;
 	cout << "Analysis Status: " << DetectorAnalysisStatus << endl;
+
+	DetectorPhaseII * det = new DetectorPhaseII( DetectorName, DetectorType, DataChannel, MCChannel,
+			DetectorAnalysisStatus );
 
 	fDetectors.push_back( det );
 
@@ -122,6 +124,8 @@ int RunPhaseII::ParseDetectorStatusFile()
 
 		AddDetector( DetectorName, DetectorType, DataChannel, MCChannel, DetectorAnalysisStatus );
 	}
+
+	detectorStatusFile.close();
 
 	cout << "******************" << endl;
 	cout << "Found " << fDetectors.size() << " detectors in Run" << endl;

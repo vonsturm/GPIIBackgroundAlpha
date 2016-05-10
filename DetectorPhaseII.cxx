@@ -62,6 +62,7 @@ void DetectorPhaseII::ReadParametersFromDatabase()
 	if( !file.is_open() )
 	{
 		cout << "ERROR: Detector Database File not found " << DETECTOR_DATABASE << endl;
+		return;
 	}
 
 	string dummy = "";
@@ -72,6 +73,8 @@ void DetectorPhaseII::ReadParametersFromDatabase()
 	file >> fAVfraction;
 
 	fActiveMass = fMass * fAVfraction;
+
+	file.close();
 
 	return;
 }
