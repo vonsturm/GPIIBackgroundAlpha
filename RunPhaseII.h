@@ -45,10 +45,13 @@ public:
 private:
 
 	int fRunNumber;
+
 	std::string fGERDA_META_DATA;
+
 	std::string fDataKeysAllFile;
 	std::string fDataKeysAnalysisFile;
 	std::string fDetectorStatusFile;
+
 	std::vector<DetectorPhaseII*> fDetectors;
 };
 

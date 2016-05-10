@@ -42,9 +42,9 @@ void RunPhaseII::SetRunSetup( int RunNumber, string DetectorStatusFile,
 
 	SetGERDA_META_DATA();
 
-	fDetectorStatusFile += DetectorStatusFile;
-	fDataKeysAnalysisFile += DataKeysAnalysisFile;
-	fDataKeysAllFile += DataKeysAllFile;
+	fDetectorStatusFile += "/" + DetectorStatusFile;
+	fDataKeysAnalysisFile += "/" + DataKeysAnalysisFile;
+	fDataKeysAllFile += "/" + DataKeysAllFile;
 
 	fDetectors = vector<DetectorPhaseII*>(0);
 }
