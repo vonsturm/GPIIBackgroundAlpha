@@ -67,7 +67,13 @@ void DetectorPhaseII::ReadParametersFromDatabase()
 
 	string dummy = "";
 
-	while( dummy != fDetectorName ) file >> dummy;
+	while( dummy != fDetectorName && !file.eof() ) file >> dummy;
+
+	if( file.eof() && dummy != fDetectorName)
+	{
+		cout << "Detector not found in DB " << fDetectorName << endl;
+		return;
+	}
 
 	file >> fMass;
 	file >> fAVfraction;

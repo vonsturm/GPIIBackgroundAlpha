@@ -81,6 +81,8 @@ void RunPhaseII::AddDetector( string DetectorName, string DetectorType,
 
 	fDetectors.push_back( det );
 
+	cout << "******************" << endl;
+
 	return;
 }
 
@@ -113,16 +115,19 @@ int RunPhaseII::ParseDetectorStatusFile()
 
 	int counterON = 0, counterOFF = 0, counterAConly = 0;
 
+	detectorStatusFile >> DetectorName >> DetectorType >> DataChannel;
+	detectorStatusFile >> MCChannel >> DetectorAnalysisStatus;
+
 	while( !detectorStatusFile.eof() )
 	{
-		detectorStatusFile >> DetectorName >> DetectorType >> DataChannel;
-		detectorStatusFile >> MCChannel >> DetectorAnalysisStatus;
-
 		if( DetectorAnalysisStatus == "ON" ) counterON++;
 		else if( DetectorAnalysisStatus == "OFF" ) counterOFF++;
 		else if( DetectorAnalysisStatus == "AC-only" ) counterAConly++;
 
 		AddDetector( DetectorName, DetectorType, DataChannel, MCChannel, DetectorAnalysisStatus );
+
+		detectorStatusFile >> DetectorName >> DetectorType >> DataChannel;
+		detectorStatusFile >> MCChannel >> DetectorAnalysisStatus;
 	}
 
 	detectorStatusFile.close();
