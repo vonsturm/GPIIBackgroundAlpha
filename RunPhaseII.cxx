@@ -42,9 +42,9 @@ void RunPhaseII::SetRunSetup( int RunNumber, string DetectorStatusFile,
 
 	SetGERDA_META_DATA();
 
-	fDetectorStatusFile += "/" + DetectorStatusFile;
-	fDataKeysAnalysisFile += "/" + DataKeysAnalysisFile;
-	fDataKeysAllFile += "/" + DataKeysAllFile;
+	fDetectorStatusFile = DetectorStatusFile;
+	fDataKeysAnalysisFile = DataKeysAnalysisFile;
+	fDataKeysAllFile = DataKeysAllFile;
 
 	fDetectors = vector<DetectorPhaseII*>(0);
 }
@@ -89,7 +89,19 @@ int RunPhaseII::ParseDetectorStatusFile()
 		return 1;
 	}
 
-	ifstream detectorStatusFile( fGERDA_META_DATA + "/" + fDetectorStatusFile );
+	string statusFileName = fGERDA_META_DATA; statusFileName += fDetectorStatusFile;
+	ifstream detectorStatusFile( statusFileName );
+
+	if( !detectorStatusFile.is_open() )
+	{
+		cout << "Could not open file " << statusFileName << endl;
+		return 1;
+	}
+	else
+	{
+		cout << "File is open " << statusFileName << endl;
+	}
+
 	string line, DetectorName, DetectorType, DetectorAnalysisStatus;
 	uint DataChannel, MCChannel;
 

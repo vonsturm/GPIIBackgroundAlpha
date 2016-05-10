@@ -26,7 +26,11 @@ public:
 	void SetRunSetup( int RunNumber, std::string DetectorStatusFile = "default.txt",
 			std::string DataKeysAnalysisFile = "default.txt", std::string DataKeysAllFile  = "default.txt");
 
-	void SetGERDA_META_DATA(){ fGERDA_META_DATA = getenv("GERDA_META_DATA"); };
+	void SetGERDA_META_DATA()
+	{
+		fGERDA_META_DATA = getenv("GERDA_META_DATA");
+		fGERDA_META_DATA += "/";
+	};
 
 	// Getters and Setters
 	int GetRunNumber(){ return fRunNumber; };
