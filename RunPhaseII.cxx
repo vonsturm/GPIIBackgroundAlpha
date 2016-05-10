@@ -32,7 +32,7 @@ RunPhaseII::RunPhaseII( int RunNumber, string DetectorStatusFile,
 		string DataKeysAnalysisFile, string DataKeysAllFile )
 {
 	SetRunSetup( RunNumber, DetectorStatusFile, DataKeysAnalysisFile, DataKeysAllFile );
-	ParseDetectorStatusFile();
+	ParseDetectorStatusFile( 1 );
 };
 
 void RunPhaseII::SetRunSetup( int RunNumber, string DetectorStatusFile,
@@ -90,7 +90,7 @@ void RunPhaseII::AddDetector( string DetectorName, string DetectorType,
 }
 
 
-int RunPhaseII::ParseDetectorStatusFile()
+int RunPhaseII::ParseDetectorStatusFile( int verbose )
 {
 	if( fGERDA_META_DATA.empty() )
 	{
@@ -108,7 +108,7 @@ int RunPhaseII::ParseDetectorStatusFile()
 	}
 	else
 	{
-		cout << "File is open " << statusFileName << endl;
+		if( verbose > 1 ) cout << "File is open " << statusFileName << endl;
 	}
 
 	string line, DetectorName, DetectorType, DetectorAnalysisStatus;
@@ -135,10 +135,13 @@ int RunPhaseII::ParseDetectorStatusFile()
 
 	detectorStatusFile.close();
 
-	cout << "******************" << endl;
-	cout << "Found " << fDetectors.size() << " detectors in Run" << endl;
-	cout << "ON " << counterON << " OFF " << counterOFF << " AC only " << counterAConly << endl;
-	cout << "******************" << endl;
+	if( verbose > 0 )
+	{
+		cout << "******************" << endl;
+		cout << "Found " << fDetectors.size() << " detectors in Run " << fRunNumber << endl;
+		cout << "ON " << counterON << " OFF " << counterOFF << " AC only " << counterAConly << endl;
+		cout << "******************" << endl;
+	}
 
 	return 0;
 }
