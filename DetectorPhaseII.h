@@ -16,11 +16,13 @@ public:
 
 	DetectorPhaseII();
 	DetectorPhaseII( std::string DetectorName, std::string DetectorType,
-			uint DataChannel, uint MCChannel, std::string DetectorAnalysisStatus = "ON" );
+			uint DataChannel, uint MCChannel, std::string DetectorAnalysisStatus = "ON",
+			double TotalMass, double ActiveVolumeFraction );
 	~DetectorPhaseII();
 
 	void SetDetectorAttributes( std::string DetectorName, std::string DetectorType,
-			uint DataChannel, uint MCChannel, std::string DetectorAnalysisStatus = "ON" );
+			uint DataChannel, uint MCChannel, std::string DetectorAnalysisStatus = "ON",
+			double TotalMass, double ActiveVolumeFraction );
 
 	// Getters and Setters
 	std::string GetDetectorName(){ return fDetectorName; };
@@ -30,6 +32,10 @@ public:
 
 	uint GetDataChannel(){ return fDataChannel; };
 	uint GetMCChannel(){ return fMCChannel; };
+
+	double GetTotalMass(){ return fMass; };
+	double GetAVfraction(){ return fAVfraction; };
+	double GetActiveMass(){ return fActiveMass; };
 
 	//
 	int CheckFlags( int verbose = 0 );
@@ -46,6 +52,11 @@ private:
 
 	uint fDataChannel;
 	uint fMCChannel;
+
+	double fMass;
+	double fAVfraction;
+
+	double fActiveMass;
 };
 
 

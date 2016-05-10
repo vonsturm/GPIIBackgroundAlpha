@@ -42,13 +42,19 @@ public:
 
 	//
 	void AddDetector( std::string DetectorName, std::string DetectorType,
-			uint DataChannel, uint MCChannel, std::string DetectorAnalysisStatus = "ON" );
+			uint DataChannel, uint MCChannel, std::string DetectorAnalysisStatus = "ON",
+			double TotalMass, double ActiveVolumeFraction );
 	int ParseDetectorStatusFile();
 	int PrintDetectorStatusFile();
 
 private:
 
 	int fRunNumber;
+
+	double fLiveTime;		// in days
+	double fExposure; 		// in kg*yr
+	double fExposureBEGE; 	// in kg*yr
+	double fExposureCOAX; 	// in kg*yr
 
 	std::string fGERDA_META_DATA;
 

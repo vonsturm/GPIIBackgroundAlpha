@@ -58,7 +58,8 @@ RunPhaseII::~RunPhaseII()
 
 
 void RunPhaseII::AddDetector( string DetectorName, string DetectorType,
-		uint DataChannel, uint MCChannel, string DetectorAnalysisStatus )
+		uint DataChannel, uint MCChannel, string DetectorAnalysisStatus,
+		double TotalMass, double ActiveVolumeFraction )
 {
 	for( auto det : fDetectors )
 		if( det->GetDetectorName() == DetectorName )
@@ -68,7 +69,7 @@ void RunPhaseII::AddDetector( string DetectorName, string DetectorType,
 		}
 
 	DetectorPhaseII * det = new DetectorPhaseII( DetectorName, DetectorType, DataChannel, MCChannel,
-			DetectorAnalysisStatus );
+			DetectorAnalysisStatus, TotalMass, ActiveVolumeFraction );
 
 	cout << "******************" << endl;
 	cout << "Added detector " << DetectorName << " to Run " << fRunNumber << endl;
@@ -106,6 +107,7 @@ int RunPhaseII::ParseDetectorStatusFile()
 
 	string line, DetectorName, DetectorType, DetectorAnalysisStatus;
 	uint DataChannel, MCChannel;
+	double TotalMass, ActiveVolumeFraction;
 
 	getline(detectorStatusFile, line);
 
@@ -115,16 +117,20 @@ int RunPhaseII::ParseDetectorStatusFile()
 	{
 		detectorStatusFile >> DetectorName >> DetectorType >> DataChannel;
 		detectorStatusFile >> MCChannel >> DetectorAnalysisStatus;
+		detectorStatusFile >> TotalMass >> ActiveVolumeFraction;
 
 		if( DetectorAnalysisStatus == "ON" ) counterON++;
 		else if( DetectorAnalysisStatus == "OFF" ) counterOFF++;
 		else if( DetectorAnalysisStatus == "AC-only" ) counterAConly++;
 
-		AddDetector( DetectorName, DetectorType, DataChannel, MCChannel, DetectorAnalysisStatus );
+		AddDetector( DetectorName, DetectorType, DataChannel, MCChannel, DetectorAnalysisStatus,
+				TotalMass, ActiveVolumeFraction );
 	}
 
+	cout << "******************" << endl;
 	cout << "Found " << fDetectors.size() << " detectors in Run" << endl;
 	cout << "ON " << counterON << " OFF " << counterOFF << " AC only " << counterAConly << endl;
+	cout << "******************" << endl;
 
 	return 0;
 }
