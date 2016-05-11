@@ -43,14 +43,14 @@ using namespace std;
 // ---------------------------------------------------------
 BEGE_backgrounds::BEGE_backgrounds() : BCModel()
 {
-	f_ndets = 29; // 30 without GD02D
+	f_ndets = 0;
 	DefineParameters();
 };
 
 // ---------------------------------------------------------
 BEGE_backgrounds::BEGE_backgrounds(const char * name) : BCModel(name)
 {
-	f_ndets = 29; // 30 without GD02D
+	f_ndets = 0;
 	DefineParameters();
 };
 
@@ -88,136 +88,163 @@ void BEGE_backgrounds::SetHistogramParameters( int hnumbins, double hemin, doubl
 	f_hemax = hemax;
 }
 
+// FIX ME: Detectors cannot change the data channel!!!
+// FIX ME: The sum histogram is still valid but the single histograms are not!!!
+// Here goes a file list with keys
+// Of each run we need to load the proper data based on the detector status meta data
+// The meta data file contains also information about the detector type
+// Here use only enrBEGe detectors
 // ---------------------------------------------------------
-int BEGE_backgrounds::ReadData( string meta_filename )
+int BEGE_backgrounds::ReadData( string runlist )
 {
-	string GERDA_PHASEII_DATA = getenv("GERDA_PHASEII_DATA");
-	string GERDA_META_DATA = getenv("GERDA_META_DATA");
-
-	string META_FILE = GERDA_META_DATA;
-
-	if( meta_filename.size() > 2 )
-		META_FILE += "/" + meta_filename;
-	else
-	{
-		cout << "No meta data filename given. Running default data set run0060-phy-analysis-tmp.txt" << endl;
-		META_FILE += "/run0060-phy-analysis-tmp.txt";
-	}
-
-	// Here the data loader could be included...
-	gada::FileMap myMap;
-	myMap.SetRootDir( GERDA_PHASEII_DATA );
-	myMap.BuildFromListOfKeys( META_FILE );
-
-	gada::DataLoader l;
-	l.AddFileMap(&myMap);
-	l.BuildTier3();
-
-	TChain * chain = l.GetMasterChain();
-	int nentries = chain->GetEntries();
-
-	cout << "There are " << nentries << " events in the chain!" <<endl;
-  
-	// fill the data in histograms
-	const int nchannels_tot = 40;
-
-	int eventChannelNumber;
-	int isvetoed;
-	int isvetoedInTime;
-	int isTP;
-	int firedChannels;
-	double ch[nchannels_tot];
-	int firedFlag[nchannels_tot];
-
-	chain -> SetBranchAddress("eventChannelNumber", &eventChannelNumber);
-	chain -> SetBranchAddress("isVetoed",&isvetoed);
-	chain -> SetBranchAddress("isVetoedInTime",&isvetoedInTime);
-	chain -> SetBranchAddress("firedFlag", firedFlag);
-	chain -> SetBranchAddress("multiplicity",&firedChannels);
-	chain -> SetBranchAddress("energy",ch);
-	chain -> SetBranchAddress("isTP",&isTP);
-
-
-	// Modify all this part in order to read only BEGe data
-	// Maybe using the ChannelMapping file we also use in MaGe
-
-	const int firstBEGE = 3;
-
-	for(int icha = firstBEGE; icha < firstBEGE + f_ndets; icha++)
-    {
-		TH1D* henergy = new TH1D(Form("henergy_%d",icha),
-				Form("Energy channel %d, mult == 1, no veto",icha),
-				f_hnumbins, f_hemin, f_hemax);
-
-		f_hdata.push_back(henergy);
-    }
-
+	// Prepare sum histograms
 	f_hdataSum = new TH1D("henergySum",
-			"Energy channels 9-12, mult==1, no veto",
+			"Energy channels enrBEGe ON, mult==1, no veto",
 			f_hnumbins, f_hemin, f_hemax);
 
-  int bins=int(f_hemax-f_hemin);
+	int bins = int(f_hemax-f_hemin);
 
-  f_hdataSum_fine = new TH1D("henergySum_fine",
-			     "Energy channels 9-12, mult==1, no veto",
-			     bins, f_hemin, f_hemax);
+	f_hdataSum_fine = new TH1D("henergySum_fine",
+			"Energy channels enrBEGe ON, mult==1, no veto",
+		    bins, f_hemin, f_hemax);
 
-  // loop over all events
-  for (int jentry=0; jentry<nentries; jentry++) 
-    {
-      //if (jentry%100000==0) cout<<" now event "<<jentry<<endl;
-      chain->GetEntry(jentry);
+	string GERDA_PHASEII_DATA = getenv("GERDA_PHASEII_DATA");
 
-      if (isTP) continue;
-      if (firedChannels != 1) continue; 
-      if (isvetoed) continue; 
-      if (isvetoedInTime) continue; 
+	ifstream RunList( runlist );
 
-      // do not consider coincidences from ANG1 and RG3 at any time
-      // make coincidence loop only over other detectors
-      // --> channel 0==ANG1, channel 7==RG3
-      int coincidence=0;
-      for(int i=0; i<eventChannelNumber; i++)
+	if( !RunList.is_open() )
 	{
-	  if(i==0 || i==7)
-	    continue;
-	  int hitDet=firedFlag[i];
-	  if(hitDet==1)
-	    coincidence+=1;
+		cout << "No run list found." << endl;
+		return 1;
 	}
 
-      if (coincidence != 1) continue;
+	int Run; RunList >> Run;
 
-      for (int icha=firstBEGE; icha<firstBEGE+f_ndets; icha++) 
+	while( !RunList.eof() )
 	{
-	  if(firedFlag[icha]==1)
-	    {
-	      // fill the channel histogram
-	      f_hdata.at(icha-9)->Fill(ch[icha]);
-	      // fill also the sum histogram
-	      f_hdataSum->Fill(ch[icha]);
-	      f_hdataSum_fine->Fill(ch[icha]);
-	    }
+		RunPhaseII * runX = new RunPhaseII( Run, Form( "run%04d-phy-detStatus.txt", Run ),
+				Form( "run%04d-phy-analysis.txt", Run ), Form( "run%04d-phy-allFiles.txt", Run ) );
+
+		f_ndets = runX->GetDetectors().size();
+
+		if( f_hdata.size() == 0 )
+		{
+			f_hdata = vector<TH1D*>( f_ndets, NULL );
+		}
+
+		string META_FILE = runX->GetDataKeysAnalysisFile();
+
+		// Here the data loader could be included...
+		gada::FileMap myMap;
+		myMap.SetRootDir( GERDA_PHASEII_DATA );
+		myMap.BuildFromListOfKeys( META_FILE );
+
+		gada::DataLoader l;
+		l.AddFileMap(&myMap);
+		l.BuildTier3();
+
+		TChain * chain = l.GetMasterChain();
+		int nentries = chain->GetEntries();
+
+		cout << "There are " << nentries << " events in the chain!" <<endl;
+  
+		// fill the data in histograms
+		int eventChannelNumber;
+		int isvetoed;
+		int isvetoedInTime;
+		int isTP;
+		int firedChannels;
+		double ch[f_ndets];
+		int firedFlag[f_ndets];
+
+		chain -> SetBranchAddress("eventChannelNumber", &eventChannelNumber);
+		chain -> SetBranchAddress("isVetoed",&isvetoed);
+		chain -> SetBranchAddress("isVetoedInTime",&isvetoedInTime);
+		chain -> SetBranchAddress("firedFlag", firedFlag);
+		chain -> SetBranchAddress("multiplicity",&firedChannels);
+		chain -> SetBranchAddress("energy",ch);
+		chain -> SetBranchAddress("isTP",&isTP);
+
+		// Modify all this part in order to read only BEGe data
+		// Maybe using the ChannelMapping file we also use in MaGe
+		vector<int> channelsBEGeON;
+		vector<int> channelsOFF;
+
+		for( auto det : runX->GetDetectors() )
+		{
+			string type = det->GetDetectorType();
+			string status = det->GetDetectorAnalysisStatus();
+			int channel = det->GetDataChannel();
+
+			if( type == "enrBEGe" && status == "ON" )
+			{
+				channelsBEGeON.push_back( channel );
+
+				if( f_hdata.at(channel) == NULL )
+				{
+					TH1D* henergy = new TH1D(Form("henergy_%d",channel),
+							Form("Energy channel %d, mult == 1, no veto",channel),
+							f_hnumbins, f_hemin, f_hemax);
+
+					f_hdata.at(channel) = henergy;
+				}
+			}
+			else if( status == "OFF" )
+			{
+				channelsOFF.push_back( channel );
+			}
+		}
+
+		delete runX;
+
+		// loop over all events
+		for (int jentry = 0; jentry < nentries; jentry++)
+		{
+			//if (jentry%100000==0) cout<<" now event "<<jentry<<endl;
+			chain->GetEntry(jentry);
+
+			if (isTP) continue;
+			if (firedChannels != 1) continue;
+			if (isvetoed) continue;
+			if (isvetoedInTime) continue;
+
+			// do not consider coincidences from ANG1 and RG3 at any time
+			// make coincidence loop only over other detectors
+			// --> channel 0==ANG1, channel 7==RG3
+			int coincidence = 0;
+			for( int i = 0; i < f_ndets; i++)
+			{
+				// continue if channel is switched off and not used for AC
+				if( find( channelsOFF.begin(), channelsOFF.end(), i ) != channelsOFF.end() )
+					continue;
+				int hitDet = firedFlag[i];
+				if( hitDet == 1 )
+					coincidence+=1;
+			}
+
+			if( coincidence != 1 ) continue;
+
+			for( auto BEGeChannel : channelsBEGeON )
+			{
+				if( firedFlag[BEGeChannel] == 1 )
+				{
+					// fill the channel histogram
+					f_hdata.at(BEGeChannel)->Fill( ch[BEGeChannel] );
+					// fill also the sum histogram
+					f_hdataSum->Fill( ch[BEGeChannel] );
+					f_hdataSum_fine->Fill( ch[BEGeChannel] );
+				}
+			}
+		}
 	}
-    }
 
-  if((int)f_hdata.size() != f_ndets)
-    {
-      cout<<"There are "<<f_hdata.size()
-	  <<" histograms but there should be "<<f_ndets<<"!"<<endl;
-      cout<<"Exit program."<<endl;
-      return -1;
-    }
+	// ----------------------------------------------
+	// --- fill the data vector for faster access ---
+	// ----------------------------------------------
 
+	FillDataArray();
 
-  // ----------------------------------------------
-  // --- fill the data vector for faster access ---
-  // ----------------------------------------------
-
-  FillDataArray();
-
-
-  return 0;
+	return 0;
 }
 
 // ---------------------------------------------------------
@@ -225,47 +252,52 @@ int BEGE_backgrounds::ReadData( string meta_filename )
 int BEGE_backgrounds::FillDataArray()
 {
   
-  for(int ibin=0; ibin<f_hnumbins; ibin++)
-    {
-      double value=f_hdataSum->GetBinContent(ibin+1);
-      f_vdata.push_back(value);
-    }
+  for(int ibin = 1; ibin <= f_hnumbins; ibin++)
+  {
+	  double value = f_hdataSum->GetBinContent( ibin );
+	  f_vdata.push_back(value);
+  }
   
 
   // fill also the arrays with upper and lower limits 
   // of the bins in the data histograms
   
-  for(int ibin=0; ibin<f_hnumbins; ibin++)
-    {
-      double lowerlimit=f_hdataSum->GetBinLowEdge(ibin+1);
-      double upperlimit=lowerlimit+f_hdataSum->GetBinWidth(ibin+1);
+  for(int ibin = 1; ibin <= f_hnumbins; ibin++)
+  {
+      double lowerlimit = f_hdataSum->GetBinLowEdge( ibin );
+      double upperlimit = lowerlimit + f_hdataSum->GetBinWidth( ibin );
 
       f_lowerlimits.push_back(lowerlimit);
       f_upperlimits.push_back(upperlimit);
-    }
-
+  }
 
   return 0;
 }
 
+
+// This part is a bit tricky
+// Either we put the full MC files here (but they are kind of large)
+// Or we treat them beforehand by smearing and histogramming
+// That could be difficult however based on the binning chosen for the data
+// it is possible to make errors with the MC spectra
+// Best is a treatment with only smearing but the full energy of the events is
+// kept and histogrammed only here
 // ---------------------------------------------------------
 int BEGE_backgrounds::ReadMC()
 {
+	// Reading MC histograms with a binning of 1keV
   
-  //-------------
-  // Po210_pPlus
-  //-------------
-  f_chain = new TChain("smearedTree");
-  for(int i=0; i<10; i++)
+	//-------------
+	// Po210_pPlus
+	//-------------
+	f_chain = new TChain("smearedTree");
+	for(int i=0; i<100; i++)
     {
-      f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/Po210_pPlus/Po210_onPplusContactSurface_GERDAPhaseI_1000000evts_000%d_smeared.root",i));
+		f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/"
+				"Po210_pPlus/Po210_onPplusContactSurface_GERDAPhaseI_1000000evts_%04d_smeared.root",i));
     }
-  for(int i=10; i<100; i++)
-    {
-      f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/Po210_pPlus/Po210_onPplusContactSurface_GERDAPhaseI_1000000evts_00%d_smeared.root",i));
-    }
-  AddMC("Po210_pPlus");
-  f_chain->Clear();
+	AddMC("Po210_pPlus");
+	f_chain->Clear();
 
   //------------------
   // Ra226chain_pPlus
@@ -274,7 +306,8 @@ int BEGE_backgrounds::ReadMC()
   f_chain = new TChain("smearedTree");
   for(int i=0; i<10; i++)
     {
-      f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/Ra226chain_pPlus/Ra226_onPplusContactSurface_GERDAPhaseI_1000000evts_000%d_smeared.root",i));
+      f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/Ra226chain_pPlus/"
+    		  "Ra226_onPplusContactSurface_GERDAPhaseI_1000000evts_000%d_smeared.root",i));
     }
   AddMC("Ra226_pPlus");
   f_chain->Clear();
@@ -283,7 +316,8 @@ int BEGE_backgrounds::ReadMC()
   f_chain = new TChain("smearedTree");
   for(int i=0; i<10; i++)
     {
-      f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/Ra226chain_pPlus/Rn222_onPplusContactSurface_GERDAPhaseI_1000000evts_000%d_smeared.root",i));
+      f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/Ra226chain_pPlus/"
+    		  "Rn222_onPplusContactSurface_GERDAPhaseI_1000000evts_000%d_smeared.root",i));
     }
   AddMC("Rn222_pPlus");
   f_chain->Clear();
@@ -292,7 +326,8 @@ int BEGE_backgrounds::ReadMC()
   f_chain = new TChain("smearedTree");
   for(int i=0; i<10; i++)
     {
-      f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/Ra226chain_pPlus/Po218_onPplusContactSurface_GERDAPhaseI_1000000evts_000%d_smeared.root",i));
+      f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/Ra226chain_pPlus/"
+    		  "Po218_onPplusContactSurface_GERDAPhaseI_1000000evts_000%d_smeared.root",i));
     }
   AddMC("Po218_pPlus");
   f_chain->Clear();
@@ -301,7 +336,8 @@ int BEGE_backgrounds::ReadMC()
   f_chain = new TChain("smearedTree");
   for(int i=0; i<10; i++)
     {
-      f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/Ra226chain_pPlus/Po214_onPplusContactSurface_GERDAPhaseI_1000000evts_000%d_smeared.root",i));
+      f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/Ra226chain_pPlus/"
+    		  "Po214_onPplusContactSurface_GERDAPhaseI_1000000evts_000%d_smeared.root",i));
     }
   AddMC("Po214_pPlus");
   f_chain->Clear();
