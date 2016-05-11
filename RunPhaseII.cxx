@@ -33,6 +33,7 @@ RunPhaseII::RunPhaseII( int RunNumber, string DetectorStatusFile,
 {
 	SetRunSetup( RunNumber, DetectorStatusFile, DataKeysAnalysisFile, DataKeysAllFile );
 	ParseDetectorStatusFile( 1 );
+	SetExposures();
 };
 
 void RunPhaseII::SetRunSetup( int RunNumber, string DetectorStatusFile,
@@ -116,6 +117,11 @@ int RunPhaseII::ParseDetectorStatusFile( int verbose )
 
 	getline(detectorStatusFile, line);
 
+	detectorStatusFile >> line >> fLiveTime;
+	for( int i = 0; i < 4; i++ ) detectorStatusFile >> line;
+
+	getline(detectorStatusFile, line);
+
 	int counterON = 0, counterOFF = 0, counterAConly = 0;
 
 	detectorStatusFile >> DetectorName >> DetectorType >> DataChannel;
@@ -168,4 +174,34 @@ int RunPhaseII::PrintDetectorStatusFile( string filename )
 	detectorStatusFile.close();
 
 	return 0;
+}
+
+
+void RunPhaseII::SetExposures()
+{
+	fExposure = 0;
+	fExposureBEGE = 0;
+	fExposureCOAX = 0;
+
+	for( auto det : fDetectors )
+	{
+		string type = det->GetDetectorType();
+		string status = det->GetDetectorAnalysisStatus();
+
+		double mass = det->GetTotalMass();
+
+		if( status == "ON" )
+		{
+			fExposure += mass;
+
+			if( type == "enrBEGe" )
+				fExposureBEGE += mass;
+			else if( type == "enrCoax" )
+				fExposureCOAX += mass;
+		}
+	}
+
+	fExposure *= fLiveTime / 365.2425 / 1000.;
+	fExposureBEGE *= fLiveTime / 365.2425 / 1000.;
+	fExposureCOAX *= fLiveTime / 365.2425 / 1000.;
 }

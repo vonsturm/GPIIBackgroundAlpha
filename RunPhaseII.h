@@ -34,6 +34,12 @@ public:
 
 	// Getters and Setters
 	int GetRunNumber(){ return fRunNumber; };
+
+	double GetLiveTime(){ return fLiveTime; };		// in days
+	double GetExposure(){ return fExposure; };		// in kg*yr
+	double GetExposureBEGE(){ return fExposureBEGE; }; 	// in kg*yr
+	double GetExposureCOAX(){ return fExposureCOAX; }; 	// in kg*yr
+
 	std::string GetGERDA_META_DATA(){ return fGERDA_META_DATA; };
 	std::string GetDataKeysAllFile(){ return fGERDA_META_DATA + "/" + fDataKeysAllFile; };
 	std::string GetDataKeysAnalysisFile(){ return fGERDA_META_DATA + "/" + fDataKeysAnalysisFile; };
@@ -62,6 +68,8 @@ private:
 	std::string fDetectorStatusFile;
 
 	std::vector<DetectorPhaseII*> fDetectors;
+
+	void SetExposures();
 };
 
 #endif /* RUNPHASEII_H_ */
