@@ -203,6 +203,12 @@ int BEGE_backgrounds::ReadData( string runlist )
 			//if (jentry%100000==0) cout<<" now event "<<jentry<<endl;
 			chain->GetEntry(jentry);
 
+			// FIX ME: Import all data cuts here!!!
+			// is vetoed by LAr veto
+			// is discharge
+			// is overshot
+			// is undershot
+			// etc...
 			if (isTP) continue;
 			if (firedChannels != 1) continue;
 			if (isvetoed) continue;
@@ -285,187 +291,159 @@ int BEGE_backgrounds::FillDataArray()
 // ---------------------------------------------------------
 int BEGE_backgrounds::ReadMC()
 {
+	string MC_SMEARED_DIR = getenv("MC_SMEARED_DIR");
+
+	if( MC_SMEARED_DIR.empty() )
+	{
+		cout << "ERROR: environment variable MC_SMEARED_DIR not set!" << endl;
+		return -1;
+	}
+
 	// Reading MC histograms with a binning of 1keV
   
 	//-------------
 	// Po210_pPlus
 	//-------------
-	f_chain = new TChain("smearedTree");
-	for(int i=0; i<100; i++)
-    {
-		f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/"
-				"Po210_pPlus/Po210_onPplusContactSurface_GERDAPhaseI_1000000evts_%04d_smeared.root",i));
-    }
+	f_MC_FileName = "smeared_Po210_onPplusContactSurface_GERDAPhaseI_1e8evts.root";
 	AddMC("Po210_pPlus");
-	f_chain->Clear();
 
-  //------------------
-  // Ra226chain_pPlus
-  //------------------
-  // --- Ra226 ---
-  f_chain = new TChain("smearedTree");
-  for(int i=0; i<10; i++)
-    {
-      f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/Ra226chain_pPlus/"
-    		  "Ra226_onPplusContactSurface_GERDAPhaseI_1000000evts_000%d_smeared.root",i));
-    }
-  AddMC("Ra226_pPlus");
-  f_chain->Clear();
+	//------------------
+	// Ra226chain_pPlus
+	//------------------
+	// --- Ra226 ---
+	f_MC_FileName = "";
+	AddMC("Ra226_pPlus");
 
-  // --- Rn222 ---
-  f_chain = new TChain("smearedTree");
-  for(int i=0; i<10; i++)
-    {
-      f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/Ra226chain_pPlus/"
-    		  "Rn222_onPplusContactSurface_GERDAPhaseI_1000000evts_000%d_smeared.root",i));
-    }
-  AddMC("Rn222_pPlus");
-  f_chain->Clear();
+	// --- Rn222 ---
+	f_MC_FileName = "";
+	AddMC("Rn222_pPlus");
 
-  // --- Po218 ---
-  f_chain = new TChain("smearedTree");
-  for(int i=0; i<10; i++)
-    {
-      f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/Ra226chain_pPlus/"
-    		  "Po218_onPplusContactSurface_GERDAPhaseI_1000000evts_000%d_smeared.root",i));
-    }
-  AddMC("Po218_pPlus");
-  f_chain->Clear();
+	// --- Po218 ---
+	f_MC_FileName = "";
+	AddMC("Po218_pPlus");
 
-  // --- Po214 ---
-  f_chain = new TChain("smearedTree");
-  for(int i=0; i<10; i++)
-    {
-      f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/Ra226chain_pPlus/"
-    		  "Po214_onPplusContactSurface_GERDAPhaseI_1000000evts_000%d_smeared.root",i));
-    }
-  AddMC("Po214_pPlus");
-  f_chain->Clear();
+	// --- Po214 ---
+	f_MC_FileName = "";
+	AddMC("Po214_pPlus");
 
 
-  //--------------------
-  // Ra226chain_inLArBH
-  //--------------------
-  // --- Ra226 ---
-  f_chain = new TChain("smearedTree");
-  for(int i=0; i<10; i++)
-    {
-      f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/Ra226chain_inLArBH/Ra226_inANG3BoreHole_GERDAPhaseI_1000000evts_000%d_smeared.root",i));
-    }
-  AddMC("Ra226_inLArBH");
-  f_chain->Clear();
+	//--------------------
+	// Ra226chain_inLArBH
+	//--------------------
+	// --- Ra226 ---
+	f_MC_FileName = "";
+	AddMC("Ra226_inLArBH");
 
-  // --- Rn222 ---
-  f_chain = new TChain("smearedTree");
-  for(int i=0; i<10; i++)
-    {
-      f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/Ra226chain_inLArBH/Rn222_inANG3BoreHole_GERDAPhaseI_1000000evts_000%d_smeared.root",i));
-    }
-  AddMC("Rn222_inLArBH");
-  f_chain->Clear();
+	// --- Rn222 ---
+	f_MC_FileName = "";
+	AddMC("Rn222_inLArBH");
 
-  // --- Po218 ---
-  f_chain = new TChain("smearedTree");
-  for(int i=0; i<10; i++)
-    {
-      f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/Ra226chain_inLArBH/Po218_inANG3BoreHole_GERDAPhaseI_1000000evts_000%d_smeared.root",i));
-    }
-  AddMC("Po218_inLArBH");
-  f_chain->Clear();
+	// --- Po218 ---
+	f_MC_FileName = "";
+	AddMC("Po218_inLArBH");
 
-  // --- Po214 ---
-  f_chain = new TChain("smearedTree");
-  for(int i=0; i<10; i++)
-    {
-      f_chain->AddFile(Form("/raid4/gerda/hemmer/BEGE_backgrounds/MC_files/Ra226chain_inLArBH/Po214_inANG3BoreHole_GERDAPhaseI_1000000evts_000%d_smeared.root",i));
-    }
-  AddMC("Po214_inLArBH");
-  f_chain->Clear();
+	// --- Po214 ---
+	f_MC_FileName = "";
+	AddMC("Po214_inLArBH");
 
+	// copy MC information in arrays to make program faster
+	FillMCArrays();
 
-  // copy MC information in arrays to make program faster
-  FillMCArrays();
-
-  return 0;
+	return 0;
 }
 
 // ---------------------------------------------------------
 int BEGE_backgrounds::AddMC(string name)
 {
+	const int nchannels_tot = f_ndets;
 
-  int nentries = f_chain->GetEntries();
+	// set the first BEGE channel
+	TH1D* henergy = new TH1D(Form("h_%s",name.c_str()),
+			Form("%s",name.c_str()),
+			f_hnumbins, f_hemin, f_hemax);
 
-  cout << "There are " << nentries << " events in the chain!" << endl;
-  
-  // fill the data in histograms
+	int bins = int( f_hemax - f_hemin );
 
-  const int nchannels_tot = 40;
+	string namefine = name;
+	namefine.append("_fine");
 
-  int firedChannels;
-  float det_energy[nchannels_tot];
-  int firedFlag[nchannels_tot];
+	TH1D* henergy_fine = new TH1D(Form("h_%s",namefine.c_str()),
+			Form("%s",namefine.c_str()),
+			bins, f_hemin, f_hemax);
 
-  f_chain->SetBranchAddress("firedFlag", firedFlag);
-  f_chain->SetBranchAddress("multiplicity",&firedChannels);
-  f_chain->SetBranchAddress("det_energy",det_energy);
+	int allbins = int( 7500. - 570. );
 
+	string nameall = name;
+	nameall.append("_all");
 
-  // set the first BEGE channel
-  
-  TH1D* henergy = new TH1D(Form("h_%s",name.c_str()),
-			   Form("%s",name.c_str()),
-			   f_hnumbins, f_hemin, f_hemax);
+	TH1D* henergy_all = new TH1D(Form("h_%s",nameall.c_str()),
+			Form("%s",nameall.c_str()),
+			allbins, 570., 7500.);
 
-  int bins=int(f_hemax-f_hemin);
+	// initialize the histogram arrays
+	for( int i = 1; i <= f_hnumbins; i++ )
+		henergy->SetBinContent( i, 0 );
+	for( int i = 1; i <= bins; i++ )
+		henergy_fine->SetBinContent( i, 0 );
+	for( int i = 1; i <= allbins; i++ )
+		henergy_all->SetBinContent( i, 0 );
 
-  string namefine=name;
-  namefine.append("_fine");
+	henergy->GetXaxis()->SetCanExtend( false );
+	henergy_fine->GetXaxis()->SetCanExtend( false );
+	henergy_all->GetXaxis()->SetCanExtend( false );
 
-  TH1D* henergy_fine = new TH1D(Form("h_%s",namefine.c_str()),
-			   Form("%s",namefine.c_str()),
-			   bins, f_hemin, f_hemax);
+	// loop over all channels
+	TFile * MCfile = new TFile( f_MC_FileName.c_str() );
 
-  int allbins=int(7500.-570.);
-
-  string nameall=name;
-  nameall.append("_all");
-
-  TH1D* henergy_all = new TH1D(Form("h_%s",nameall.c_str()),
-			   Form("%s",nameall.c_str()),
-			   allbins, 570., 7500.);
-
-  const int firstBEGE=9;
-
-  // loop over all events
-  for (int jentry=0; jentry<nentries; jentry++) 
+	for( int idet = 0; idet < f_ndets; idet++ )
     {
-      //if (jentry%100000==0) cout<<" now event "<<jentry<<endl;
-      f_chain->GetEntry(jentry);
-      if (firedChannels != 1) continue; 
+		if( f_hdata.at(idet) != NULL )
+		{
+			TH1D* MC_raw = (TH1D*)MCfile->Get( Form( "h%i", idet ) );
 
-      if(firedFlag[firstBEGE]==1)
-	{
-	  henergy_all->Fill(det_energy[firstBEGE]);
+			int nbins_MC_raw = MC_raw->GetNbinsX();
 
-	  if(det_energy[firstBEGE]>=2019. && det_energy[firstBEGE]<=2059.)
-	    continue;
-	  else
-	    {
-	      henergy->Fill(det_energy[firstBEGE]);
-	      henergy_fine->Fill(det_energy[firstBEGE]);
-	    }
-	}
+			for( int i = 1; i < nbins_MC_raw; i++ )
+			{
+				double bincontent = MC_raw->GetBinContent( i );
+				double bincenter = MC_raw->GetBinCenter( i );
+
+				if( henergy->FindBin( bincenter ) > 0 &&
+						henergy->FindBin( bincenter ) <= f_hnumbins )
+					henergy->SetBinContent( henergy->FindBin( bincenter ),
+							henergy->GetBinContent( henergy->FindBin( bincenter ) ) + bincontent );
+
+				if( henergy_fine->FindBin( bincenter ) > 0 &&
+						henergy_fine->FindBin( bincenter ) <= bins )
+					henergy_fine->SetBinContent( henergy_fine->FindBin( bincenter ),
+							henergy_fine->GetBinContent( henergy_fine->FindBin( bincenter ) ) + bincontent );
+
+				if( henergy_all->FindBin( bincenter ) > 0 &&
+						henergy_all->FindBin( bincenter ) <= allbins )
+					henergy_all->SetBinContent( henergy_all->FindBin( bincenter ),
+							henergy_all->GetBinContent( henergy_all->FindBin( bincenter ) ) + bincontent );
+			}
+		}
     }
-  
 
-  double scaling = henergy->Integral();
-  henergy->Scale(1./scaling);
-  henergy_fine->Scale(1./scaling);
-  henergy_all->Scale(1./scaling);
-  f_MC.push_back(henergy);
-  f_MCfine.push_back(henergy_fine);
-  f_MCall.push_back(henergy_all);
-  f_MCname.push_back(name);
+  double scaling = henergy->Integral( );
+
+  henergy->Scale( 1./scaling );
+  henergy_fine->Scale( 1./scaling );
+  henergy_all->Scale( 1./scaling );
+
+  f_MC.push_back( henergy );
+  f_MCfine.push_back( henergy_fine );
+  f_MCall.push_back( henergy_all );
+  f_MCname.push_back( name );
+
+  for( int h = f_hdata.size() - 1; h >= 0; h-- )
+  {
+	  if( f_hdata.at(h) == NULL )
+	  {
+		  f_hdata.erase( f_hdata.begin() + h );
+	  }
+  }
 
   return 0;
 }
@@ -475,14 +453,14 @@ int BEGE_backgrounds::AddMC(string name)
 int BEGE_backgrounds::FillMCArrays()
 {
 
-  for(int iMC=0; iMC<(int)f_MC.size(); iMC++)
-    {
-      for(int ibin=0; ibin<f_hnumbins; ibin++)
-	{
-	  double value=f_MC.at(iMC)->GetBinContent(ibin+1);
-	  f_vMC.push_back(value);
-	}
-    }
+  for( int iMC = 0; iMC < (int)f_MC.size(); iMC++ )
+  {
+      for( int ibin = 1; ibin <= f_hnumbins; ibin++ )
+      {
+    	  double value = f_MC.at(iMC)->GetBinContent( ibin );
+    	  f_vMC.push_back(value);
+      }
+  }
 
   return 0;
 }
@@ -497,40 +475,18 @@ double BEGE_backgrounds::LogLikelihood(const std::vector <double> & parameters)
   
   double logprob = 0.;
 
-//       index = 
-// 	GetParameter(Form("ExpPar1_%d",idet))->GetIndex();
-//       double ExpPar1 = parameters.at(index);
+  for( int ibin = 0; ibin < f_hnumbins; ibin++)
+  {
+	  double lambda = 0.;
 
-//       index = 
-// 	GetParameter(Form("ExpPar2_%d",idet))->GetIndex();
-//       double ExpPar2 = parameters.at(index);
-
-//       index = 
-// 	GetParameter(Form("Constant_%d",idet))->GetIndex();
-//       double Constant = parameters.at(index);
-
-  for(int ibin=0; ibin<f_hnumbins; ibin++)
-    {
-      double lambda=0.;
-
-      for(int iMC=0; iMC<(int)f_MC.size(); iMC++)
-	{
-	  lambda+=parameters.at(iMC)*f_vMC[iMC*f_hnumbins+ibin];
-	}	  
-// 	  double lowerlimit = f_lowerlimits[ibin];
-// 	  double upperlimit = f_upperlimits[ibin];
-
-// 	  double alpha = ((ExpPar1/ExpPar2) 
-// 			 * (TMath::Exp(ExpPar2*upperlimit)
-// 			    -TMath::Exp(ExpPar2*lowerlimit)))
-// 	    + Constant * (upperlimit-lowerlimit);
-// 	  double alpha = Constant * (upperlimit-lowerlimit);
+	  for( int iMC = 0; iMC < (int)f_MC.size(); iMC++)
+	  {
+		  lambda += parameters.at(iMC) * f_vMC[iMC*f_hnumbins + ibin];
+	  }
 	    
       double bincontent = f_vdata[ibin];
       
-      double sum = -lambda 
-	+ bincontent*log(lambda) 
-	- BCMath::LogFact((int)bincontent);
+      double sum = bincontent*log(lambda) - lambda - BCMath::LogFact((int)bincontent);
       
       logprob += sum;
     }
@@ -547,35 +503,12 @@ double BEGE_backgrounds::LogAPrioriProbability(std::vector <double> parameters)
 
   double logprob = 0.;
 
-  for(int iMC=0; iMC<(int)f_MC.size(); iMC++)
+  for( int iMC = 0; iMC < (int)f_MC.size(); iMC++ )
     {
       double range = GetParameter(iMC)->GetRangeWidth();
       // flat prior for all contributions
-      logprob += log(1./range);
+      logprob += log( 1./range );
     }
-//       // exponential function + 
-//       // constant function to account 
-//       // for alpha contribution
-//       // flat priors:
-
-//       index = 
-// 	GetParameter(Form("ExpPar1_%d",idet))->GetIndex();
-//       double d_ExpPar1 = GetParameter(index)->GetRangeWidth();
-//       //flat prior for ExpPar1
-//       logprob += log(1./d_ExpPar1);
-
-//       index = 
-// 	GetParameter(Form("ExpPar2_%d",idet))->GetIndex();
-//       double d_ExpPar2 = GetParameter(index)->GetRangeWidth();
-//       //flat prior for ExpPar2
-//       logprob += log(1./d_ExpPar2);
-
-//       index = 
-// 	GetParameter(Form("Constant_%d",idet))->GetIndex();
-//       double d_Constant = GetParameter(index)->GetRangeWidth();
-//       //flat prior for Constant
-//       logprob += log(1./d_Constant);
-
   
    return logprob;
 }
@@ -586,14 +519,14 @@ double BEGE_backgrounds::EstimatePValue()
   //Allen's routine for the evaluation of p-value
   //This is derived from PRD 83 (2011) 012004, appendix
   //taken from Luciano
-  double logp0=LogLikelihood(GetBestFitParameters()); //likelihood at the mode
+  double logp0 = LogLikelihood( GetBestFitParameters() ); //likelihood at the mode
 
   /*
     Now we initialize the Markov Chain by setting the number of entries in a bin to
     the integer 
     part of the mean in that bin.  This will give the maximum possible likelihood.
   */
-  double sumlog=0;
+  double sumlog = 0;
 
 
   /* mean is the array where you have the expected mean in each bin (calculated
@@ -601,37 +534,26 @@ double BEGE_backgrounds::EstimatePValue()
      each bin (integer part)
   */
 
-  vector<double> mean(f_hnumbins,0);
-  vector<int> nom(f_hnumbins,0);
+  vector<double> mean( f_hnumbins, 0 );
+  vector<int> nom( f_hnumbins, 0 );
 
   vector<double> parameters = GetBestFitParameters();
 
+  for( int ibin = 0; ibin < f_hnumbins; ibin++ )
+  {
+      double lambda = 0.;
 
-  for(int ibin=0; ibin<f_hnumbins; ibin++)
-    {
-      double lambda=0.;
-
-      for(int iMC=0; iMC<(int)f_MC.size(); iMC++)
-	{
-	  lambda+=parameters.at(iMC)*f_vMC[iMC*f_hnumbins+ibin];
-	}	  
-// 	  double lowerlimit = f_lowerlimits[ibin];
-// 	  double upperlimit = f_upperlimits[ibin];
-
-// 	  double alpha = ((ExpPar1/ExpPar2) 
-// 			 * (TMath::Exp(ExpPar2*upperlimit)
-// 			    -TMath::Exp(ExpPar2*lowerlimit)))
-// 	    + Constant * (upperlimit-lowerlimit);
-// 	  double alpha = Constant * (upperlimit-lowerlimit);
-	    
+      for( int iMC = 0; iMC < (int)f_MC.size(); iMC++ )
+      {
+    	  lambda += parameters.at(iMC)*f_vMC[iMC*f_hnumbins+ibin];
+      }
 
       int counter = ibin;
 
-      mean.at(counter) = std::max(lambda,1e-8);
-      nom.at(counter) = int(mean.at(counter));
-      sumlog += BCMath::LogPoisson(nom[counter],mean[counter]);
-
-    }
+      mean.at(counter) = std::max( lambda, 1e-8 );
+      nom.at(counter) = int( mean.at(counter) );
+      sumlog += BCMath::LogPoisson( nom[counter], mean[counter] );
+  }
 
   cout << "Logprob for best: " << sumlog << endl;
 
@@ -642,36 +564,41 @@ double BEGE_backgrounds::EstimatePValue()
   */
   const int nloops = 100000;
   int Pgood = 0;
-  for (int iloop=0;iloop<nloops;iloop++)
-    {
-      for (int ibin=0;ibin<f_hnumbins;ibin++)
-	{
-	  int counter = ibin;
-	  if (rand()>RAND_MAX/2) // Try to increase the bin content by 1 
-	    {
-	      double r=mean[counter]/(nom[counter]+1);
-	      double rtest=double(rand())/RAND_MAX;
-	      if (rtest<r) //Accept
-		{
-		  nom[counter]=nom[counter]+1;
-		  sumlog+=log(r);
-		}
-	    }
-	  else // Try to decrease the bin content by 1 
-	    {
-	      double r=nom[counter]/mean[counter];
-	      double rtest=double(rand())/RAND_MAX;
-	      if (rtest<r) //Accept
-		{
-		  nom[counter]=nom[counter]-1;
-		  sumlog+=log(r);
-		}
-	    }
-	}
-      if (sumlog<logp0) Pgood++;
-    }
+
+  for( int iloop = 0; iloop < nloops; iloop++ )
+  {
+      for( int ibin = 0; ibin < f_hnumbins; ibin++)
+      {
+    	  int counter = ibin;
+
+    	  if ( rand() > RAND_MAX/2 ) // Try to increase the bin content by 1
+    	  {
+    		  double r = mean[counter]/(nom[counter]+1);
+    		  double rtest = double(rand())/RAND_MAX;
+    		  if( rtest < r ) //Accept
+    		  {
+    			  nom[counter] = nom[counter]+1;
+    			  sumlog += log(r);
+    		  }
+    	  }
+    	  else // Try to decrease the bin content by 1
+    	  {
+    		  double r = nom[counter]/mean[counter];
+    		  double rtest = double(rand())/RAND_MAX;
+    		  if ( rtest < r ) //Accept
+    		  {
+    			  nom[counter] = nom[counter]-1;
+    			  sumlog += log(r);
+    		  }
+    	  }
+      }
+      if ( sumlog < logp0 ) Pgood++;
+  }
+
   double pvalue = double(Pgood)/double(nloops);
+
   cout << "p-value is " << pvalue << endl;
+
   return pvalue;
 }
 
@@ -679,50 +606,44 @@ double BEGE_backgrounds::EstimatePValue()
 
 void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* rootfilename)
 {
-  TFile* rootOut=new TFile(rootfilename,"recreate");
-  if(!rootOut->IsOpen())
-    cout<<"No rootfile opened!"<<endl;
+  TFile* rootOut = new TFile( rootfilename, "recreate" );
+
+  if(!rootOut->IsOpen()) cout<<"No rootfile opened!"<<endl;
+
   rootOut->cd();
 
-  TH1D* hMC = new TH1D("hMC",
-		       "model",
-		       f_hnumbins, f_hemin, f_hemax);
+  TH1D* hMC = new TH1D("hMC", "model", f_hnumbins, f_hemin, f_hemax);
 
-  int bins=int(f_hemax-f_hemin);
-  TH1D* hMC_fine = new TH1D("hMC_fine",
-			    "model",
-			    bins, f_hemin, f_hemax);
+  int bins = int( f_hemax - f_hemin );
+  TH1D* hMC_fine = new TH1D("hMC_fine", "model", bins, f_hemin, f_hemax);
 
-  int binsall=int(7500.-570.);
-  TH1D* hMC_all = new TH1D("hMC_all",
-			   "model",
-			   binsall, 570., 7500.);
+  int binsall = int( 7500. - 570. );
+  TH1D* hMC_all = new TH1D("hMC_all", "model", binsall, 570., 7500.);
 
-  TH1D* hresiduals = new TH1D("hresiduals",
-			      "residuals",
-			      f_hnumbins, f_hemin, f_hemax);
-
+  TH1D* hresiduals = new TH1D("hresiduals", "residuals", f_hnumbins, f_hemin, f_hemax);
 
   vector<double> eventsMC;
+  vector<double> eventsMC_fine;
   vector<double> eventsMC_all;
-  //   vector<double> eventsMC_fine;
 
-  for(int iMC=0; iMC<(int)f_MC.size(); iMC++)
-    {
-      // prepare the histograms
-      f_MC.at(iMC)->Scale(parameters.at(iMC));
-      f_MCfine.at(iMC)->Scale(parameters.at(iMC));
-      f_MCall.at(iMC)->Scale(parameters.at(iMC));
-      //f_MC.at(iMC)->Write();
+  for( int iMC = 0; iMC < (int)f_MC.size(); iMC++ )
+  {
+	  // prepare the histograms
+      f_MC.at(iMC)->Scale( parameters.at(iMC) );
+      f_MCfine.at(iMC)->Scale( parameters.at(iMC) );
+      f_MCall.at(iMC)->Scale( parameters.at(iMC) );
+
+      f_MC.at(iMC)->Write();
       f_MCfine.at(iMC)->Write();
       f_MCall.at(iMC)->Write();
-      hMC->Add(f_MC.at(iMC));
-      hMC_fine->Add(f_MCfine.at(iMC));
-      hMC_all->Add(f_MCall.at(iMC));
+
+      hMC->Add( f_MC.at(iMC) );
+      hMC_fine->Add( f_MCfine.at(iMC) );
+      hMC_all->Add( f_MCall.at(iMC) );
 
       // count the events
-      eventsMC.push_back(f_MC.at(iMC)->Integral());
-      eventsMC_all.push_back(f_MCall.at(iMC)->Integral());
+      eventsMC.push_back( f_MC.at(iMC)->Integral() );
+      eventsMC_all.push_back( f_MCall.at(iMC)->Integral() );
       
       //       int lowerBin=f_MCfine.at(iMC)->FindBin(1000.);
       //       int higherBin=f_MCfine.at(iMC)->FindBin(1450.);
@@ -730,17 +651,16 @@ void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* r
       //       eventsMC_fine.push_back(f_MCfine.at(iMC)->Integral(lowerBin, higherBin-1));
     }
 
-
-  double binwidth=f_hdata.at(0)->GetBinWidth(1);
+  double binwidth = f_hdata.at(0)->GetBinWidth(1);
 
   // write the single detector data spectra
   for(int idet=0; idet<f_ndets; idet++)
-    {
+  {
       f_hdata.at(idet)->SetLineWidth(2);
       f_hdata.at(idet)->GetXaxis()->SetTitle("Energy (keV)");
       f_hdata.at(idet)->GetYaxis()->SetTitle(Form("Events/(%d keV)",(int)binwidth));
       f_hdata.at(idet)->Write();
-    }
+  }
   // write the finer binning data histogram
   f_hdataSum_fine->SetLineWidth(2);
   f_hdataSum_fine->GetXaxis()->SetTitle("Energy (keV)");
