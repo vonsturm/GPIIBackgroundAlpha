@@ -77,6 +77,7 @@ void DetectorPhaseII::ReadParametersFromDatabase()
 
 	file >> fMass;
 	file >> fAVfraction;
+	file >> fEndDynamicRange;
 
 	fActiveMass = fMass * fAVfraction/100.;
 

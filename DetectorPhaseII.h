@@ -54,6 +54,8 @@ private:
 	double fMass;
 	double fAVfraction;
 	double fActiveMass;
+
+	double fEndDynamicRange;
 };
 
 
