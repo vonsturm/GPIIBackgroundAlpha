@@ -644,12 +644,7 @@ void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* r
       // count the events
       eventsMC.push_back( f_MC.at(iMC)->Integral() );
       eventsMC_all.push_back( f_MCall.at(iMC)->Integral() );
-      
-      //       int lowerBin=f_MCfine.at(iMC)->FindBin(1000.);
-      //       int higherBin=f_MCfine.at(iMC)->FindBin(1450.);
-      
-      //       eventsMC_fine.push_back(f_MCfine.at(iMC)->Integral(lowerBin, higherBin-1));
-    }
+  }
 
   double binwidth = f_hdata.at(0)->GetBinWidth(1);
 
@@ -711,17 +706,17 @@ void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* r
   string name;
   
   for(int iMC=0; iMC<(int)f_MC.size(); iMC++)
-    {
+  {
       f_MC.at(iMC)->SetLineWidth(2);
-      if(iMC<10)
-	{
-	  f_MC.at(iMC)->SetLineColor(iMC+2);
-	}
-      if(iMC>=8)
-	{
-	  f_MC.at(iMC)->SetLineColor(iMC-8+2);
-	  f_MC.at(iMC)->SetLineStyle(2);
-	}
+
+      if(iMC < 10) f_MC.at(iMC)->SetLineColor(iMC+2);
+
+      if(iMC >= 8)
+      {
+    	  f_MC.at(iMC)->SetLineColor(iMC-8+2);
+    	  f_MC.at(iMC)->SetLineStyle(2);
+      }
+
       f_MC.at(iMC)->Draw("same");
       f_MC.at(iMC)->GetXaxis()->SetTitle("Energy (keV)");
       f_MC.at(iMC)->GetYaxis()->SetTitle(Form("Events/(%d keV)",(int)binwidth));
@@ -729,7 +724,7 @@ void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* r
       legend->AddEntry(f_MC.at(iMC),Form("%s",name.c_str()),"l");
 
       f_MC.at(iMC)->Write();
-    }
+  }
 
   legend->Draw();
   canvas->Write();
@@ -741,37 +736,22 @@ void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* r
   hresiduals->GetYaxis()->SetTitle(Form("residual counts/(%d keV)",(int)binwidth));
   hresiduals->Write();
 
-  
   // events info
-  cout<<"---------------------------------------------"<<endl;
-  cout<<"---------------------------------------------"<<endl<<endl;
-  for(int iMC=0; iMC<(int)eventsMC.size(); iMC++)
-    {
-      cout<<"Events: "<<endl;
-      cout<<f_MCname.at(iMC)<<": "<<eventsMC.at(iMC)<<endl;
-      cout<<"In total spectrum from (570 - 7500) keV"<<endl;
-      cout<<f_MCname.at(iMC)<<": "<<eventsMC_all.at(iMC)<<endl;
-    }
-  cout<<"Total events in MC: "<<hMC->Integral()<<endl;
-  cout<<endl;
-  cout<<"Events in data: "<<f_hdataSum->Integral()<<endl;
-  cout<<endl;
-  cout<<"---------------------------------------------"<<endl;
-  cout<<"---------------------------------------------"<<endl<<endl;
-
-//   cout<<"---------------------------------------------"<<endl;
-//   cout<<"---------------------------------------------"<<endl<<endl;
-//   double sum=0.;
-//   for(int iMC=0; iMC<(int)eventsMC_fine.size(); iMC++)
-//     {
-//       cout<<"Events between 1 and 1.45 MeV: "<<endl;
-//       cout<<f_MCname.at(iMC)<<": "<<eventsMC_fine.at(iMC)<<endl;
-//       sum+=eventsMC_fine.at(iMC);
-//     }
-//   cout<<"In total "<<sum<<" events in this range"<<endl;
-//   cout<<endl;
-//   cout<<"---------------------------------------------"<<endl;
-//   cout<<"---------------------------------------------"<<endl<<endl;
+  cout << "---------------------------------------------" << endl;
+  cout << "---------------------------------------------" << endl << endl;
+  for( int iMC = 0; iMC < (int)eventsMC.size(); iMC++ )
+  {
+      cout << "Events: " << endl;
+      cout << f_MCname.at(iMC) << ": " << eventsMC.at(iMC) << endl;
+      cout << "In total spectrum from (570 - 7500) keV" << endl;
+      cout << f_MCname.at(iMC) << ": " << eventsMC_all.at(iMC) << endl;
+  }
+  cout << "Total events in MC: " << hMC->Integral() << endl;
+  cout << endl;
+  cout << "Events in data: " << f_hdataSum->Integral() << endl;
+  cout << endl;
+  cout << "---------------------------------------------" << endl;
+  cout << "---------------------------------------------" << endl << endl;
 
   rootOut->Close();
 }
