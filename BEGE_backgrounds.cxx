@@ -358,8 +358,6 @@ int BEGE_backgrounds::ReadMC()
 // ---------------------------------------------------------
 int BEGE_backgrounds::AddMC(string name)
 {
-	const int nchannels_tot = f_ndets;
-
 	// set the first BEGE channel
 	TH1D* henergy = new TH1D(Form("h_%s",name.c_str()),
 			Form("%s",name.c_str()),
