@@ -244,6 +244,8 @@ int BEGE_backgrounds::ReadData( string runlist )
 		}
 	}
 
+	RunList.close();
+
 	// ----------------------------------------------
 	// --- fill the data vector for faster access ---
 	// ----------------------------------------------
@@ -424,28 +426,31 @@ int BEGE_backgrounds::AddMC(string name)
 							henergy_all->GetBinContent( henergy_all->FindBin( bincenter ) ) + bincontent );
 			}
 		}
-    }
+	}
 
-  double scaling = henergy->Integral( );
+	MCfile->Close();
 
-  henergy->Scale( 1./scaling );
-  henergy_fine->Scale( 1./scaling );
-  henergy_all->Scale( 1./scaling );
+	double scaling = henergy->Integral( );
 
-  f_MC.push_back( henergy );
-  f_MCfine.push_back( henergy_fine );
-  f_MCall.push_back( henergy_all );
-  f_MCname.push_back( name );
+	henergy->Scale( 1./scaling );
+	henergy_fine->Scale( 1./scaling );
 
-  for( int h = f_hdata.size() - 1; h >= 0; h-- )
-  {
-	  if( f_hdata.at(h) == NULL )
-	  {
-		  f_hdata.erase( f_hdata.begin() + h );
-	  }
-  }
+	henergy_all->Scale( 1./scaling );
 
-  return 0;
+	f_MC.push_back( henergy );
+	f_MCfine.push_back( henergy_fine );
+	f_MCall.push_back( henergy_all );
+	f_MCname.push_back( name );
+
+	for( int h = f_hdata.size() - 1; h >= 0; h-- )
+	{
+		if( f_hdata.at(h) == NULL )
+		{
+			f_hdata.erase( f_hdata.begin() + h );
+		}
+	}
+
+	return 0;
 }
 
 // ---------------------------------------------------------
