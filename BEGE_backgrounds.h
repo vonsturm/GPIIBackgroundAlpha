@@ -63,7 +63,7 @@ class BEGE_backgrounds : public BCModel
       TH1D* f_hdataSum;
       TH1D* f_hdataSum_fine;
 
-      TChain* f_chain;
+      std::string f_MC_FileName;
 
       std::vector<TH1D*> f_MC;
       std::vector<TH1D*> f_MCfine;
