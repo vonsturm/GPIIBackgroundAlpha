@@ -69,7 +69,7 @@ int main()
       precision=BCEngineMCMC::kVeryHigh;
     }
 
-  cout<<"Precision: "<<precisionString<<endl;
+  cout << "Precision: " << precisionString << endl;
 
   // set the precision for the fit
   m->MCMCSetPrecision(precision);
@@ -88,13 +88,13 @@ int main()
 
   m->SetHistogramParameters(hnumbins, hemin, hemax);
 
-  cout<<endl;
-  cout<<"**********************************************"<<endl;
-  cout<<"ENERGY RANGE AND BINWIDTH INFORMATION"<<endl;
-  cout<<"Energy range: ("<<hemin<<" - "<<hemax<<")keV"<<endl;
-  cout<<"Binwidth: "<<binwidth<<endl;
-  cout<<"**********************************************"<<endl;
-  cout<<endl;
+  cout << endl;
+  cout << "**********************************************" << endl;
+  cout << "ENERGY RANGE AND BINWIDTH INFORMATION" << endl;
+  cout << "Energy range: (" << hemin << " - " << hemax << ")keV" << endl;
+  cout << "Binwidth: " << binwidth << endl;
+  cout << "**********************************************" << endl;
+  cout << endl;
 
   // --- define data input ---
   // read in the names of the files you want to use, 
@@ -117,7 +117,10 @@ int main()
 //     m->MCMCSetFlagFillHistograms(i,false); //disable histos for nuisance parameters
 
   // create new output object
-  BCModelOutput* mout = new BCModelOutput(m,Form("/raid4/gerda/hemmer/BEGE_backgrounds/alpha_fitResults_allPhaseI/%s/BEGE_backgrounds_model.root",precisionString.c_str()));
+  BCModelOutput* mout = new BCModelOutput( m,
+		  Form( "/opt/exp_software/gerda/gerda_gpfs/vonsturm/BAT/BEGE_alphas/ModelOutput/%s/"
+				  "BEGE_alphas_model.root", precisionString.c_str() ) );
+
   // switch writing of Markov Chains on
   mout->WriteMarkovChain(true);
 
@@ -144,14 +147,16 @@ int main()
   // ----------------------------------
 
   // draw all marginalized distributions into a PostScript file
-  m->PrintAllMarginalized(Form("/raid4/gerda/hemmer/BEGE_backgrounds/alpha_fitResults_allPhaseI/%s/BEGE_backgrounds_plots.ps",precisionString.c_str()));
+  m->PrintAllMarginalized( Form( "/opt/exp_software/gerda/gerda_gpfs/vonsturm/BAT/BEGE_alphas/ModelOutput/%s/"
+		  "BEGE_alphas_plots.ps", precisionString.c_str() ) );
 
   // print all summary plots
 //   summary->PrintParameterPlot(Form("/raid4/gerda/hemmer/BAT_BEGE_backgrounds_results_M1/%s/%dkeVBins/BEGE_backgrounds_parameters.eps",precisionString.c_str(),(int)binwidth));
 //   summary->PrintCorrelationPlot(Form("/raid4/gerda/hemmer/BAT_BEGE_backgrounds_results_M1/%s/%dkeVBins/BEGE_backgrounds_correlation.eps",precisionString.c_str(),(int)binwidth));
 //   summary->PrintKnowledgeUpdatePlots(Form("/raid4/gerda/hemmer/BAT_BEGE_backgrounds_results_M1/%s/%dkeVBins/BEGE_backgrounds_update.ps",precisionString.c_str(),(int)binwidth)); 
   // print results of the analysis into a text file
-  m->PrintResults(Form("/raid4/gerda/hemmer/BEGE_backgrounds/alpha_fitResults_allPhaseI/%s/BEGE_backgrounds_results.txt",precisionString.c_str()));
+  m->PrintResults( Form( "/opt/exp_software/gerda/gerda_gpfs/vonsturm/BAT/BEGE_alphas/ModelOutput/%s/"
+		  "BEGE_alphas_results.txt", precisionString.c_str() ) );
   
 
   // calculate p-value
@@ -162,33 +167,33 @@ int main()
   // write out user defined plots, information, ...
   // -----------------------------------------------
 
-  cout<<"------------------------------------------------------------"<<endl;
-  cout<<"************************************************************"<<endl;
-  cout<<"------------------------------------------------------------"<<endl;
+  cout << "------------------------------------------------------------" << endl;
+  cout << "************************************************************" << endl;
+  cout << "------------------------------------------------------------" << endl;
 
   size_t nPars = m->GetNParameters();
-  for (int i=0;i<(int)nPars;i++)        
-    {
-    
+
+  for( int i = 0; i < (int)nPars; i++ )
+  {
       //Get the parameters of interest
-      BCH1D* output=m->GetMarginalized(Form("par_%d",i));
+      BCH1D* output = m->GetMarginalized(Form("par_%d",i));
   
-      double mode=output->GetMode();
-      double xmin=0., xmax=0.;
+      double mode = output->GetMode();
+      double xmin = 0., xmax = 0.;
       output->GetSmallestInterval(xmin, xmax);
 
       double quantile = output->GetQuantile(0.90);
 
-      cout<<"Parameter "<<i<<":"<<endl;
-      cout<<"Mode: "<<mode<<" + "<<xmax-mode<<" - "<<mode-xmin<<endl;
-      cout<<"Interval: ("<<xmin<<" - "<<xmax<<")"<<endl;
-      cout<<"90% quantile: "<<quantile<<endl;
+      cout << "Parameter " << i << ":" << endl;
+      cout << "Mode: " << mode << " + " << xmax-mode << " - " << mode-xmin << endl;
+      cout << "Interval: (" << xmin << " - " << xmax << ")" << endl;
+      cout << "90% quantile: " << quantile << endl;
     }
   
   
-  cout<<"------------------------------------------------------------"<<endl;
-  cout<<"************************************************************"<<endl;
-  cout<<"------------------------------------------------------------"<<endl;
+  cout << "------------------------------------------------------------" << endl;
+  cout << "************************************************************" << endl;
+  cout << "------------------------------------------------------------" << endl;
 
   
 //   //write additional info in the output file
@@ -202,7 +207,8 @@ int main()
   mout->Close();
 
   // dump event information and plots for best fit parameters
-  char* rootOutput = Form("/raid4/gerda/hemmer/BEGE_backgrounds/alpha_fitResults_allPhaseI/%s/BEGE_backgrounds.root",precisionString.c_str());
+  char* rootOutput = Form("/opt/exp_software/gerda/gerda_gpfs/vonsturm/BAT/BEGE_alphas/ModelOutput/%s/"
+		  "BEGE_backgrounds.root",precisionString.c_str());
   m->DumpHistosAndInfo(m->GetBestFitParameters(), rootOutput);
 
   delete m;
