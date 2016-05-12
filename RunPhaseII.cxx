@@ -91,6 +91,22 @@ void RunPhaseII::AddDetector( string DetectorName, string DetectorType,
 }
 
 
+DetectorPhaseII* RunPhaseII::GetDetectorInDataChannel( int channel )
+{
+	if( fDetectors.size() <= 0 )
+	{
+		cout << "ERROR: No detectors found." << endl;
+		return NULL;
+	}
+
+	for( auto det : fDetectors )
+	{
+		if( det->GetDataChannel() == channel )
+			return det;
+	}
+}
+
+
 int RunPhaseII::ParseDetectorStatusFile( int verbose )
 {
 	if( fGERDA_META_DATA.empty() )
