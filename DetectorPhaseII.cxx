@@ -66,6 +66,7 @@ void DetectorPhaseII::ReadParametersFromDatabase()
 	}
 
 	string dummy = "";
+	double ddummy;
 
 	while( dummy != fDetectorName && !file.eof() ) file >> dummy;
 
@@ -77,7 +78,8 @@ void DetectorPhaseII::ReadParametersFromDatabase()
 
 	file >> fMass;
 	file >> fAVfraction;
-	file >> fEndDynamicRange;
+	file >> ddummy;
+	fEndDynamicRange = floor( ddummy );
 
 	fActiveMass = fMass * fAVfraction/100.;
 

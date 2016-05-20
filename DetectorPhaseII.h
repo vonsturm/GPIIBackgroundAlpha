@@ -35,6 +35,8 @@ public:
 	double GetAVfraction(){ return fAVfraction; };
 	double GetActiveMass(){ return fActiveMass; };
 
+	int GetDynamicRange(){ return fEndDynamicRange; };
+
 	//
 	void ReadParametersFromDatabase();
 
@@ -55,7 +57,7 @@ private:
 	double fAVfraction;
 	double fActiveMass;
 
-	double fEndDynamicRange;
+	int fEndDynamicRange;
 };
 
 
