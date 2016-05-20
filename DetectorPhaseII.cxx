@@ -8,6 +8,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <cmath> 
+#include <ctgmath>
 
 #include "DetectorPhaseII.h"
 
