@@ -134,7 +134,7 @@ int RunPhaseII::ParseDetectorStatusFile( int verbose )
 	getline(detectorStatusFile, line);
 
 	detectorStatusFile >> line >> fLiveTime;
-	for( int i = 0; i < 4; i++ ) detectorStatusFile >> line;
+	for( int i = 0; i < 9; i++ ) detectorStatusFile >> line;
 
 	getline(detectorStatusFile, line);
 
