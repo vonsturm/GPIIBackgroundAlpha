@@ -262,7 +262,7 @@ int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
 				if( firedFlag.at(BEGeChannel) == 1 )
 				{
 					// do not add events with energy greater than the dynamic range of the detector
-					if( energy.at(BEGeChannel) >= fDetectorDynamicRange( BEGeChannel ) )
+					if( energy.at(BEGeChannel) >= fDetectorDynamicRange.at( BEGeChannel ) )
 						continue;
 
 					// skip events in blinded region

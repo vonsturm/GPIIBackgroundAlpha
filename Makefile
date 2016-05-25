@@ -50,8 +50,8 @@ GLIBS       += -L$(GERDA_BASE_DIR)/lib -lgerda-ada
 # add GELATIO flags
 CXXFLAGS    += -I$(GERDA_BASE_DIR)/include/gelatio
 
-LIBS        += -L$(GERDA_BASE_DIR)/lib -lGELATIODecoders -lGELATIOManagement -lModules -lGELATIOUtilities
-GLIBS       += -L$(GERDA_BASE_DIR)/lib -lGELATIODecoders -lGELATIOManagement -lModules -lGELATIOUtilities
+LIBS        += -L$(GERDA_BASE_DIR)/lib -lGELATIODecoders -lGELATIOManagement -lGELATIOModules -lGELATIOUtilities
+GLIBS       += -L$(GERDA_BASE_DIR)/lib -lGELATIODecoders -lGELATIOManagement -lGELATIOModules -lGELATIOUtilities
 
 
 # ----------------------------------------------------------------------
