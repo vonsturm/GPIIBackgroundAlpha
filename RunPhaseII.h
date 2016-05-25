@@ -26,10 +26,10 @@ public:
 	void SetRunSetup( int RunNumber, std::string DetectorStatusFile = "default.txt",
 			std::string DataKeysAnalysisFile = "default.txt", std::string DataKeysAllFile  = "default.txt");
 
-	void SetGERDA_META_DATA()
+	void SetGERDA_DETECTOR_STATUS()
 	{
-		fGERDA_META_DATA = getenv("GERDA_META_DATA");
-		fGERDA_META_DATA += "/";
+		fGERDA_DETECTOR_STATUS = getenv("GERDA_DETECTOR_STATUS");
+		fGERDA_DETECTOR_STATUS += "/";
 	};
 
 	void SetGERDA_DATA_SETS()
@@ -46,10 +46,10 @@ public:
 	double GetExposureBEGE(){ return fExposureBEGE; }; 	// in kg*yr
 	double GetExposureCOAX(){ return fExposureCOAX; }; 	// in kg*yr
 
-	std::string GetGERDA_META_DATA(){ return fGERDA_META_DATA; };
+	std::string GetGERDA_DETECTOR_STATUS(){ return fGERDA_DETECTOR_STATUS; };
 	std::string GetGERDA_DATA_SETS(){ return fGERDA_DATA_SETS; };
 
-	std::string GetDetectorStatusFile(){ return fGERDA_META_DATA + "/" + fDetectorStatusFile; };
+	std::string GetDetectorStatusFile(){ return fGERDA_DETECTOR_STATUS + "/" + fDetectorStatusFile; };
 	std::string GetDataKeysAllFile(){ return fGERDA_DATA_SETS + "/" + fDataKeysAllFile; };
 	std::string GetDataKeysAnalysisFile(){ return fGERDA_DATA_SETS + "/" + fDataKeysAnalysisFile; };
 
@@ -71,7 +71,7 @@ private:
 	double fExposureBEGE; 	// in kg*yr
 	double fExposureCOAX; 	// in kg*yr
 
-	std::string fGERDA_META_DATA;
+	std::string fGERDA_DETECTOR_STATUS;
 	std::string fGERDA_DATA_SETS;
 
 	std::string fDataKeysAllFile;

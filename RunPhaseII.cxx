@@ -41,7 +41,7 @@ void RunPhaseII::SetRunSetup( int RunNumber, string DetectorStatusFile,
 {
 	fRunNumber = RunNumber;
 
-	SetGERDA_META_DATA();
+	SetGERDA_DETECTOR_STATUS();
 	SetGERDA_DATA_SETS();
 
 	fDetectorStatusFile = DetectorStatusFile;
@@ -110,13 +110,13 @@ DetectorPhaseII* RunPhaseII::GetDetectorInDataChannel( int channel )
 
 int RunPhaseII::ParseDetectorStatusFile( int verbose )
 {
-	if( fGERDA_META_DATA.empty() )
+	if( fGERDA_DETECTOR_STATUS.empty() )
 	{
-		cout << "WARNING: Environment variable GERDA_META_DATA not set." << endl;
+		cout << "WARNING: Environment variable GERDA_DETECTOR_STATUS not set." << endl;
 		return 1;
 	}
 
-	string statusFileName = fGERDA_META_DATA; statusFileName += fDetectorStatusFile;
+	string statusFileName = GetDetectorStatusFile();
 	ifstream detectorStatusFile( statusFileName );
 
 	if( !detectorStatusFile.is_open() )
