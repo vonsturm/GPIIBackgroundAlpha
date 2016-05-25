@@ -32,6 +32,12 @@ public:
 		fGERDA_META_DATA += "/";
 	};
 
+	void SetGERDA_DATA_SETS()
+	{
+		fGERDA_DATA_SETS = getenv("GERDA_DATA_SETS");
+		fGERDA_DATA_SETS += "/";
+	};
+
 	// Getters and Setters
 	int GetRunNumber(){ return fRunNumber; };
 
@@ -41,9 +47,10 @@ public:
 	double GetExposureCOAX(){ return fExposureCOAX; }; 	// in kg*yr
 
 	std::string GetGERDA_META_DATA(){ return fGERDA_META_DATA; };
+	std::string GetGERDA_DATA_SETS(){ return fGERDA_DATA_SETS; };
 	std::string GetDataKeysAllFile(){ return fGERDA_META_DATA + "/" + fDataKeysAllFile; };
-	std::string GetDataKeysAnalysisFile(){ return fGERDA_META_DATA + "/" + fDataKeysAnalysisFile; };
-	std::string GetDetectorStatusFile(){ return fGERDA_META_DATA + "/" + fDetectorStatusFile; };
+	std::string GetDataKeysAnalysisFile(){ return fGERDA_DATA_SETS + "/" + fDataKeysAnalysisFile; };
+	std::string GetDetectorStatusFile(){ return fGERDA_DATA_SETS + "/" + fDetectorStatusFile; };
 	std::vector<DetectorPhaseII*> GetDetectors(){ return fDetectors; };
 	DetectorPhaseII* GetDetectorInDataChannel( int channel );
 
@@ -63,6 +70,7 @@ private:
 	double fExposureCOAX; 	// in kg*yr
 
 	std::string fGERDA_META_DATA;
+	std::string fGERDA_DATA_SETS;
 
 	std::string fDataKeysAllFile;
 	std::string fDataKeysAnalysisFile;
