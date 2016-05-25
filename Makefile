@@ -47,6 +47,12 @@ CXXFLAGS    += -I$(GERDA_BASE_DIR)/include/gerda-ada/
 LIBS        += -L$(GERDA_BASE_DIR)/lib -lgerda-ada
 GLIBS       += -L$(GERDA_BASE_DIR)/lib -lgerda-ada
 
+# add GELATIO flags
+CXXFLAGS    += -I$(GERDA_BASE_DIR)/include/gelatio
+
+LIBS        += -L$(GERDA_BASE_DIR)/lib -lGELATIODecoders -lGELATIOManagement -lModules -lGELATIOUtilities
+GLIBS       += -L$(GERDA_BASE_DIR)/lib -lGELATIODecoders -lGELATIOManagement -lModules -lGELATIOUtilities
+
 
 # ----------------------------------------------------------------------
 # The following definitions depend on the setup of the system where
