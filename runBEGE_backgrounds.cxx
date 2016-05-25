@@ -43,7 +43,7 @@ int main()
   
   //--->
   //---- SET HERE ----
-  const int precisionValue = 3;
+  const int precisionValue = 0;
   //------------------
 
   string precisionString="";
@@ -79,9 +79,9 @@ int main()
 
   //--->
   //---- SET HERE ----
-  double hemin=3500.;
-  double hemax=7500.;
-  double binwidth=50.;
+  double hemin=3500.; //try also 2900
+  double hemax=5300.;
+  double binwidth=30.;
   //------------------
 
   int hnumbins=(int)((hemax-hemin)/binwidth);
@@ -98,14 +98,13 @@ int main()
 
   // --- define data input ---
   // read in the names of the files you want to use, 
-  m->ReadData();
+  vector<int> runlist = { 53,54,55,56,57,58,59,60,61,62 };
+  m->ReadDataEnrBEGe( runlist );
 
   // --- read in the MC histograms ---
-
-  m->ReadMC();
+  m->ReadMCAlpha();
 
   // --- define parameters ---
-
   m->DefineParameters();
 
   // to get better sensitivity on a certain parameter
@@ -117,9 +116,10 @@ int main()
 //     m->MCMCSetFlagFillHistograms(i,false); //disable histos for nuisance parameters
 
   // create new output object
-  BCModelOutput* mout = new BCModelOutput( m,
-		  Form( "/opt/exp_software/gerda/gerda_gpfs/vonsturm/BAT/BEGE_alphas/ModelOutput/%s/"
-				  "BEGE_alphas_model.root", precisionString.c_str() ) );
+  string OUTPUT_DIR = "/opt/exp_software/gerda/gerda_gpfs/vonsturm/BAT/BEGE_alphas/ModelOutput/";
+  OUTPUT_DIR += precisionString;
+
+  BCModelOutput* mout = new BCModelOutput( m, Form( "%s/BEGE_alphas_model.root", OUTPUT_DIR.c_str() ) );
 
   // switch writing of Markov Chains on
   mout->WriteMarkovChain(true);
@@ -147,16 +147,14 @@ int main()
   // ----------------------------------
 
   // draw all marginalized distributions into a PostScript file
-  m->PrintAllMarginalized( Form( "/opt/exp_software/gerda/gerda_gpfs/vonsturm/BAT/BEGE_alphas/ModelOutput/%s/"
-		  "BEGE_alphas_plots.ps", precisionString.c_str() ) );
+  m->PrintAllMarginalized( Form( "%s/BEGE_alphas_plots.ps", OUTPUT_DIR.c_str() ) );
 
   // print all summary plots
 //   summary->PrintParameterPlot(Form("/raid4/gerda/hemmer/BAT_BEGE_backgrounds_results_M1/%s/%dkeVBins/BEGE_backgrounds_parameters.eps",precisionString.c_str(),(int)binwidth));
 //   summary->PrintCorrelationPlot(Form("/raid4/gerda/hemmer/BAT_BEGE_backgrounds_results_M1/%s/%dkeVBins/BEGE_backgrounds_correlation.eps",precisionString.c_str(),(int)binwidth));
 //   summary->PrintKnowledgeUpdatePlots(Form("/raid4/gerda/hemmer/BAT_BEGE_backgrounds_results_M1/%s/%dkeVBins/BEGE_backgrounds_update.ps",precisionString.c_str(),(int)binwidth)); 
   // print results of the analysis into a text file
-  m->PrintResults( Form( "/opt/exp_software/gerda/gerda_gpfs/vonsturm/BAT/BEGE_alphas/ModelOutput/%s/"
-		  "BEGE_alphas_results.txt", precisionString.c_str() ) );
+  m->PrintResults( Form( "%s/BEGE_alphas_results.txt", OUTPUT_DIR.c_str() ) );
   
 
   // calculate p-value
@@ -207,8 +205,7 @@ int main()
   mout->Close();
 
   // dump event information and plots for best fit parameters
-  char* rootOutput = Form("/opt/exp_software/gerda/gerda_gpfs/vonsturm/BAT/BEGE_alphas/ModelOutput/%s/"
-		  "BEGE_backgrounds.root",precisionString.c_str());
+  char* rootOutput = Form( "%s/BEGE_backgrounds.root", OUTPUT_DIR.c_str() );
   m->DumpHistosAndInfo(m->GetBestFitParameters(), rootOutput);
 
   delete m;

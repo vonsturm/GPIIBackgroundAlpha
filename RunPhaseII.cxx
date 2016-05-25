@@ -42,6 +42,7 @@ void RunPhaseII::SetRunSetup( int RunNumber, string DetectorStatusFile,
 	fRunNumber = RunNumber;
 
 	SetGERDA_META_DATA();
+	SetGERDA_DATA_SETS();
 
 	fDetectorStatusFile = DetectorStatusFile;
 	fDataKeysAnalysisFile = DataKeysAnalysisFile;

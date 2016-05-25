@@ -77,7 +77,7 @@ void BEGE_backgrounds::DefineParameters()
 	// Add all MC histograms as fit parameters
 	for(int iMC = 0; iMC < (int)f_MC.size(); iMC++)
 	{
-		AddParameter( Form("par_%d",iMC), 0., 100. );
+		AddParameter( Form("par_%d_%s",iMC,f_MCname.at(iMC).c_str()), 0., 100. );
 	}
 }
 
@@ -87,6 +87,20 @@ void BEGE_backgrounds::SetHistogramParameters( int hnumbins, double hemin, doubl
 	f_hnumbins = hnumbins;
 	f_hemin = hemin;
 	f_hemax = hemax;
+
+	double binsize = (f_hemax - f_hemin) / (double)f_hnumbins;
+
+	// exclude 2039 +- 25 keV from fit
+	if ( (2039. + 25. - f_hemin) > 0 )
+	{
+		int bin_start = ceil( (2039. - 25. - f_hemin) / binsize );
+		int bin_stop = ceil( (2039. + 25. - f_hemin) / binsize );
+
+		cout << "Skipping blinded region: bins " << bin_start << " - " << bin_stop << endl;
+
+		for( int i = bin_start; i <= bin_stop; i++)
+			f_binsToSkip.push_back(i);
+	}
 }
 
 // FIX ME: Detectors cannot change the data channel!!!
@@ -96,41 +110,46 @@ void BEGE_backgrounds::SetHistogramParameters( int hnumbins, double hemin, doubl
 // The meta data file contains also information about the detector type
 // Here use only enrBEGe detectors
 // ---------------------------------------------------------
-int BEGE_backgrounds::ReadData( string runlist )
+int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
 {
 	// Prepare sum histograms
 	f_hdataSum = new TH1D("henergySum",
-			"Energy channels enrBEGe ON, mult==1, no veto",
+			"Energy channels enrBEGe ON, mult==1, no veto (mu,LAr), no TP",
 			f_hnumbins, f_hemin, f_hemax);
 
 	int bins = int(f_hemax-f_hemin);
 
 	f_hdataSum_fine = new TH1D("henergySum_fine",
-			"Energy channels enrBEGe ON, mult==1, no veto",
+			"Energy channels enrBEGe ON, mult==1, no veto (mu,LAr), no TP",
 		    bins, f_hemin, f_hemax);
 
 	string GERDA_PHASEII_DATA = getenv("GERDA_PHASEII_DATA");
 
-	ifstream RunList( runlist );
+	double liveTimeAnalyzed = 0;
+	double totExposure = 0;
+	double totExposureBEGe = 0;
+	double totExposureCoax = 0;
 
-	if( !RunList.is_open() )
+	for( auto Run : runlist )
 	{
-		cout << "No run list found." << endl;
-		return 1;
-	}
+		cout << "---------------------------------------------" << endl;
+		cout << "Adding run " << Run << " to analysis." << endl;
+		cout << "---------------------------------------------" << endl;
 
-	int Run; RunList >> Run;
-
-	while( !RunList.eof() )
-	{
 		RunPhaseII * runX = new RunPhaseII( Run, Form( "run%04d-phy-detStatus.txt", Run ),
 				Form( "run%04d-phy-analysis.txt", Run ), Form( "run%04d-phy-allFiles.txt", Run ) );
 
 		f_ndets = runX->GetDetectors().size();
 
+		liveTimeAnalyzed += runX->GetLiveTime();
+		totExposure += runX->GetExposure();
+		totExposureBEGe += runX->GetExposureBEGE();
+		totExposureCoax += runX->GetExposureCOAX();
+
 		if( f_hdata.size() == 0 )
 		{
 			f_hdata = vector<TH1D*>( f_ndets, NULL );
+			fDetectorLivetime = vector<double>(f_ndets, 0);
 		}
 
 		string META_FILE = runX->GetDataKeysAnalysisFile();
@@ -142,7 +161,7 @@ int BEGE_backgrounds::ReadData( string runlist )
 
 		gada::DataLoader l;
 		l.AddFileMap(&myMap);
-		l.BuildTier3();
+		l.BuildTier4();
 
 		TChain * chain = l.GetMasterChain();
 		int nentries = chain->GetEntries();
@@ -151,23 +170,26 @@ int BEGE_backgrounds::ReadData( string runlist )
   
 		// fill the data in histograms
 		int eventChannelNumber;
-		int isvetoed;
-		int isvetoedInTime;
+		long timestamp;
+		int decimalTimestamp;
+		int isMuVetoed;
+		vector<int> firedFlag(f_ndets);
+		int multiplicity;
+		vector<double> energy(f_ndets);
 		int isTP;
-		int firedChannels;
-		double ch[f_ndets];
-		int firedFlag[f_ndets];
+		int isLArVetoed;
 
 		chain -> SetBranchAddress("eventChannelNumber", &eventChannelNumber);
-		chain -> SetBranchAddress("isVetoed",&isvetoed);
-		chain -> SetBranchAddress("isVetoedInTime",&isvetoedInTime);
-		chain -> SetBranchAddress("firedFlag", firedFlag);
-		chain -> SetBranchAddress("multiplicity",&firedChannels);
-		chain -> SetBranchAddress("energy",ch);
+		chain -> SetBranchAddress("timestamp",&timestamp);
+		chain -> SetBranchAddress("decimalTimestamp",&decimalTimestamp);
+		chain -> SetBranchAddress("isMuVetoed", &isMuVetoed);
+		chain -> SetBranchAddress("firedFlag", &firedFlag);
+		chain -> SetBranchAddress("multiplicity",&multiplicity);
+		chain -> SetBranchAddress("energy",&energy);
 		chain -> SetBranchAddress("isTP",&isTP);
+		chain -> SetBranchAddress("isLArVetoed",&isLArVetoed);
 
-		// Modify all this part in order to read only BEGe data
-		// Maybe using the ChannelMapping file we also use in MaGe
+		// Read only BEGe data
 		vector<int> channelsBEGeON;
 		vector<int> channelsOFF;
 
@@ -175,11 +197,17 @@ int BEGE_backgrounds::ReadData( string runlist )
 		{
 			string type = det->GetDetectorType();
 			string status = det->GetDetectorAnalysisStatus();
+			string name = det->GetDetectorName();
 			int channel = det->GetDataChannel();
+			fDetectorDynamicRange.at(channel) = det->GetDynamicRange();
 
 			if( type == "enrBEGe" && status == "ON" )
 			{
+				cout << "+ " << type << " detector " << name << " in channel " << channel << endl;
+
 				channelsBEGeON.push_back( channel );
+
+				fDetectorLivetime.at(channel) += runX->GetLiveTime();
 
 				if( f_hdata.at(channel) == NULL )
 				{
@@ -196,62 +224,92 @@ int BEGE_backgrounds::ReadData( string runlist )
 			}
 		}
 
-		delete runX;
-
 		// loop over all events
 		for (int jentry = 0; jentry < nentries; jentry++)
 		{
-			//if (jentry%100000==0) cout<<" now event "<<jentry<<endl;
-			chain->GetEntry(jentry);
+			if ( jentry%( (int)(nentries/100) ) == 0 )
+				cout << " processing event " << jentry << " (" << (int)(jentry/nentries) << "%)" << endl;
+			chain->GetEntry( jentry );
 
-			// FIX ME: Import all data cuts here!!!
+			// Cuts after Quality cuts
+			// is test pulser
+			// is vetoed by muon veto
+			// has multiplicity != 1
 			// is vetoed by LAr veto
-			// is discharge
-			// is overshot
-			// is undershot
-			// etc...
-			if (isTP) continue;
-			if (firedChannels != 1) continue;
-			if (isvetoed) continue;
-			if (isvetoedInTime) continue;
+			if ( isTP ) 				continue;
+			if ( isMuVetoed ) 			continue;
+			if ( multiplicity != 1 ) 	continue;
+			if ( isLArVetoed ) 			continue;
 
 			// do not consider coincidences from ANG1 and RG3 at any time
 			// make coincidence loop only over other detectors
-			// --> channel 0==ANG1, channel 7==RG3
 			int coincidence = 0;
+
 			for( int i = 0; i < f_ndets; i++)
 			{
 				// continue if channel is switched off and not used for AC
 				if( find( channelsOFF.begin(), channelsOFF.end(), i ) != channelsOFF.end() )
 					continue;
-				int hitDet = firedFlag[i];
-				if( hitDet == 1 )
-					coincidence+=1;
+				int hitDet = firedFlag.at(i);
+				if( hitDet )
+					coincidence += 1;
 			}
 
 			if( coincidence != 1 ) continue;
 
 			for( auto BEGeChannel : channelsBEGeON )
 			{
-				if( firedFlag[BEGeChannel] == 1 )
+				if( firedFlag.at(BEGeChannel) == 1 )
 				{
+					// do not add events with energy greater than the dynamic range of the detector
+					if( energy.at(BEGeChannel) >= fDetectorDynamicRange( BEGeChannel ) )
+						continue;
+
+					// skip events in blinded region
+					if( ( energy.at(BEGeChannel) >= (2039. - 25.) ) && ( energy.at(BEGeChannel) <= (2039. + 25.) ) )
+						continue;
+
 					// fill the channel histogram
-					f_hdata.at(BEGeChannel)->Fill( ch[BEGeChannel] );
+					f_hdata.at(BEGeChannel)->Fill( energy.at(BEGeChannel) );
 					// fill also the sum histogram
-					f_hdataSum->Fill( ch[BEGeChannel] );
-					f_hdataSum_fine->Fill( ch[BEGeChannel] );
+					f_hdataSum->Fill( energy.at(BEGeChannel) );
+					f_hdataSum_fine->Fill( energy.at(BEGeChannel) );
 				}
 			}
 		}
-	}
 
-	RunList.close();
+		// make sure the blinded region is really empty
+		for( auto BEGeChannel : channelsBEGeON )
+		{
+			for( auto b : f_binsToSkip )
+				f_hdata.at(BEGeChannel)->SetBinContent(b,0);
+		}
+
+		for( auto b : f_binsToSkip )
+			f_hdataSum->SetBinContent(b,0);
+
+		delete runX;
+	}
 
 	// ----------------------------------------------
 	// --- fill the data vector for faster access ---
 	// ----------------------------------------------
 
 	FillDataArray();
+
+	// ----------------------------------------------
+	// --- control output ---
+	// ----------------------------------------------
+
+	cout << "---------------------------------------------" << endl;
+	cout << "---------------------------------------------" << endl;
+	cout << "All selected runs combined:" << endl;
+	cout << "\tLivetime: " << liveTimeAnalyzed/365.242 << "yr" << endl;
+	cout << "\tExposure: " << totExposure << "kg yr" << endl;
+	cout << "\tExposure BEGE: " << totExposureBEGe << "kg yr" << endl;
+	cout << "\tExposyre COAX: " << totExposureCoax << "kg yr" << endl;
+	cout << "---------------------------------------------" << endl;
+	cout << "---------------------------------------------" << endl;
 
 	return 0;
 }
@@ -267,10 +325,9 @@ int BEGE_backgrounds::FillDataArray()
 	  f_vdata.push_back(value);
   }
   
-
   // fill also the arrays with upper and lower limits 
   // of the bins in the data histograms
-  
+  // dont't know what they should be good for...
   for(int ibin = 1; ibin <= f_hnumbins; ibin++)
   {
       double lowerlimit = f_hdataSum->GetBinLowEdge( ibin );
@@ -286,13 +343,13 @@ int BEGE_backgrounds::FillDataArray()
 
 // This part is a bit tricky
 // Either we put the full MC files here (but they are kind of large)
-// Or we treat them beforehand by smearing and histogramming
+// Or we treat them beforehand by smearing and histograming
 // That could be difficult however based on the binning chosen for the data
 // it is possible to make errors with the MC spectra
 // Best is a treatment with only smearing but the full energy of the events is
-// kept and histogrammed only here
+// kept and histogramed only here
 // ---------------------------------------------------------
-int BEGE_backgrounds::ReadMC()
+int BEGE_backgrounds::ReadMCAlpha()
 {
 	string MC_SMEARED_DIR = getenv("MC_SMEARED_DIR");
 
@@ -307,47 +364,57 @@ int BEGE_backgrounds::ReadMC()
 	//-------------
 	// Po210_pPlus
 	//-------------
-	f_MC_FileName = "smeared_Po210_onPplusContactSurface_GERDAPhaseI_1e8evts.root";
-	AddMC("Po210_pPlus");
+	f_MC_FileName = "histograms_Po210_onPplusSurface.root";
+//	AddMCSingle( "Po210_pPlus_dl0nm", "hist_dl0nm" );
+	AddMCSingle( "Po210_pPlus_dl100nm", "hist_dl100nm" );
+//	AddMCSingle( "Po210_pPlus_dl200nm", "hist_dl200nm" );
+//	AddMCSingle( "Po210_pPlus_dl300nm", "hist_dl300nm" );
+	AddMCSingle( "Po210_pPlus_dl400nm", "hist_dl400nm" );
+//	AddMCSingle( "Po210_pPlus_dl500nm", "hist_dl500nm" );
+//	AddMCSingle( "Po210_pPlus_dl600nm", "hist_dl600nm" );
+	AddMCSingle( "Po210_pPlus_dl700nm", "hist_dl700nm" );
+//	AddMCSingle( "Po210_pPlus_dl800nm", "hist_dl800nm" );
+//	AddMCSingle( "Po210_pPlus_dl900nm", "hist_dl900nm" );
+	AddMCSingle( "Po210_pPlus_dl1000nm", "hist_dl1000nm" );
 
-	//------------------
-	// Ra226chain_pPlus
-	//------------------
-	// --- Ra226 ---
-	f_MC_FileName = "";
-	AddMC("Ra226_pPlus");
-
-	// --- Rn222 ---
-	f_MC_FileName = "";
-	AddMC("Rn222_pPlus");
-
-	// --- Po218 ---
-	f_MC_FileName = "";
-	AddMC("Po218_pPlus");
-
-	// --- Po214 ---
-	f_MC_FileName = "";
-	AddMC("Po214_pPlus");
-
-
-	//--------------------
-	// Ra226chain_inLArBH
-	//--------------------
-	// --- Ra226 ---
-	f_MC_FileName = "";
-	AddMC("Ra226_inLArBH");
-
-	// --- Rn222 ---
-	f_MC_FileName = "";
-	AddMC("Rn222_inLArBH");
-
-	// --- Po218 ---
-	f_MC_FileName = "";
-	AddMC("Po218_inLArBH");
-
-	// --- Po214 ---
-	f_MC_FileName = "";
-	AddMC("Po214_inLArBH");
+//	//------------------
+//	// Ra226chain_pPlus
+//	//------------------
+//	// --- Ra226 ---
+//	f_MC_FileName = "";
+//	AddMC("Ra226_pPlus");
+//
+//	// --- Rn222 ---
+//	f_MC_FileName = "";
+//	AddMC("Rn222_pPlus");
+//
+//	// --- Po218 ---
+//	f_MC_FileName = "";
+//	AddMC("Po218_pPlus");
+//
+//	// --- Po214 ---
+//	f_MC_FileName = "";
+//	AddMC("Po214_pPlus");
+//
+//
+//	//--------------------
+//	// Ra226chain_inLArBH
+//	//--------------------
+//	// --- Ra226 ---
+//	f_MC_FileName = "";
+//	AddMC("Ra226_inLArBH");
+//
+//	// --- Rn222 ---
+//	f_MC_FileName = "";
+//	AddMC("Rn222_inLArBH");
+//
+//	// --- Po218 ---
+//	f_MC_FileName = "";
+//	AddMC("Po218_inLArBH");
+//
+//	// --- Po214 ---
+//	f_MC_FileName = "";
+//	AddMC("Po214_inLArBH");
 
 	// copy MC information in arrays to make program faster
 	FillMCArrays();
@@ -356,9 +423,13 @@ int BEGE_backgrounds::ReadMC()
 }
 
 // ---------------------------------------------------------
-int BEGE_backgrounds::AddMC(string name)
+
+int BEGE_backgrounds::AddMC( string name )
 {
-	// set the first BEGE channel
+	cout << "---------------------------------------------" << endl;
+	cout << "Adding MC component " << name << endl;
+	cout << "---------------------------------------------" << endl;
+
 	TH1D* henergy = new TH1D(Form("h_%s",name.c_str()),
 			Form("%s",name.c_str()),
 			f_hnumbins, f_hemin, f_hemax);
@@ -372,14 +443,14 @@ int BEGE_backgrounds::AddMC(string name)
 			Form("%s",namefine.c_str()),
 			bins, f_hemin, f_hemax);
 
-	int allbins = int( 7500. - 570. );
+	int allbins = int( 7500. - 550. );
 
 	string nameall = name;
 	nameall.append("_all");
 
 	TH1D* henergy_all = new TH1D(Form("h_%s",nameall.c_str()),
 			Form("%s",nameall.c_str()),
-			allbins, 570., 7500.);
+			allbins, 550., 7500.);
 
 	// initialize the histogram arrays
 	for( int i = 1; i <= f_hnumbins; i++ )
@@ -398,29 +469,38 @@ int BEGE_backgrounds::AddMC(string name)
 
 	for( int idet = 0; idet < f_ndets; idet++ )
     {
+		// Fill only MC histograms that have a corresponding data histogram
 		if( f_hdata.at(idet) != NULL )
 		{
+			double livetime = fDetectorLivetime.at(idet);
+
+			cout << "+ MC spectrum h" << idet << " with lifetime weight " << livetime << endl;
+
 			TH1D* MC_raw = (TH1D*)MCfile->Get( Form( "h%i", idet ) );
+			MC_raw->Scale(livetime);
 
-			int nbins_MC_raw = MC_raw->GetNbinsX();
+			int start_deleting = MC_raw->FindBin( (double)fDetectorDynamicRange.at( idet ) + 0.5  );
+			int last_bin = MC_raw->GetNbinsX();
 
-			for( int i = 1; i < nbins_MC_raw; i++ )
+			for( int b = start_deleting; b <= last_bin; b++ )
+			{
+				MC_raw->SetBinContent( b, 0 );
+			}
+
+			for( int i = 1; i < last_bin; i++ )
 			{
 				double bincontent = MC_raw->GetBinContent( i );
 				double bincenter = MC_raw->GetBinCenter( i );
 
-				if( henergy->FindBin( bincenter ) > 0 &&
-						henergy->FindBin( bincenter ) <= f_hnumbins )
+				if( henergy->FindBin( bincenter ) > 0 && henergy->FindBin( bincenter ) <= f_hnumbins )
 					henergy->SetBinContent( henergy->FindBin( bincenter ),
 							henergy->GetBinContent( henergy->FindBin( bincenter ) ) + bincontent );
 
-				if( henergy_fine->FindBin( bincenter ) > 0 &&
-						henergy_fine->FindBin( bincenter ) <= bins )
+				if( henergy_fine->FindBin( bincenter ) > 0 && henergy_fine->FindBin( bincenter ) <= bins )
 					henergy_fine->SetBinContent( henergy_fine->FindBin( bincenter ),
 							henergy_fine->GetBinContent( henergy_fine->FindBin( bincenter ) ) + bincontent );
 
-				if( henergy_all->FindBin( bincenter ) > 0 &&
-						henergy_all->FindBin( bincenter ) <= allbins )
+				if( henergy_all->FindBin( bincenter ) > 0 && henergy_all->FindBin( bincenter ) <= allbins )
 					henergy_all->SetBinContent( henergy_all->FindBin( bincenter ),
 							henergy_all->GetBinContent( henergy_all->FindBin( bincenter ) ) + bincontent );
 			}
@@ -429,11 +509,11 @@ int BEGE_backgrounds::AddMC(string name)
 
 	MCfile->Close();
 
-	double scaling = henergy->Integral( );
+	double intInBlindedRegion = henergy->Integral( f_binsToSkip.front(), f_binsToSkip.back() );
+	double scaling = henergy->Integral() - intInBlindedRegion;
 
 	henergy->Scale( 1./scaling );
 	henergy_fine->Scale( 1./scaling );
-
 	henergy_all->Scale( 1./scaling );
 
 	f_MC.push_back( henergy );
@@ -441,16 +521,97 @@ int BEGE_backgrounds::AddMC(string name)
 	f_MCall.push_back( henergy_all );
 	f_MCname.push_back( name );
 
-	for( int h = f_hdata.size() - 1; h >= 0; h-- )
+	return 0;
+}
+
+
+// ---------------------------------------------------------
+
+int BEGE_backgrounds::AddMCSingle( string name, string histoname )
+{
+	cout << "---------------------------------------------" << endl;
+	cout << "Adding MC component " << name << endl;
+	cout << "---------------------------------------------" << endl;
+
+	// set the first BEGE channel
+	TH1D* henergy = new TH1D(Form("h_%s",name.c_str()),
+			Form("%s",name.c_str()),
+			f_hnumbins, f_hemin, f_hemax);
+
+	int bins = int( f_hemax - f_hemin );
+
+	string namefine = name;
+	namefine.append("_fine");
+
+	TH1D* henergy_fine = new TH1D(Form("h_%s",namefine.c_str()),
+			Form("%s",namefine.c_str()),
+			bins, f_hemin, f_hemax);
+
+	int allbins = int( 7500. - 600. );
+
+	string nameall = name;
+	nameall.append("_all");
+
+	TH1D* henergy_all = new TH1D(Form("h_%s",nameall.c_str()),
+			Form("%s",nameall.c_str()),
+			allbins, 600., 7500.);
+
+	// initialize the histogram arrays
+	for( int i = 1; i <= f_hnumbins; i++ )
+		henergy->SetBinContent( i, 0 );
+	for( int i = 1; i <= bins; i++ )
+		henergy_fine->SetBinContent( i, 0 );
+	for( int i = 1; i <= allbins; i++ )
+		henergy_all->SetBinContent( i, 0 );
+
+	henergy->GetXaxis()->SetCanExtend( false );
+	henergy_fine->GetXaxis()->SetCanExtend( false );
+	henergy_all->GetXaxis()->SetCanExtend( false );
+
+	// loop over all channels
+	TFile * MCfile = new TFile( f_MC_FileName.c_str() );
+
+	// get histo from file
+	TH1D* MC_raw = (TH1D*)MCfile->Get( histoname.c_str() );
+	int last_bin = MC_raw->GetNbinsX();
+
+	cout << "+ MC spectrum " << histoname << endl;
+
+	for( int i = 1; i < last_bin; i++ )
 	{
-		if( f_hdata.at(h) == NULL )
-		{
-			f_hdata.erase( f_hdata.begin() + h );
-		}
+		double bincontent = MC_raw->GetBinContent( i );
+		double bincenter = MC_raw->GetBinCenter( i );
+
+		if( henergy->FindBin( bincenter ) > 0 && henergy->FindBin( bincenter ) <= f_hnumbins )
+			henergy->SetBinContent( henergy->FindBin( bincenter ),
+					henergy->GetBinContent( henergy->FindBin( bincenter ) ) + bincontent );
+
+		if( henergy_fine->FindBin( bincenter ) > 0 && henergy_fine->FindBin( bincenter ) <= bins )
+			henergy_fine->SetBinContent( henergy_fine->FindBin( bincenter ),
+					henergy_fine->GetBinContent( henergy_fine->FindBin( bincenter ) ) + bincontent );
+
+		if( henergy_all->FindBin( bincenter ) > 0 && henergy_all->FindBin( bincenter ) <= allbins )
+			henergy_all->SetBinContent( henergy_all->FindBin( bincenter ),
+					henergy_all->GetBinContent( henergy_all->FindBin( bincenter ) ) + bincontent );
 	}
+
+	MCfile->Close();
+
+	double intInBlindedRegion = henergy->Integral( f_binsToSkip.front(), f_binsToSkip.back() );
+	double scaling = henergy->Integral() - intInBlindedRegion;
+
+	henergy->Scale( 1./scaling );
+	henergy_fine->Scale( 1./scaling );
+	henergy_all->Scale( 1./scaling );
+
+	f_MC.push_back( henergy );
+	f_MCfine.push_back( henergy_fine );
+	f_MCall.push_back( henergy_all );
+	f_MCname.push_back( name );
 
 	return 0;
 }
+
 
 // ---------------------------------------------------------
 
@@ -476,11 +637,17 @@ double BEGE_backgrounds::LogLikelihood(const std::vector <double> & parameters)
 
   // This methods returns the logarithm of the conditional probability
   // p(data|parameters). This is where you have to define your model.
-  
+  //
+  // For this method to not be alpha specific we have to exclude the blinding region from the likelihood
+
   double logprob = 0.;
 
   for( int ibin = 0; ibin < f_hnumbins; ibin++)
   {
+	  // skip blinded region in the likelihood
+	  if( find( f_binsToSkip.begin(), f_binsToSkip.end(), ibin ) != f_binsToSkip.end() )
+		  continue;
+
 	  double lambda = 0.;
 
 	  for( int iMC = 0; iMC < (int)f_MC.size(); iMC++)
@@ -493,7 +660,7 @@ double BEGE_backgrounds::LogLikelihood(const std::vector <double> & parameters)
       double sum = bincontent*log(lambda) - lambda - BCMath::LogFact((int)bincontent);
       
       logprob += sum;
-    }
+  }
 
   return logprob;
 }
@@ -507,14 +674,19 @@ double BEGE_backgrounds::LogAPrioriProbability(std::vector <double> parameters)
 
   double logprob = 0.;
 
+  // skip blinded region in the likelihood
+  int bins = f_binsToSkip.size();
+  double binsize = (f_hemax - f_hemin) / (double)f_hnumbins;
+  double skippedRange = binsize * (double)bins;
+
   for( int iMC = 0; iMC < (int)f_MC.size(); iMC++ )
-    {
+  {
       double range = GetParameter(iMC)->GetRangeWidth();
       // flat prior for all contributions
-      logprob += log( 1./range );
-    }
+      logprob += log( 1. / ( range - skippedRange ) );
+  }
   
-   return logprob;
+  return logprob;
 }
 // ---------------------------------------------------------
 
@@ -545,6 +717,10 @@ double BEGE_backgrounds::EstimatePValue()
 
   for( int ibin = 0; ibin < f_hnumbins; ibin++ )
   {
+	  //TODO
+	  if( find( f_binsToSkip.begin(), f_binsToSkip.end(), ibin ) != f_binsToSkip.end() )
+		  continue;
+
       double lambda = 0.;
 
       for( int iMC = 0; iMC < (int)f_MC.size(); iMC++ )
@@ -573,6 +749,9 @@ double BEGE_backgrounds::EstimatePValue()
   {
       for( int ibin = 0; ibin < f_hnumbins; ibin++)
       {
+    	  if( find( f_binsToSkip.begin(), f_binsToSkip.end(), ibin ) != f_binsToSkip.end() )
+    		  continue;
+
     	  int counter = ibin;
 
     	  if ( rand() > RAND_MAX/2 ) // Try to increase the bin content by 1
@@ -650,15 +829,18 @@ void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* r
       eventsMC_all.push_back( f_MCall.at(iMC)->Integral() );
   }
 
-  double binwidth = f_hdata.at(0)->GetBinWidth(1);
-
   // write the single detector data spectra
   for(int idet=0; idet<f_ndets; idet++)
   {
-      f_hdata.at(idet)->SetLineWidth(2);
-      f_hdata.at(idet)->GetXaxis()->SetTitle("Energy (keV)");
-      f_hdata.at(idet)->GetYaxis()->SetTitle(Form("Events/(%d keV)",(int)binwidth));
-      f_hdata.at(idet)->Write();
+	  if( f_hdata.at(idet) != NULL )
+	  {
+		  double binwidth = f_hdata.at(idet)->GetBinWidth(1);
+
+		  f_hdata.at(idet)->SetLineWidth(2);
+		  f_hdata.at(idet)->GetXaxis()->SetTitle("Energy (keV)");
+		  f_hdata.at(idet)->GetYaxis()->SetTitle(Form("Events/(%d keV)",(int)binwidth));
+		  f_hdata.at(idet)->Write();
+	  }
   }
   // write the finer binning data histogram
   f_hdataSum_fine->SetLineWidth(2);
@@ -689,19 +871,23 @@ void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* r
   legend->SetFillStyle(0);
   legend->SetBorderSize(0);
 
+  double binwidth_hsum = f_hdataSum->GetBinWidth(1);
+
   f_hdataSum->SetLineWidth(2);
   f_hdataSum->SetMarkerStyle(20);
   f_hdataSum->GetXaxis()->SetTitle("Energy (keV)");
-  f_hdataSum->GetYaxis()->SetTitle(Form("Events/(%d keV)",(int)binwidth));
+  f_hdataSum->GetYaxis()->SetTitle(Form("Events/(%d keV)",(int)binwidth_hsum));
   f_hdataSum->Draw("P");
   f_hdataSum->Write();
   legend->AddEntry(f_hdataSum,"data","p");
+
+  double binwidth_hMC = hMC->GetBinWidth(1);
 
   hMC->SetLineWidth(2);
   hMC->SetLineColor(1);
   hMC->Draw("same");
   hMC->GetXaxis()->SetTitle("Energy (keV)");
-  hMC->GetYaxis()->SetTitle(Form("Events/(%d keV)",(int)binwidth));
+  hMC->GetYaxis()->SetTitle(Form("Events/(%d keV)",(int)binwidth_hMC));
   hMC->Write();
   legend->AddEntry(hMC,"model","l");
 
@@ -723,7 +909,7 @@ void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* r
 
       f_MC.at(iMC)->Draw("same");
       f_MC.at(iMC)->GetXaxis()->SetTitle("Energy (keV)");
-      f_MC.at(iMC)->GetYaxis()->SetTitle(Form("Events/(%d keV)",(int)binwidth));
+      f_MC.at(iMC)->GetYaxis()->SetTitle(Form("Events/(%d keV)",(int)binwidth_hMC));
       name=f_MCname.at(iMC);
       legend->AddEntry(f_MC.at(iMC),Form("%s",name.c_str()),"l");
 
@@ -733,11 +919,11 @@ void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* r
   legend->Draw();
   canvas->Write();
       
-  hresiduals->Add(f_hdataSum, hMC, 1., -1.);
+  hresiduals->Add(f_hdataSum, hMC, 1., -1.); // differences !!!
   hresiduals->SetLineWidth(2);
   hresiduals->SetMarkerStyle(20);
   hresiduals->GetXaxis()->SetTitle("Energy (keV)");
-  hresiduals->GetYaxis()->SetTitle(Form("residual counts/(%d keV)",(int)binwidth));
+  hresiduals->GetYaxis()->SetTitle(Form("residual counts/(%d keV)",(int)binwidth_hMC));
   hresiduals->Write();
 
   // events info
