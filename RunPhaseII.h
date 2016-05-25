@@ -48,9 +48,11 @@ public:
 
 	std::string GetGERDA_META_DATA(){ return fGERDA_META_DATA; };
 	std::string GetGERDA_DATA_SETS(){ return fGERDA_DATA_SETS; };
-	std::string GetDataKeysAllFile(){ return fGERDA_META_DATA + "/" + fDataKeysAllFile; };
+
+	std::string GetDetectorStatusFile(){ return fGERDA_META_DATA + "/" + fDetectorStatusFile; };
+	std::string GetDataKeysAllFile(){ return fGERDA_DATA_SETS + "/" + fDataKeysAllFile; };
 	std::string GetDataKeysAnalysisFile(){ return fGERDA_DATA_SETS + "/" + fDataKeysAnalysisFile; };
-	std::string GetDetectorStatusFile(){ return fGERDA_DATA_SETS + "/" + fDetectorStatusFile; };
+
 	std::vector<DetectorPhaseII*> GetDetectors(){ return fDetectors; };
 	DetectorPhaseII* GetDetectorInDataChannel( int channel );
 
