@@ -41,10 +41,13 @@ class BEGE_backgrounds : public BCModel
 
       // my own methods
       void SetHistogramParameters(int hnumbins, double hemin, double hemax);
-      int ReadData( std::string meta_filename = "" );
+      int ReadDataEnrBEGe( std::vector<int> runlist );
+      int ReadDataEnrCoax( std::vector<int> runlist );
+      int ReadDataNatCoax( std::vector<int> runlist );
       int FillDataArray();
-      int ReadMC();
-      int AddMC(std::string name);
+      int ReadMCAlpha();
+      int AddMC( std::string name );
+      int AddMCSingle( std::string name, std::string histoname );
       int FillMCArrays();
 
       double getndets() {return f_ndets;};
@@ -58,6 +61,10 @@ class BEGE_backgrounds : public BCModel
       int f_hnumbins;
       double f_hemin;
       double f_hemax;
+      std::vector<int> f_binsToSkip;
+
+      std::vector<double> fDetectorLivetime;
+      std::vector<int> fDetectorDynamicRange;
 
       std::vector<TH1D*> f_hdata;
       TH1D* f_hdataSum;
