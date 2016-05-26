@@ -40,6 +40,7 @@
 #include "BEGE_backgrounds.h"
 
 using namespace std;
+using namespace gada;
 
 // ---------------------------------------------------------
 BEGE_backgrounds::BEGE_backgrounds() : BCModel()
@@ -141,6 +142,8 @@ int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
 
 		f_ndets = runX->GetDetectors().size();
 
+		cout << "Found " << f_ndets << " detectors in Run" << Run << endl;
+
 		liveTimeAnalyzed += runX->GetLiveTime();
 		totExposure += runX->GetExposure();
 		totExposureBEGe += runX->GetExposureBEGE();
@@ -154,6 +157,8 @@ int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
 
 		string META_FILE = runX->GetDataKeysAnalysisFile();
 
+		cout << "Adding key list " << META_FILE << endl;
+
 		// Here the data loader could be included...
 		gada::FileMap myMap;
 		myMap.SetRootDir( GERDA_PHASEII_DATA );
@@ -163,7 +168,7 @@ int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
 		l.AddFileMap(&myMap);
 		l.BuildTier4();
 
-		TChain * chain = l.GetMasterChain();
+		TChain * chain = l.GetSharedMasterChain();
 		int nentries = chain->GetEntries();
 
 		cout << "There are " << nentries << " events in the chain!" <<endl;
