@@ -54,7 +54,7 @@ public:
 	std::string GetDataKeysAnalysisFile(){ return fGERDA_DATA_SETS + "/" + fDataKeysAnalysisFile; };
 
 	std::vector<DetectorPhaseII*> GetDetectors(){ return fDetectors; };
-	DetectorPhaseII* GetDetectorInDataChannel( int channel );
+	DetectorPhaseII* GetDetectorInDataChannel( uint channel );
 
 	//
 	void AddDetector( std::string DetectorName, std::string DetectorType,
