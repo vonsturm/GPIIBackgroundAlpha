@@ -80,8 +80,8 @@ void DetectorPhaseII::ReadParametersFromDatabase()
 
 	file >> fMass;
 	file >> fAVfraction;
-	file >> ddummy;
-	fEndDynamicRange = floor( ddummy );
+	file >> ddummy; fEndDynamicRange = floor( ddummy );
+	file >> fLiveTime;
 
 	fActiveMass = fMass * fAVfraction/100.;
 

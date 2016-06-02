@@ -34,6 +34,7 @@ public:
 	double GetTotalMass(){ return fMass; };
 	double GetAVfraction(){ return fAVfraction; };
 	double GetActiveMass(){ return fActiveMass; };
+	double GetLiveTime(){ return fLiveTime; };
 
 	int GetDynamicRange(){ return fEndDynamicRange; };
 
@@ -56,6 +57,8 @@ private:
 	double fMass;
 	double fAVfraction;
 	double fActiveMass;
+
+	double fLiveTime;	
 
 	int fEndDynamicRange;
 };
