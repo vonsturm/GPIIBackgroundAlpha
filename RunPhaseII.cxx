@@ -92,7 +92,7 @@ void RunPhaseII::AddDetector( string DetectorName, string DetectorType,
 }
 
 
-DetectorPhaseII* RunPhaseII::GetDetectorInDataChannel( int channel )
+DetectorPhaseII* RunPhaseII::GetDetectorInDataChannel( uint channel )
 {
 	if( fDetectors.size() <= 0 )
 	{
@@ -105,6 +105,8 @@ DetectorPhaseII* RunPhaseII::GetDetectorInDataChannel( int channel )
 		if( det->GetDataChannel() == channel )
 			return det;
 	}
+
+	return NULL;
 }
 
 
