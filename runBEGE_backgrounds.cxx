@@ -11,6 +11,7 @@
 #include <BAT/BCEngineMCMC.h>
 #include <BAT/BCH1D.h>
 #include <BAT/BCModelOutput.h>
+#include <BAT/BCParameter.h>
 
 #include "TStyle.h"
 
@@ -43,7 +44,7 @@ int main()
   
   //--->
   //---- SET HERE ----
-  const int precisionValue = 0;
+  const int precisionValue = 3;
   //------------------
 
   string precisionString="";
@@ -74,14 +75,13 @@ int main()
   // set the precision for the fit
   m->MCMCSetPrecision(precision);
 
-
   // === Set the histograms for the data spectra ===
 
   //--->
   //---- SET HERE ----
   double hemin=3500.; //try also 2900
   double hemax=5300.;
-  double binwidth=30.;
+  double binwidth=50.;
   //------------------
 
   int hnumbins=(int)((hemax-hemin)/binwidth);
@@ -98,7 +98,7 @@ int main()
 
   // --- define data input ---
   // read in the names of the files you want to use, 
-  vector<int> runlist = { 53,54,55,56,57,58,59,60,61,62 };
+  vector<int> runlist = { 53,54,55,56,57,58,59,60,61,62,63 };
   m->ReadDataEnrBEGe( runlist );
 
   // --- read in the MC histograms ---
@@ -110,6 +110,17 @@ int main()
   // to get better sensitivity on a certain parameter
 //   m->SetNbins("inverseHalflife_BEGE_backgrounds",2000);
 //  m->SetNbins("halflife_2nbb",2000);
+  // Set parameter binning
+  size_t nPars = m->GetNParameters();
+  cout << nPars << " Parameters in the fit." << endl;
+  for ( size_t i = 0; i < nPars; i++ )  
+  {
+	m->GetParameter(i)->SetNbins(5000);
+  	cout << "Binning par " << i << ": " << m->GetParameter(i)->GetNbins() << endl;
+  }
+
+  m->SetNbins(2000);
+
 
 //   size_t nPars = m->GetNParameters();
 //   for (size_t i=0;i<nPars;i++)        
@@ -169,12 +180,12 @@ int main()
   cout << "************************************************************" << endl;
   cout << "------------------------------------------------------------" << endl;
 
-  size_t nPars = m->GetNParameters();
-
   for( int i = 0; i < (int)nPars; i++ )
   {
+      vector<string> MCnames = m->GetMCParNames();
+
       //Get the parameters of interest
-      BCH1D* output = m->GetMarginalized(Form("par_%d",i));
+      BCH1D* output = m->GetMarginalized(Form("par_%d_%s",i,MCnames.at(i).c_str() ));
   
       double mode = output->GetMode();
       double xmin = 0., xmax = 0.;
@@ -182,7 +193,7 @@ int main()
 
       double quantile = output->GetQuantile(0.90);
 
-      cout << "Parameter " << i << ":" << endl;
+      cout << "Parameter " << i << " " << MCnames.at(i) << ":" << endl;
       cout << "Mode: " << mode << " + " << xmax-mode << " - " << mode-xmin << endl;
       cout << "Interval: (" << xmin << " - " << xmax << ")" << endl;
       cout << "90% quantile: " << quantile << endl;
@@ -205,7 +216,7 @@ int main()
   mout->Close();
 
   // dump event information and plots for best fit parameters
-  char* rootOutput = Form( "%s/BEGE_backgrounds.root", OUTPUT_DIR.c_str() );
+  char* rootOutput = Form( "%s/BEGE_alphas_histograms.root", OUTPUT_DIR.c_str() );
   m->DumpHistosAndInfo(m->GetBestFitParameters(), rootOutput);
 
   delete m;
