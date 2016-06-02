@@ -44,8 +44,8 @@ GLIBS       += -L$(CUBA_BASE_DIR)/lib -lcuba
 # add GERDA-ADA flags
 CXXFLAGS    += -I$(GERDA_BASE_DIR)/include/gerda-ada/
 
-LIBS        += -L$(GERDA_BASE_DIR)/lib -lgerda-ada
-GLIBS       += -L$(GERDA_BASE_DIR)/lib -lgerda-ada
+LIBS        += -L$(GERDA_BASE_DIR)/lib -lgerda-ada-core	-lgerda-ada-calib-ged -lgerda-ada-dataprod -lgerda-ada-evtviewer -lgerda-ada-monitoring -lgerda-ada-psd-base -lgerda-ada-stats
+GLIBS       += -L$(GERDA_BASE_DIR)/lib -lgerda-ada-core -lgerda-ada-calib-ged -lgerda-ada-dataprod -lgerda-ada-evtviewer -lgerda-ada-monitoring	-lgerda-ada-psd-base -lgerda-ada-stats
 
 # add GELATIO flags
 CXXFLAGS    += -I$(GERDA_BASE_DIR)/include/gelatio
