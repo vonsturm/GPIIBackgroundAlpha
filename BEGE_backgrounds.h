@@ -35,7 +35,7 @@ class BEGE_backgrounds : public BCModel
 
       // Methods to overload, see file BEGE_backgrounds.cxx
       void DefineParameters();
-      double LogAPrioriProbability(std::vector <double> parameters);
+      double LogAPrioriProbability(const std::vector<double> &parameters);
       double LogLikelihood(const std::vector <double> & parameters);
       // void MCMCIterationInterface();
 
@@ -50,6 +50,8 @@ class BEGE_backgrounds : public BCModel
       int AddMCSingle( std::string name, std::string histoname );
       int FillMCArrays();
 
+      std::vector<std::string> GetMCParNames(){ return f_MCname; };
+
       double getndets() {return f_ndets;};
 
       double EstimatePValue();
@@ -63,7 +65,7 @@ class BEGE_backgrounds : public BCModel
       double f_hemax;
       std::vector<int> f_binsToSkip;
 
-      std::vector<double> fDetectorLivetime;
+      std::vector<double> fDetectorLiveTime;
       std::vector<int> fDetectorDynamicRange;
 
       std::vector<TH1D*> f_hdata;

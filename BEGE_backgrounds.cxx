@@ -78,7 +78,7 @@ void BEGE_backgrounds::DefineParameters()
 	// Add all MC histograms as fit parameters
 	for(int iMC = 0; iMC < (int)f_MC.size(); iMC++)
 	{
-		AddParameter( Form("par_%d_%s",iMC,f_MCname.at(iMC).c_str()), 0., 100. );
+		AddParameter( Form( "par_%d_%s",iMC,f_MCname.at(iMC).c_str() ), 0, 500. );
 	}
 }
 
@@ -126,11 +126,11 @@ int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
 
 	string GERDA_PHASEII_DATA = getenv("GERDA_PHASEII_DATA");
 
-	double liveTimeAnalyzed = 0;
+/*	double liveTimeAnalyzed = 0;
 	double totExposure = 0;
 	double totExposureBEGe = 0;
 	double totExposureCoax = 0;
-
+*/
 	for( auto Run : runlist )
 	{
 		cout << "---------------------------------------------" << endl;
@@ -141,18 +141,23 @@ int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
 				Form( "run%04d-phy-analysis.txt", Run ), Form( "run%04d-phy-allFiles.txt", Run ) );
 
 		f_ndets = runX->GetDetectors().size();
+		fDetectorDynamicRange.resize( f_ndets );
 
 		cout << "Found " << f_ndets << " detectors in Run" << Run << endl;
+/*		cout << "Livetime: " << runX->GetLiveTime() << endl;
+		cout << "Exposure: " << runX->GetExposure() << endl;
+		cout << "enrBEGe Exposure: " << runX->GetExposureBEGE() << endl;
+		cout << "enrCoax Exposure: " << runX->GetExposureCOAX() << endl;
 
 		liveTimeAnalyzed += runX->GetLiveTime();
 		totExposure += runX->GetExposure();
 		totExposureBEGe += runX->GetExposureBEGE();
 		totExposureCoax += runX->GetExposureCOAX();
-
+*/
 		if( f_hdata.size() == 0 )
 		{
 			f_hdata = vector<TH1D*>( f_ndets, NULL );
-			fDetectorLivetime = vector<double>(f_ndets, 0);
+			fDetectorLiveTime = vector<double>(f_ndets, 0);
 		}
 
 		string META_FILE = runX->GetDataKeysAnalysisFile();
@@ -166,7 +171,8 @@ int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
 
 		gada::DataLoader l;
 		l.AddFileMap(&myMap);
-		l.BuildTier4();
+		l.BuildTier3();
+//		l.BuildTier4();
 
 		TChain * chain = l.GetSharedMasterChain();
 		int nentries = chain->GetEntries();
@@ -175,24 +181,31 @@ int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
   
 		// fill the data in histograms
 		int eventChannelNumber;
-		long timestamp;
-		int decimalTimestamp;
-		int isMuVetoed;
-		vector<int> firedFlag(f_ndets);
+		unsigned long long timestamp;
+		unsigned int decimalTimestamp;
+		vector<int> * firedFlag = new vector<int>(f_ndets);
 		int multiplicity;
-		vector<double> energy(f_ndets);
+		vector<double> * energy = new vector<double>(f_ndets);
 		int isTP;
-		int isLArVetoed;
+//		int isMuVetoed;
+//		int isLArVetoed;
+		int isVetoed;
+		int isVetoedInTime;
+		vector<int> * failedFlag = new vector<int>(f_ndets);
 
 		chain -> SetBranchAddress("eventChannelNumber", &eventChannelNumber);
 		chain -> SetBranchAddress("timestamp",&timestamp);
 		chain -> SetBranchAddress("decimalTimestamp",&decimalTimestamp);
-		chain -> SetBranchAddress("isMuVetoed", &isMuVetoed);
 		chain -> SetBranchAddress("firedFlag", &firedFlag);
 		chain -> SetBranchAddress("multiplicity",&multiplicity);
-		chain -> SetBranchAddress("energy",&energy);
+		chain -> SetBranchAddress("rawEnergyGauss",&energy);
+//		chain -> SetBranchAddress("energy",&energy);
 		chain -> SetBranchAddress("isTP",&isTP);
-		chain -> SetBranchAddress("isLArVetoed",&isLArVetoed);
+//		chain -> SetBranchAddress("isMuVetoed", &isMuVetoed);
+//		chain -> SetBranchAddress("isLArVetoed",&isLArVetoed);
+		chain -> SetBranchAddress("isVetoed", &isVetoed);
+		chain -> SetBranchAddress("isVetoedInTime", &isVetoedInTime);
+		chain -> SetBranchAddress("failedFlag",&failedFlag);
 
 		// Read only BEGe data
 		vector<int> channelsBEGeON;
@@ -204,15 +217,15 @@ int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
 			string status = det->GetDetectorAnalysisStatus();
 			string name = det->GetDetectorName();
 			int channel = det->GetDataChannel();
+			
 			fDetectorDynamicRange.at(channel) = det->GetDynamicRange();
+			fDetectorLiveTime.at(channel) = det->GetLiveTime();
 
 			if( type == "enrBEGe" && status == "ON" )
 			{
 				cout << "+ " << type << " detector " << name << " in channel " << channel << endl;
 
 				channelsBEGeON.push_back( channel );
-
-				fDetectorLivetime.at(channel) += runX->GetLiveTime();
 
 				if( f_hdata.at(channel) == NULL )
 				{
@@ -232,8 +245,8 @@ int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
 		// loop over all events
 		for (int jentry = 0; jentry < nentries; jentry++)
 		{
-			if ( jentry%( (int)(nentries/100) ) == 0 )
-				cout << " processing event " << jentry << " (" << (int)(jentry/nentries) << "%)" << endl;
+			if ( jentry%( (int)(nentries/10) ) == 0 )
+				cout << " processing event " << jentry << " (" << (int)(jentry*100/nentries) << "%)" << endl;
 			chain->GetEntry( jentry );
 
 			// Cuts after Quality cuts
@@ -242,20 +255,22 @@ int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
 			// has multiplicity != 1
 			// is vetoed by LAr veto
 			if ( isTP ) 				continue;
-			if ( isMuVetoed ) 			continue;
-			if ( multiplicity != 1 ) 	continue;
-			if ( isLArVetoed ) 			continue;
+			if ( multiplicity != 1 ) 		continue;
+//			if ( isMuVetoed ) 			continue;
+//			if ( isLArVetoed ) 			continue;
+			if ( isVetoed ) 			continue;
+			if ( isVetoedInTime ) 			continue;
 
 			// do not consider coincidences from ANG1 and RG3 at any time
 			// make coincidence loop only over other detectors
 			int coincidence = 0;
 
-			for( int i = 0; i < f_ndets; i++)
+			for( int i = 0; i < f_ndets; i++ )
 			{
 				// continue if channel is switched off and not used for AC
 				if( find( channelsOFF.begin(), channelsOFF.end(), i ) != channelsOFF.end() )
 					continue;
-				int hitDet = firedFlag.at(i);
+				int hitDet = firedFlag->at(i);
 				if( hitDet )
 					coincidence += 1;
 			}
@@ -264,22 +279,22 @@ int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
 
 			for( auto BEGeChannel : channelsBEGeON )
 			{
-				if( firedFlag.at(BEGeChannel) == 1 )
-				{
-					// do not add events with energy greater than the dynamic range of the detector
-					if( energy.at(BEGeChannel) >= fDetectorDynamicRange.at( BEGeChannel ) )
-						continue;
+				if( failedFlag->at(BEGeChannel) != 0 )		continue;
+				if( firedFlag->at(BEGeChannel) != 1 )		continue;
 
-					// skip events in blinded region
-					if( ( energy.at(BEGeChannel) >= (2039. - 25.) ) && ( energy.at(BEGeChannel) <= (2039. + 25.) ) )
-						continue;
+				// do not add events with energy greater than the dynamic range of the detector
+				if( energy->at(BEGeChannel) >= fDetectorDynamicRange.at( BEGeChannel ) )
+					continue;
 
-					// fill the channel histogram
-					f_hdata.at(BEGeChannel)->Fill( energy.at(BEGeChannel) );
-					// fill also the sum histogram
-					f_hdataSum->Fill( energy.at(BEGeChannel) );
-					f_hdataSum_fine->Fill( energy.at(BEGeChannel) );
-				}
+				// skip events in blinded region
+				if( ( energy->at(BEGeChannel) >= (2039. - 25.) ) && ( energy->at(BEGeChannel) <= (2039. + 25.) ) )
+					continue;
+
+				// fill the channel histogram
+				f_hdata.at(BEGeChannel)->Fill( energy->at(BEGeChannel) );
+				// fill also the sum histogram
+				f_hdataSum->Fill( energy->at(BEGeChannel) );
+				f_hdataSum_fine->Fill( energy->at(BEGeChannel) );
 			}
 		}
 
@@ -305,14 +320,16 @@ int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
 	// ----------------------------------------------
 	// --- control output ---
 	// ----------------------------------------------
+	int channel = 0;
 
 	cout << "---------------------------------------------" << endl;
-	cout << "---------------------------------------------" << endl;
 	cout << "All selected runs combined:" << endl;
-	cout << "\tLivetime: " << liveTimeAnalyzed/365.242 << "yr" << endl;
-	cout << "\tExposure: " << totExposure << "kg yr" << endl;
-	cout << "\tExposure BEGE: " << totExposureBEGe << "kg yr" << endl;
-	cout << "\tExposyre COAX: " << totExposureCoax << "kg yr" << endl;
+	for( auto LT : fDetectorLiveTime )
+	{	
+		cout << " " << channel << ": " << LT << endl;
+		channel++;
+	}
+
 	cout << "---------------------------------------------" << endl;
 	cout << "---------------------------------------------" << endl;
 
@@ -369,18 +386,73 @@ int BEGE_backgrounds::ReadMCAlpha()
 	//-------------
 	// Po210_pPlus
 	//-------------
-	f_MC_FileName = "histograms_Po210_onPplusSurface.root";
+	f_MC_FileName = MC_SMEARED_DIR;
+	f_MC_FileName += "/histograms_Po210_onPplusSurface.root";
 //	AddMCSingle( "Po210_pPlus_dl0nm", "hist_dl0nm" );
-	AddMCSingle( "Po210_pPlus_dl100nm", "hist_dl100nm" );
+//	AddMCSingle( "Po210_pPlus_dl100nm", "hist_dl100nm" );
 //	AddMCSingle( "Po210_pPlus_dl200nm", "hist_dl200nm" );
 //	AddMCSingle( "Po210_pPlus_dl300nm", "hist_dl300nm" );
-	AddMCSingle( "Po210_pPlus_dl400nm", "hist_dl400nm" );
+//	AddMCSingle( "Po210_pPlus_dl400nm", "hist_dl400nm" );
 //	AddMCSingle( "Po210_pPlus_dl500nm", "hist_dl500nm" );
-//	AddMCSingle( "Po210_pPlus_dl600nm", "hist_dl600nm" );
-	AddMCSingle( "Po210_pPlus_dl700nm", "hist_dl700nm" );
+	AddMCSingle( "Po210_pPlus_dl600nm", "hist_dl600nm" );
+//	AddMCSingle( "Po210_pPlus_dl700nm", "hist_dl700nm" );
 //	AddMCSingle( "Po210_pPlus_dl800nm", "hist_dl800nm" );
 //	AddMCSingle( "Po210_pPlus_dl900nm", "hist_dl900nm" );
-	AddMCSingle( "Po210_pPlus_dl1000nm", "hist_dl1000nm" );
+//	AddMCSingle( "Po210_pPlus_dl1000nm", "hist_dl1000nm" );
+
+//      //------------------
+//	// Ra226chain_pPlus
+//	//------------------
+	f_MC_FileName = MC_SMEARED_DIR;
+//	f_MC_FileName += "/Ra226chain_onPplusSurface_PhaseI.root";
+//	AddMCSingle("Ra226_pPlus","h_Ra226_onPplusSurface");
+//	AddMCSingle("Rn222_pPlus","h_Rn222_onPplusSurface");
+//	AddMCSingle("Po214_pPlus","h_Po214_onPplusSurface");
+//	AddMCSingle("Po218_pPlus","h_Po218_onPplusSurface");
+
+	f_MC_FileName += "/histograms_Ra226_onPplusSurface.root";
+//	AddMCSingle("Ra226_chain_pPlus","h_Ra226chain_onPplusSurface");
+
+//	AddMCSingle( "Ra226_pPlus_dl0nm", "hist_dl0nm" );
+//	AddMCSingle( "Ra226_pPlus_dl100nm", "hist_dl100nm" );
+//	AddMCSingle( "Ra226_pPlus_dl200nm", "hist_dl200nm" );
+//	AddMCSingle( "Ra226_pPlus_dl300nm", "hist_dl300nm" );
+//	AddMCSingle( "Ra226_pPlus_dl400nm", "hist_dl400nm" );
+//	AddMCSingle( "Ra226_pPlus_dl500nm", "hist_dl500nm" );
+	AddMCSingle( "Ra226_pPlus_dl600nm", "hist_dl600nm" );
+//	AddMCSingle( "Ra226_pPlus_dl700nm", "hist_dl700nm" );
+//	AddMCSingle( "Ra226_pPlus_dl800nm", "hist_dl800nm" );
+//	AddMCSingle( "Ra226_pPlus_dl900nm", "hist_dl900nm" );
+//	AddMCSingle( "Ra226_pPlus_dl1000nm", "hist_dl1000nm" );
+
+	f_MC_FileName = MC_SMEARED_DIR;
+	f_MC_FileName += "/histograms_Rn222_onPplusSurface.root";
+
+//	AddMCSingle( "Rn222_pPlus_dl0nm", "hist_dl0nm" );
+//	AddMCSingle( "Rn222_pPlus_dl100nm", "hist_dl100nm" );
+//	AddMCSingle( "Rn222_pPlus_dl200nm", "hist_dl200nm" );
+//	AddMCSingle( "Rn222_pPlus_dl300nm", "hist_dl300nm" );
+//	AddMCSingle( "Rn222_pPlus_dl400nm", "hist_dl400nm" );
+//	AddMCSingle( "Rn222_pPlus_dl500nm", "hist_dl500nm" );
+	AddMCSingle( "Rn222_pPlus_dl600nm", "hist_dl600nm" );
+//	AddMCSingle( "Rn222_pPlus_dl700nm", "hist_dl700nm" );
+//	AddMCSingle( "Rn222_pPlus_dl800nm", "hist_dl800nm" );
+//	AddMCSingle( "Rn222_pPlus_dl900nm", "hist_dl900nm" );
+//	AddMCSingle( "Rn222_pPlus_dl1000nm", "hist_dl1000nm" );
+
+
+//	//--------------------
+//	// Ra226chain_inLArBH
+//	//--------------------
+	f_MC_FileName = MC_SMEARED_DIR;
+	f_MC_FileName += "/Ra226chain_inLArBH_PhaseI.root";
+//	AddMCSingle("Ra226_chain_inLArBH","h_Ra226chain_inLArBH");
+
+	AddMCSingle("Ra226_inLArBH","h_Ra226_inLArBH");
+	AddMCSingle("Rn222_inLArBH","h_Rn222_inLArBH");
+//	AddMCSingle("Po214_inLArBH","h_Po214_inLArBH");
+//	AddMCSingle("Po218_inLArBH","h_Po218_inLArBH");
+
 
 //	//------------------
 //	// Ra226chain_pPlus
@@ -448,14 +520,14 @@ int BEGE_backgrounds::AddMC( string name )
 			Form("%s",namefine.c_str()),
 			bins, f_hemin, f_hemax);
 
-	int allbins = int( 7500. - 550. );
+	int allbins = int( 7500. - 600. );
 
 	string nameall = name;
 	nameall.append("_all");
 
 	TH1D* henergy_all = new TH1D(Form("h_%s",nameall.c_str()),
 			Form("%s",nameall.c_str()),
-			allbins, 550., 7500.);
+			allbins, 600., 7500.);
 
 	// initialize the histogram arrays
 	for( int i = 1; i <= f_hnumbins; i++ )
@@ -477,7 +549,7 @@ int BEGE_backgrounds::AddMC( string name )
 		// Fill only MC histograms that have a corresponding data histogram
 		if( f_hdata.at(idet) != NULL )
 		{
-			double livetime = fDetectorLivetime.at(idet);
+			double livetime = fDetectorLiveTime.at(idet);
 
 			cout << "+ MC spectrum h" << idet << " with lifetime weight " << livetime << endl;
 
@@ -514,7 +586,9 @@ int BEGE_backgrounds::AddMC( string name )
 
 	MCfile->Close();
 
-	double intInBlindedRegion = henergy->Integral( f_binsToSkip.front(), f_binsToSkip.back() );
+	double intInBlindedRegion = 0; 
+	if( f_binsToSkip.size() > 0 )
+		henergy->Integral( f_binsToSkip.front(), f_binsToSkip.back() );
 	double scaling = henergy->Integral() - intInBlindedRegion;
 
 	henergy->Scale( 1./scaling );
@@ -582,7 +656,7 @@ int BEGE_backgrounds::AddMCSingle( string name, string histoname )
 
 	cout << "+ MC spectrum " << histoname << endl;
 
-	for( int i = 1; i < last_bin; i++ )
+	for( int i = 1; i <= last_bin; i++ )
 	{
 		double bincontent = MC_raw->GetBinContent( i );
 		double bincenter = MC_raw->GetBinCenter( i );
@@ -600,10 +674,14 @@ int BEGE_backgrounds::AddMCSingle( string name, string histoname )
 					henergy_all->GetBinContent( henergy_all->FindBin( bincenter ) ) + bincontent );
 	}
 
-	MCfile->Close();
+	cout << "MC histo loaded" << endl;
 
-	double intInBlindedRegion = henergy->Integral( f_binsToSkip.front(), f_binsToSkip.back() );
+	double intInBlindedRegion = 0;
+	if( f_binsToSkip.size() > 0 )
+		intInBlindedRegion = henergy->Integral( f_binsToSkip.front(), f_binsToSkip.back() );
 	double scaling = henergy->Integral() - intInBlindedRegion;
+
+	cout << "Scaling MC " << 1./scaling << endl;
 
 	henergy->Scale( 1./scaling );
 	henergy_fine->Scale( 1./scaling );
@@ -613,6 +691,8 @@ int BEGE_backgrounds::AddMCSingle( string name, string histoname )
 	f_MCfine.push_back( henergy_fine );
 	f_MCall.push_back( henergy_all );
 	f_MCname.push_back( name );
+
+	MCfile->Close();
 
 	return 0;
 }
@@ -671,8 +751,7 @@ double BEGE_backgrounds::LogLikelihood(const std::vector <double> & parameters)
 }
 
 // ---------------------------------------------------------
-
-double BEGE_backgrounds::LogAPrioriProbability(std::vector <double> parameters)
+double BEGE_backgrounds::LogAPrioriProbability(const std::vector<double> &parameters)
 {
    // This method returns the logarithm of the prior probability for the
    // parameters p(parameters).
@@ -805,8 +884,8 @@ void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* r
   int bins = int( f_hemax - f_hemin );
   TH1D* hMC_fine = new TH1D("hMC_fine", "model", bins, f_hemin, f_hemax);
 
-  int binsall = int( 7500. - 570. );
-  TH1D* hMC_all = new TH1D("hMC_all", "model", binsall, 570., 7500.);
+  int binsall = int( 7500. - 600. );
+  TH1D* hMC_all = new TH1D("hMC_all", "model", binsall, 600., 7500.);
 
   TH1D* hresiduals = new TH1D("hresiduals", "residuals", f_hnumbins, f_hemin, f_hemax);
 
@@ -924,7 +1003,8 @@ void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* r
   legend->Draw();
   canvas->Write();
       
-  hresiduals->Add(f_hdataSum, hMC, 1., -1.); // differences !!!
+  hresiduals->Add(f_hdataSum);
+  hresiduals->Divide(hMC); //ratio
   hresiduals->SetLineWidth(2);
   hresiduals->SetMarkerStyle(20);
   hresiduals->GetXaxis()->SetTitle("Energy (keV)");
@@ -938,13 +1018,17 @@ void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* r
   {
       cout << "Events: " << endl;
       cout << f_MCname.at(iMC) << ": " << eventsMC.at(iMC) << endl;
-      cout << "In total spectrum from (570 - 7500) keV" << endl;
+      cout << "In total spectrum from (600 - 7500) keV" << endl;
       cout << f_MCname.at(iMC) << ": " << eventsMC_all.at(iMC) << endl;
   }
   cout << "Total events in MC: " << hMC->Integral() << endl;
   cout << endl;
   cout << "Events in data: " << f_hdataSum->Integral() << endl;
   cout << endl;
+  cout << "Estimate of BI: " << hMC_all->GetBinLowEdge( 1401 ) << "keV-" << hMC_all->GetBinLowEdge( 1501 ) << "keV" << endl;
+  cout << hMC_all->Integral( 1401, 1500 ) << "cts -> " << hMC_all->Integral( 1401, 1500 )/100./5.988 << "cts/(keV kg yr)" << endl;
+  cout << "Estimate of BI: " << hMC_all->GetBinLowEdge( 1415 ) << "keV-" << hMC_all->GetBinLowEdge( 1465 ) << "keV" << endl;
+  cout << hMC_all->Integral( 1415, 1464 ) << "cts -> " << hMC_all->Integral( 1415, 1464 )/50./5.988 << "cts/(keV kg yr)" << endl;
   cout << "---------------------------------------------" << endl;
   cout << "---------------------------------------------" << endl << endl;
 
