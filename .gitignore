@@ -6,12 +6,8 @@
 
 alpha_timeDistribution.C
 
-RA_PoiStat.C
-RA_PoiStat.h
-
-Plot_BEGE.C
-
-files
+files/
+ModelOutput/
 
 runBEGE_backgrounds
 test_classes
