@@ -115,11 +115,11 @@ int main()
   cout << nPars << " Parameters in the fit." << endl;
   for ( size_t i = 0; i < nPars; i++ )  
   {
-	m->GetParameter(i)->SetNbins(5000);
+	m->GetParameter(i)->SetNbins(1000);
   	cout << "Binning par " << i << ": " << m->GetParameter(i)->GetNbins() << endl;
   }
 
-  m->SetNbins(2000);
+  //m->SetNbins(2000);
 
 
 //   size_t nPars = m->GetNParameters();

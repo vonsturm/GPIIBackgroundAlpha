@@ -78,7 +78,7 @@ void BEGE_backgrounds::DefineParameters()
 	// Add all MC histograms as fit parameters
 	for(int iMC = 0; iMC < (int)f_MC.size(); iMC++)
 	{
-		AddParameter( Form( "par_%d_%s",iMC,f_MCname.at(iMC).c_str() ), 0, 500. );
+		AddParameter( Form( "par_%d_%s",iMC,f_MCname.at(iMC).c_str() ), 0, 1000. );
 	}
 }
 
