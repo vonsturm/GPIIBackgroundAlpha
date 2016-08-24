@@ -75,10 +75,13 @@ BEGE_backgrounds::~BEGE_backgrounds()
 // ---------------------------------------------------------
 void BEGE_backgrounds::DefineParameters()
 {
+        vector<double> RangeMin_enrBEGe = {100.,0.,0.,0.,0.};
+        vector<double> RangeMax_enrBEGe = {250.,50.,50.,100.,150.};
+
 	// Add all MC histograms as fit parameters
 	for(int iMC = 0; iMC < (int)f_MC.size(); iMC++)
 	{
-		AddParameter( Form( "par_%d_%s",iMC,f_MCname.at(iMC).c_str() ), 0, 1000. );
+                AddParameter( Form( "par_%d_%s",iMC,f_MCname.at(iMC).c_str() ), RangeMin_enrBEGe.at(iMC), RangeMax_enrBEGe.at(iMC) );
 	}
 }
 
@@ -449,7 +452,7 @@ int BEGE_backgrounds::ReadMCAlpha()
 //	AddMCSingle("Ra226_chain_inLArBH","h_Ra226chain_inLArBH");
 
 	AddMCSingle("Ra226_inLArBH","h_Ra226_inLArBH");
-	AddMCSingle("Rn222_inLArBH","h_Rn222_inLArBH");
+//	AddMCSingle("Rn222_inLArBH","h_Rn222_inLArBH");
 //	AddMCSingle("Po214_inLArBH","h_Po214_inLArBH");
 //	AddMCSingle("Po218_inLArBH","h_Po218_inLArBH");
 
@@ -520,14 +523,14 @@ int BEGE_backgrounds::AddMC( string name )
 			Form("%s",namefine.c_str()),
 			bins, f_hemin, f_hemax);
 
-	int allbins = int( 7500. - 600. );
+	int allbins = 7500;
 
 	string nameall = name;
 	nameall.append("_all");
 
 	TH1D* henergy_all = new TH1D(Form("h_%s",nameall.c_str()),
 			Form("%s",nameall.c_str()),
-			allbins, 600., 7500.);
+			allbins, 0., 7500.);
 
 	// initialize the histogram arrays
 	for( int i = 1; i <= f_hnumbins; i++ )
@@ -626,14 +629,14 @@ int BEGE_backgrounds::AddMCSingle( string name, string histoname )
 			Form("%s",namefine.c_str()),
 			bins, f_hemin, f_hemax);
 
-	int allbins = int( 7500. - 600. );
+	int allbins = 7500;
 
 	string nameall = name;
 	nameall.append("_all");
 
 	TH1D* henergy_all = new TH1D(Form("h_%s",nameall.c_str()),
 			Form("%s",nameall.c_str()),
-			allbins, 600., 7500.);
+			allbins, 0., 7500.);
 
 	// initialize the histogram arrays
 	for( int i = 1; i <= f_hnumbins; i++ )
@@ -884,8 +887,8 @@ void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* r
   int bins = int( f_hemax - f_hemin );
   TH1D* hMC_fine = new TH1D("hMC_fine", "model", bins, f_hemin, f_hemax);
 
-  int binsall = int( 7500. - 600. );
-  TH1D* hMC_all = new TH1D("hMC_all", "model", binsall, 600., 7500.);
+  int binsall = 7500;
+  TH1D* hMC_all = new TH1D("hMC_all", "model", binsall, 0, 7500.);
 
   TH1D* hresiduals = new TH1D("hresiduals", "residuals", f_hnumbins, f_hemin, f_hemax);
 
@@ -1018,7 +1021,7 @@ void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* r
   {
       cout << "Events: " << endl;
       cout << f_MCname.at(iMC) << ": " << eventsMC.at(iMC) << endl;
-      cout << "In total spectrum from (600 - 7500) keV" << endl;
+      cout << "In total spectrum from (0 - 7500) keV" << endl;
       cout << f_MCname.at(iMC) << ": " << eventsMC_all.at(iMC) << endl;
   }
   cout << "Total events in MC: " << hMC->Integral() << endl;
