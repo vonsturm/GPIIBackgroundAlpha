@@ -162,7 +162,7 @@ int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
 		}
 		else
 		{
-			cout << "Unknown data set " << data_set << end;
+			cout << "Unknown data set " << data_set << endl;
 			exit(EXIT_FAILURE);
 		}
 	}
