@@ -34,7 +34,6 @@ int main( int argc, char* argv[] )
     string runlist;
     string detectorlist = "";
     bool useDetectorList = false;
-    string fitselection;
 
     double hMin = 3500., hMax = 7500.;  // fit range in keV
     double hBinning = 30.;              // bin size in keV
@@ -51,13 +50,13 @@ int main( int argc, char* argv[] )
         { "binning",    required_argument, 0,   'B' },
         { "min",        required_argument, 0,   'm' },
         { "max",        required_argument, 0,   'M' },
-        { "fit",        required_argument, 0,   'F' },
+        { "parconfig",  required_argument, 0,   'C' },
         { 0, 0, 0, 0 }
     };
 
     int option_index = 0;
 
-    while( (choice = getopt_long(argc, argv, "hR:D:P:S:B:m:M:F:", long_options, &option_index)) != -1 )
+    while( (choice = getopt_long(argc, argv, "hR:D:P:S:B:m:M:C:", long_options, &option_index)) != -1 )
     {
         switch (choice)
         {
@@ -87,8 +86,8 @@ int main( int argc, char* argv[] )
             case 'M':
                 hMax = atof( optarg );
                 break;
-            case 'F':
-                fitselection = optarg;
+            case 'C':
+                m->SetParConfigFile( optarg );
                 break;
             default:
                 cout << "Unknown option: -" << choice << endl;
@@ -138,6 +137,7 @@ int main( int argc, char* argv[] )
 
     // read in the names of the files you want to use,
     m->ReadData( runlist, data_set, detectorlist, useDetectorList );
+
 
 /*
     // --- read in the MC histograms ---

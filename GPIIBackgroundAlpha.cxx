@@ -359,7 +359,7 @@ int GPIIBackgroundAlpha::FillDataArray()
 // Best is a treatment with only smearing but the full energy of the events is
 // kept and histogramed only here
 // ---------------------------------------------------------
-int GPIIBackgroundAlpha::ReadMCAlpha()
+int GPIIBackgroundAlpha::ReadMC()
 {
 	string MC_SMEARED_DIR = getenv("MC_SMEARED_DIR");
 
