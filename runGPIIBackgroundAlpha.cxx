@@ -22,7 +22,7 @@
 
 using namespace std;
 
-UsageGPIIBackgroundAlpha();
+void UsageGPIIBackgroundAlpha();
 
 int main( int argc, char* argv[] )
 {
@@ -272,7 +272,7 @@ int main( int argc, char* argv[] )
 
 
 
-UsageGPIIBackgroundAlpha()
+void UsageGPIIBackgroundAlpha()
 {
     cout << "Usage: runGPIIBackgroundAlpha" << endl;
     cout << "\tOptions" << endl;
