@@ -119,7 +119,7 @@ int main( int argc, char* argv[] )
     BCEngineMCMC::Precision precision;
     if( precisionString == "kLow" ) precision = BCEngineMCMC::kLow;
     else if( precisionString == "kMedium" ) precision = BCEngineMCMC::kMedium;
-    else if( precisionString == "kHigh" ) precision = BCEngineMCMC::kHigh
+    else if( precisionString == "kHigh" ) precision = BCEngineMCMC::kHigh;
     else if( precisionString == "kVeryHigh" ) precision = BCEngineMCMC::kVeryHigh;
     m->MCMCSetPrecision(precision);
 
