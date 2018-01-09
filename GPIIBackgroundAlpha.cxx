@@ -154,7 +154,7 @@ int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
 		}
 		else if( data_set == "enrCoax" )
 		{
-			for( auto d : alldetlist ){ if( d.find("RG") == 0 || d.contains("ANG") == 0 ) detlist.push_back(d); }
+			for( auto d : alldetlist ){ if( d.find("RG") == 0 || d.find("ANG") == 0 ) detlist.push_back(d); }
 		}
 		else if( data_set == "natCoax" )
 		{
@@ -256,7 +256,7 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist, vector<string> detectorlis
 	vector<int> * firedFlag = new vector<int>(f_ndets);
 	vector<int> * failedFlag = new vector<int>(f_ndets);
 	vector<int> * failedFlag_isPhysical = new vector<int>(f_ndets);
-	vector<int> * failedFlag_isSaturated = new vector<int>()f_ndets;
+	vector<int> * failedFlag_isSaturated = new vector<int>(f_ndets);
 
 	chain -> SetBranchAddress("eventChannelNumber", &eventChannelNumber);
 	chain -> SetBranchAddress("multiplicity",&multiplicity);
@@ -287,7 +287,7 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist, vector<string> detectorlis
 		for( auto d : detectorlist )
 		{
 			RunConf = RunConfManager -> GetRunConfiguration( timestamp );
-			GEChannel * channel = RunConf -> GetChannel( d );
+			GEChannel * channel = RunConf -> GetChannel( d.c_str() );
 			int c = channel -> GetChannelNumber();
 
 			if( !RunConf -> IsOn( c ) ) continue;
