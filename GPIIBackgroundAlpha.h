@@ -42,9 +42,9 @@ class GPIIBackgroundAlpha : public BCModel
       // Histograms
       void SetHistogramParameters(int hNbins, double hMin, double hMax)
       {
-          f_hnumbins = hnumbins;
-          f_hemin = hemin;
-          f_hemax = hemax;
+          f_hnumbins = hNbins;
+          f_hemin = hMin;
+          f_hemax = hMax;
       }
       int InitializeHistograms();
 
@@ -55,8 +55,8 @@ class GPIIBackgroundAlpha : public BCModel
       int FillDataArray();
 
       // Read MC pdfs
-      void SetParConfigFile( std::string name ){ f_parConfigFile = name; };
-      std::string GetParConfigFile(){ return f_parConfigFile };
+      void SetParConfigFile( std::string name ){ f_parConfigFile = name; return; };
+      std::string GetParConfigFile(){ return f_parConfigFile; };
 
       int ReadMCAlpha();
       int AddMC( std::string name );
@@ -80,10 +80,10 @@ class GPIIBackgroundAlpha : public BCModel
       std::string f_parConfigFile;
 
       std::vector<double> f_RunLiveTime;
-      std::map<string,double> f_DetectorLiveTime;
+      std::map<std::string,double> f_DetectorLiveTime;
       //std::vector<int> fDetectorDynamicRange;
 
-      std::map<string,TH1D*> f_hdata;
+      std::map<std::string,TH1D*> f_hdata;
       TH1D* f_hdataSum;
       TH1D* f_hdataSum_fine;
 
