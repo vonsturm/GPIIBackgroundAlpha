@@ -115,8 +115,9 @@ int GPIIBackgroundAlpha::InitializeHistograms( vector<string> detectorlist )
 }
 
 // ---------------------------------------------------------
+
 int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
-	std::string detectorlistname, bool useDetectorList, int verbosity );
+	std::string detectorlistname, bool useDetectorList, int verbosity )
 {
 	// make list of detectors
 	vector<string> detlist;
