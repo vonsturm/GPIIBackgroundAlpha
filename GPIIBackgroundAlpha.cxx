@@ -150,15 +150,15 @@ int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
 
 		if( data_set == "enrBEGe" )
 		{
-			for( auto d : dlist ){ if( d.find("GD") == 0 ) detlist.push_back(d); }
+			for( auto d : alldetlist ){ if( d.find("GD") == 0 ) detlist.push_back(d); }
 		}
 		else if( data_set == "enrCoax" )
 		{
-			for( auto d : dlist ){ if( d.find("RG") == 0 || d.contains("ANG") == 0 ) detlist.push_back(d); }
+			for( auto d : alldetlist ){ if( d.find("RG") == 0 || d.contains("ANG") == 0 ) detlist.push_back(d); }
 		}
 		else if( data_set == "natCoax" )
 		{
-			for( auto d : dlist ) { if( d.find("GTF") == 0 ) detlist.push_back(d); }
+			for( auto d : alldetlist ) { if( d.find("GTF") == 0 ) detlist.push_back(d); }
 		}
 		else
 		{
@@ -180,7 +180,7 @@ int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
 	while( !filerunlist.eof() )
 	{
 		string keylist = GERDA_DATA_SETS;
-		filename += "/run"; keylist += Form( "%04d", run );
+		keylist += "/run"; keylist += Form( "%04d", run );
 		keylist += "-phy-analysis.txt";
 
 		if(verbosity > 0) cout << "\tkeylist" << endl;
@@ -196,7 +196,7 @@ int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
 	{
 		cout << "Detector LiveTimes: " << endl;
 
-		for( auto d ; detectorlist )
+		for( auto d : detlist )
 			cout << "\t" << d << ": " << f_DetectorLiveTime[d] << endl;
 	}
 
@@ -255,8 +255,8 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist, vector<string> detectorlis
 	vector<double> * energy = new vector<double>(f_ndets);
 	vector<int> * firedFlag = new vector<int>(f_ndets);
 	vector<int> * failedFlag = new vector<int>(f_ndets);
-	vector<int> * failedFlag_isPhysical = new vector<int>(fNDetectors);
-	vector<int> * failedFlag_isSaturated = new vector<int>(fNDetectors);
+	vector<int> * failedFlag_isPhysical = new vector<int>(f_ndets);
+	vector<int> * failedFlag_isSaturated = new vector<int>()f_ndets;
 
 	chain -> SetBranchAddress("eventChannelNumber", &eventChannelNumber);
 	chain -> SetBranchAddress("multiplicity",&multiplicity);
@@ -287,21 +287,22 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist, vector<string> detectorlis
 		for( auto d : detectorlist )
 		{
 			RunConf = RunConfManager -> GetRunConfiguration( timestamp );
-			int c = RunConf -> GetChannel( d.c_str() );
+			GEChannel * channel = RunConf -> GetChannel( d );
+			int c = channel -> GetChannelNumber();
 
 			if( !RunConf -> IsOn( c ) ) continue;
 
-			double en = energy[c];
+			double en = energy.at(c);
 
 			// fill energy spectra
-			if( ( multiplicity == 1 && !failedFlag_isPhysical[c] ||
-				!failedFlag_isSaturated[c] )
+			if( ( multiplicity == 1 && !failedFlag_isPhysical.at(c) ||
+				!failedFlag_isSaturated.at(c) )
 			{
-				if( !failedFlag_isSaturated[c] ) en = 10000.;
+				if( !failedFlag_isSaturated.at(c) ) en = 10000.;
 
-				f_hdata[d] -> Fill( energy[c] );
-				f_hdataSum -> Fill( energy[c] );
-				f_hdataSum_fine -> Fill( energy[c] );
+				f_hdata[d] -> Fill( en );
+				f_hdataSum -> Fill( en );
+				f_hdataSum_fine -> Fill( en );
 			}
 		}
 	}
