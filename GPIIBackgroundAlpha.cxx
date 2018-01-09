@@ -292,13 +292,13 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist, vector<string> detectorlis
 
 			if( !RunConf -> IsOn( c ) ) continue;
 
-			double en = energy.at(c);
+			double en = energy->at(c);
 
 			// fill energy spectra
-			if( ( multiplicity == 1 && !failedFlag_isPhysical.at(c) ||
-				!failedFlag_isSaturated.at(c) )
+			if( ( multiplicity == 1 && !failedFlag_isPhysical->at(c) ) ||
+				!failedFlag_isSaturated->at(c) )
 			{
-				if( !failedFlag_isSaturated.at(c) ) en = 10000.;
+				if( !failedFlag_isSaturated->at(c) ) en = 10000.;
 
 				f_hdata[d] -> Fill( en );
 				f_hdataSum -> Fill( en );
@@ -308,7 +308,7 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist, vector<string> detectorlis
 	}
 
 	int frequencyTP = 20;
-	dobule runLiveTimeInDays = nTP * frequencyTP / 60. / 60. / 24.;
+	double runLiveTimeInDays = nTP * frequencyTP / 60. / 60. / 24.;
 
 	// run live time in days
 	f_RunLiveTime.push_back( runLiveTimeInDays );
@@ -349,6 +349,7 @@ int GPIIBackgroundAlpha::FillDataArray()
   return 0;
 }
 
+/*
 
 // This part is a bit tricky
 // Either we put the full MC files here (but they are kind of large)
@@ -696,6 +697,8 @@ int GPIIBackgroundAlpha::FillMCArrays()
 
   	return 0;
 }
+
+*/
 
 // ---------------------------------------------------------
 
