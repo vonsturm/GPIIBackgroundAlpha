@@ -9,6 +9,7 @@
 
 // C/C++ includes
 #include <vector>
+#include <map>
 
 // ROOT includes
 #include "TH1D.h"
@@ -37,16 +38,26 @@ class GPIIBackgroundAlpha : public BCModel
       void DefineParameters();
       double LogAPrioriProbability(const std::vector<double> &parameters);
       double LogLikelihood(const std::vector <double> & parameters);
-      // void MCMCIterationInterface();
 
-      // my own methods
-      void SetHistogramParameters(int hnumbins, double hemin, double hemax);
-      int ReadData( std::string runlist ); //wrapper
-      int ReadDataEnrBEGe( std::vector<int> runlist );
-      int ReadDataEnrCoax( std::vector<int> runlist );
-      int ReadDataNatCoax( std::vector<int> runlist );
+      // Histograms
+      void SetHistogramParameters(int hNbins, double hMin, double hMax)
+      {
+          f_hnumbins = hnumbins;
+          f_hemin = hemin;
+          f_hemax = hemax;
+      }
+      int InitializeHistograms();
 
+      // Read Data
+      int ReadData( std::string runlist, std::string data_set,
+          std::string detectorlistname, bool useDetectorList, int verbosity = 0 );
+      int ReadRunData( std::string keylist, std::vector<std::string> detectorlist );
       int FillDataArray();
+
+      // Read MC pdfs
+      void SetParConfigFile( std::string name ){ f_parConfigFile = name; };
+      std::string GetParConfigFile(){ return f_parConfigFile };
+
       int ReadMCAlpha();
       int AddMC( std::string name );
       int AddMCSingle( std::string name, std::string histoname );
@@ -65,12 +76,14 @@ class GPIIBackgroundAlpha : public BCModel
       int f_hnumbins;
       double f_hemin;
       double f_hemax;
-      std::vector<int> f_binsToSkip;
 
-      std::vector<double> fDetectorLiveTime;
-      std::vector<int> fDetectorDynamicRange;
+      std::string f_parConfigFile;
 
-      std::vector<TH1D*> f_hdata;
+      std::vector<double> f_RunLiveTime;
+      std::map<string,double> f_DetectorLiveTime;
+      //std::vector<int> fDetectorDynamicRange;
+
+      std::map<string,TH1D*> f_hdata;
       TH1D* f_hdataSum;
       TH1D* f_hdataSum_fine;
 

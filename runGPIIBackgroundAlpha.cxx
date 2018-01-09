@@ -28,16 +28,21 @@ int main( int argc, char* argv[] )
 {
     // arguments
     string data_set = "enrBEGe";
-    double hMin = 3500., hMax = 7500.;  // fit range in keV
-    double hBinning = 30.;                  // bin size in keV
     string precisionString = "kLow";
+    string runlist;
+    string detectorlist = "";
+    bool useDetectorList = false;
+    string fitselection;
+
+    double hMin = 3500., hMax = 7500.;  // fit range in keV
+    double hBinning = 30.;              // bin size in keV
 
     int choice = 0;
 
     static struct option long_options[] =
     {
+        { "runlist",    required_argument, 0,   'R' },
         { "help",       no_argument,       0,   'h' },
-        { "runs",       required_argument, 0,   'R' },
         { "detectors",  required_argument, 0,   'D' },
         { "precision",  required_argument, 0,   'P' },
         { "dataset",    required_argument, 0,   'S'},
@@ -48,41 +53,47 @@ int main( int argc, char* argv[] )
         { 0, 0, 0, 0 }
     };
 
-        int option_index = 0;
+    int option_index = 0;
 
-        while( (choice = getopt_long(argc, argv, "hR:D:P:S:B:m:M:F:", long_options, &option_index)) != -1 )
+    while( (choice = getopt_long(argc, argv, "hR:D:P:S:B:m:M:F:", long_options, &option_index)) != -1 )
     {
         switch (choice)
         {
-                case 'h':
-                    UsageGPIIBackgroundAlpha();
-                    return 0;
-                case 'R':
-                    break;
-                case 'D':
-                    break;
-                case 'P':
-                    precisionString = optarg;
-                    break;
-                case 'S':
-                    break;
-                case 'B':
-                    hBinning = atof( optarg );
-                    break;
-                case 'm':
-                    hMin = atof( optarg );
-                    break;
-                case 'M':
-                    hMax = atof( optarg );
-                    break;
-                case 'F':
-                    break;
-                default:
-                    cout << "Unknown option: -" << choice << endl;
-                    UsageGPIIBackgroundAlpha();
-                    return -1;
-            }
+            case 'h':
+                UsageGPIIBackgroundAlpha();
+                return 0;
+            case 'R':
+                runlist = optarg;
+                break;
+            case 'D':
+                detectorlist = optarg;
+                useDetectorList = true;
+                break;
+            case 'P':
+                precisionString = optarg;
+                break;
+            case 'S':
+                data_set = optarg;
+                useDetectorList = false;
+                break;
+            case 'B':
+                hBinning = atof( optarg );
+                break;
+            case 'm':
+                hMin = atof( optarg );
+                break;
+            case 'M':
+                hMax = atof( optarg );
+                break;
+            case 'F':
+                fitselection = optarg;
+                break;
+            default:
+                cout << "Unknown option: -" << choice << endl;
+                UsageGPIIBackgroundAlpha();
+                return -1;
         }
+    }
 
     // --------- set input parameters ------
 
@@ -123,12 +134,12 @@ int main( int argc, char* argv[] )
     BCLog::OutSummary( Form( "Binning: %.0f keV", hBinning ) );
     BCLog::OutSummary( Form( "Number of Bins: %i", hNbins ) );
 
-  // read in the names of the files you want to use,
-  vector<int> runlist = { 53,54,55,56,57,58,59,60,61,62,63 };
-  m->ReadDataEnrBEGe( runlist );
+    // read in the names of the files you want to use,
+    m->ReadData( runlist, data_set, detectorlist, useDetectorList );
 
-  // --- read in the MC histograms ---
-  m->ReadMCAlpha();
+/*
+    // --- read in the MC histograms ---
+    m->ReadMCAlpha();
 
   // --- define parameters ---
   m->DefineParameters();
@@ -254,7 +265,7 @@ int main( int argc, char* argv[] )
 
   // close log file
   BCLog::CloseLog();
-
+*/
   return 0;
 
 }

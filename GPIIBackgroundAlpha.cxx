@@ -35,6 +35,11 @@
 #include "FileMap.h"
 #include "DataLoader.h"
 
+#include "GETRunConfiguration.hh"
+#include "GERunConfigurationManager.hh"
+
+#include "ProgressBar.h"
+
 // own includes
 #include "RunPhaseII.h"
 #include "GPIIBackgroundAlpha.h"
@@ -72,11 +77,12 @@ GPIIBackgroundAlpha::~GPIIBackgroundAlpha()
 	f_vMC.clear();
 };
 
+// FIX ME
 // ---------------------------------------------------------
-void GPIIBackgroundAlpha::DefineParameters()
+void GPIIBackgroundAlpha::DefineParameters( string parConfigFile )
 {
-        vector<double> RangeMin_enrBEGe = {100.,0.,0.,0.,0.};
-        vector<double> RangeMax_enrBEGe = {250.,50.,50.,100.,150.};
+    vector<double> RangeMin_enrBEGe = {100.,0.,0.,0.,0.};
+    vector<double> RangeMax_enrBEGe = {250.,50.,50.,100.,150.};
 
 	// Add all MC histograms as fit parameters
 	for(int iMC = 0; iMC < (int)f_MC.size(); iMC++)
@@ -85,256 +91,232 @@ void GPIIBackgroundAlpha::DefineParameters()
 	}
 }
 
-// ---------------------------------------------------------
-void GPIIBackgroundAlpha::SetHistogramParameters( int hnumbins, double hemin, double hemax )
+int InitializeHistograms( vector<string> detectorlist )
 {
-	f_hnumbins = hnumbins;
-	f_hemin = hemin;
-	f_hemax = hemax;
+	string name = "hSum";
+	string name_fine = name; name_fine += "_fine";
+	int bins = int(f_hemax-f_hemin);
 
-	double binsize = (f_hemax - f_hemin) / (double)f_hnumbins;
+	f_hdataSum = new TH1D( name.c_str(), name.c_str(), f_hnumbins, f_hemin, f_hemax);
+	f_hdataSum_fine = new TH1D( name_fine.c_str(), name_fine.c_str(), bins, f_hemin, f_hemax);
 
-	// exclude 2039 +- 25 keV from fit
-	if ( (2039. + 25. - f_hemin) > 0 )
+	for( auto det : detectorlist )
 	{
-		int bin_start = ceil( (2039. - 25. - f_hemin) / binsize );
-		int bin_stop = ceil( (2039. + 25. - f_hemin) / binsize );
+		string name_single = Form( "hSingle_%s", det.c_str() );
 
-		cout << "Skipping blinded region: bins " << bin_start << " - " << bin_stop << endl;
+		TH1D * henergy = new TH1D( name_single.c_str(), name_single.c_str(),
+			f_hnumbins, f_hemin, f_hemax);
 
-		for( int i = bin_start; i <= bin_stop; i++)
-			f_binsToSkip.push_back(i);
+		f_hdata[det] = henergy;
+		f_DetectorLiveTime[det] = 0.;
 	}
+
+	return 0;
 }
 
-// FIX ME: Detectors cannot change the data channel!!!
-// FIX ME: The sum histogram is still valid but the single histograms are not!!!
+// ---------------------------------------------------------
+int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
+	std::string detectorlistname, bool useDetectorList, int verbosity );
+{
+	// make list of detectors
+	vector<string> detlist;
+
+	if( useDetectorList )
+	{
+		ifstream detectorlist( detectorlistname );
+		string det; detectorlist >> det;
+
+		while( detectorlist.eof() )
+		{
+			detlist.push_back( det );
+			detectorlist >> det;
+		}
+
+		detectorlist.close();
+	}
+	else
+	{
+		vector<string> alldetlist =
+		{
+			"GD91A", "GD35B", "GD02B", "GD00B", "GD61A", "GD89B", "GD02D", "GD91C",
+			"ANG5", "RG1", "ANG3",
+			"GD02A", "GD32B", "GD32A", "GD32C", "GD89C", "GD61C", "GD76B", "GD00C",
+			"GD35C", "GD76C", "GD89D", "GD00D", "GD79C", "GD35A", "GD91B", "GD61B",
+			"ANG2", "ANG4", "RG2",
+			"GD00A", "GD02C", "GD79B", "GD91D", "GD32D", "GD89A", "ANG1",
+			"GTF112", "GTF32", "GTF45_2"
+		}
+
+		if( data_set == "enrBEGe" )
+		{
+			for( auto d : dlist ){ if( d.find("GD") == 0 ) detlist.push_back(d); }
+		}
+		else if( data_set == "enrCoax" )
+		{
+			for( auto d : dlist ){ if( d.find("RG") == 0 || d.contains("ANG") == 0 ) detlist.push_back(d); }
+		}
+		else if( data_set == "natCoax" )
+		{
+			for( auto d : dlist ) { if( d.find("GTF") == 0 ) detlist.push_back(d); }
+		}
+		else
+		{
+			cout << "Unknown data set " << data_set << end;
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	f_ndets = detlist.size();
+	if( verbosity > 0 ) cout << "Fitting data of " << f_ndets << "detectors" << endl;
+	InitializeHistograms( detlist );
+
+	// read analysis key lists of each run
+	string GERDA_DATA_SETS = getenv( "GERDA_DATA_SETS" );
+	vector<string> keylist;
+	ifstream filerunlist( runlist );
+	int run; filerunlist >> run;
+
+	while( !filerunlist.eof() )
+	{
+		string keylist = GERDA_DATA_SETS;
+		filename += "/run"; keylist += Form( "%04d", run );
+		keylist += "-phy-analysis.txt";
+
+		if(verbosity > 0) cout << "\tkeylist" << endl;
+
+		ReadRunData( keylist, detlist );
+
+		filerunlist >> run;
+	}
+
+	filerunlist.close();
+
+	if(verbosity > 0)
+	{
+		cout << "Detector LiveTimes: " << endl;
+
+		for( auto d ; detectorlist )
+			cout << "\t" << d << ": " << f_DetectorLiveTime[d] << endl;
+	}
+
+	return 0;
+}
+
 // Here goes a file list with keys
 // Of each run we need to load the proper data based on the detector status meta data
 // The meta data file contains also information about the detector type
 // Here use only enrBEGe detectors
 // ---------------------------------------------------------
-int GPIIBackgroundAlpha::ReadDataEnrBEGe( std::vector<int> runlist )
+int GPIIBackgroundAlpha::ReadRunData( string keylist, vector<string> detectorlist )
 {
-	// Prepare sum histograms
-	f_hdataSum = new TH1D("henergySum",
-			"Energy channels enrBEGe ON, mult==1, no veto (mu,LAr), no TP",
-			f_hnumbins, f_hemin, f_hemax);
-
-	int bins = int(f_hemax-f_hemin);
-
-	f_hdataSum_fine = new TH1D("henergySum_fine",
-			"Energy channels enrBEGe ON, mult==1, no veto (mu,LAr), no TP",
-		    bins, f_hemin, f_hemax);
-
 	string GERDA_PHASEII_DATA = getenv("GERDA_PHASEII_DATA");
+	string MU_CAL = getenv("MU_CAL");
 
-/*	double liveTimeAnalyzed = 0;
-	double totExposure = 0;
-	double totExposureBEGe = 0;
-	double totExposureCoax = 0;
-*/
-	for( auto Run : runlist )
+	if( GERDA_PHASEII_DATA == "" )
 	{
-		cout << "---------------------------------------------" << endl;
-		cout << "Adding run " << Run << " to analysis." << endl;
-		cout << "---------------------------------------------" << endl;
-
-		RunPhaseII * runX = new RunPhaseII( Run, Form( "run%04d-phy-detStatus.txt", Run ),
-				Form( "run%04d-phy-analysis.txt", Run ), Form( "run%04d-phy-allFiles.txt", Run ) );
-
-		f_ndets = runX->GetDetectors().size();
-		fDetectorDynamicRange.resize( f_ndets );
-
-		cout << "Found " << f_ndets << " detectors in Run" << Run << endl;
-/*		cout << "Livetime: " << runX->GetLiveTime() << endl;
-		cout << "Exposure: " << runX->GetExposure() << endl;
-		cout << "enrBEGe Exposure: " << runX->GetExposureBEGE() << endl;
-		cout << "enrCoax Exposure: " << runX->GetExposureCOAX() << endl;
-
-		liveTimeAnalyzed += runX->GetLiveTime();
-		totExposure += runX->GetExposure();
-		totExposureBEGe += runX->GetExposureBEGE();
-		totExposureCoax += runX->GetExposureCOAX();
-*/
-		if( f_hdata.size() == 0 )
-		{
-			f_hdata = vector<TH1D*>( f_ndets, NULL );
-			fDetectorLiveTime = vector<double>(f_ndets, 0);
-		}
-
-		string META_FILE = runX->GetDataKeysAnalysisFile();
-
-		cout << "Adding key list " << META_FILE << endl;
-
-		// Here the data loader could be included...
-		gada::FileMap myMap;
-		myMap.SetRootDir( GERDA_PHASEII_DATA );
-		myMap.BuildFromListOfKeys( META_FILE );
-
-		gada::DataLoader l;
-		l.AddFileMap(&myMap);
-		l.BuildTier3();
-//		l.BuildTier4();
-
-		TChain * chain = l.GetSharedMasterChain();
-		int nentries = chain->GetEntries();
-
-		cout << "There are " << nentries << " events in the chain!" <<endl;
-
-		// fill the data in histograms
-		int eventChannelNumber;
-		unsigned long long timestamp;
-		unsigned int decimalTimestamp;
-		vector<int> * firedFlag = new vector<int>(f_ndets);
-		int multiplicity;
-		vector<double> * energy = new vector<double>(f_ndets);
-		int isTP;
-//		int isMuVetoed;
-//		int isLArVetoed;
-		int isVetoed;
-		int isVetoedInTime;
-		vector<int> * failedFlag = new vector<int>(f_ndets);
-
-		chain -> SetBranchAddress("eventChannelNumber", &eventChannelNumber);
-		chain -> SetBranchAddress("timestamp",&timestamp);
-		chain -> SetBranchAddress("decimalTimestamp",&decimalTimestamp);
-		chain -> SetBranchAddress("firedFlag", &firedFlag);
-		chain -> SetBranchAddress("multiplicity",&multiplicity);
-		chain -> SetBranchAddress("rawEnergyGauss",&energy);
-//		chain -> SetBranchAddress("energy",&energy);
-		chain -> SetBranchAddress("isTP",&isTP);
-//		chain -> SetBranchAddress("isMuVetoed", &isMuVetoed);
-//		chain -> SetBranchAddress("isLArVetoed",&isLArVetoed);
-		chain -> SetBranchAddress("isVetoed", &isVetoed);
-		chain -> SetBranchAddress("isVetoedInTime", &isVetoedInTime);
-		chain -> SetBranchAddress("failedFlag",&failedFlag);
-
-		// Read only BEGe data
-		vector<int> channelsBEGeON;
-		vector<int> channelsOFF;
-
-		for( auto det : runX->GetDetectors() )
-		{
-			string type = det->GetDetectorType();
-			string status = det->GetDetectorAnalysisStatus();
-			string name = det->GetDetectorName();
-			int channel = det->GetDataChannel();
-
-			fDetectorDynamicRange.at(channel) = det->GetDynamicRange();
-			fDetectorLiveTime.at(channel) = det->GetLiveTime();
-
-			if( type == "enrBEGe" && status == "ON" )
-			{
-				cout << "+ " << type << " detector " << name << " in channel " << channel << endl;
-
-				channelsBEGeON.push_back( channel );
-
-				if( f_hdata.at(channel) == NULL )
-				{
-					TH1D* henergy = new TH1D(Form("henergy_%d",channel),
-							Form("Energy channel %d, mult == 1, no veto",channel),
-							f_hnumbins, f_hemin, f_hemax);
-
-					f_hdata.at(channel) = henergy;
-				}
-			}
-			else if( status == "OFF" )
-			{
-				channelsOFF.push_back( channel );
-			}
-		}
-
-		// loop over all events
-		for (int jentry = 0; jentry < nentries; jentry++)
-		{
-			if ( jentry%( (int)(nentries/10) ) == 0 )
-				cout << " processing event " << jentry << " (" << (int)(jentry*100/nentries) << "%)" << endl;
-			chain->GetEntry( jentry );
-
-			// Cuts after Quality cuts
-			// is test pulser
-			// is vetoed by muon veto
-			// has multiplicity != 1
-			// is vetoed by LAr veto
-			if ( isTP ) 				continue;
-			if ( multiplicity != 1 ) 		continue;
-//			if ( isMuVetoed ) 			continue;
-//			if ( isLArVetoed ) 			continue;
-			if ( isVetoed ) 			continue;
-			if ( isVetoedInTime ) 			continue;
-
-			// do not consider coincidences from ANG1 and RG3 at any time
-			// make coincidence loop only over other detectors
-			int coincidence = 0;
-
-			for( int i = 0; i < f_ndets; i++ )
-			{
-				// continue if channel is switched off and not used for AC
-				if( find( channelsOFF.begin(), channelsOFF.end(), i ) != channelsOFF.end() )
-					continue;
-				int hitDet = firedFlag->at(i);
-				if( hitDet )
-					coincidence += 1;
-			}
-
-			if( coincidence != 1 ) continue;
-
-			for( auto BEGeChannel : channelsBEGeON )
-			{
-				if( failedFlag->at(BEGeChannel) != 0 )		continue;
-				if( firedFlag->at(BEGeChannel) != 1 )		continue;
-
-				// do not add events with energy greater than the dynamic range of the detector
-				if( energy->at(BEGeChannel) >= fDetectorDynamicRange.at( BEGeChannel ) )
-					continue;
-
-				// skip events in blinded region
-				if( ( energy->at(BEGeChannel) >= (2039. - 25.) ) && ( energy->at(BEGeChannel) <= (2039. + 25.) ) )
-					continue;
-
-				// fill the channel histogram
-				f_hdata.at(BEGeChannel)->Fill( energy->at(BEGeChannel) );
-				// fill also the sum histogram
-				f_hdataSum->Fill( energy->at(BEGeChannel) );
-				f_hdataSum_fine->Fill( energy->at(BEGeChannel) );
-			}
-		}
-
-		// make sure the blinded region is really empty
-		for( auto BEGeChannel : channelsBEGeON )
-		{
-			for( auto b : f_binsToSkip )
-				f_hdata.at(BEGeChannel)->SetBinContent(b,0);
-		}
-
-		for( auto b : f_binsToSkip )
-			f_hdataSum->SetBinContent(b,0);
-
-		delete runX;
+		cout << "Environment variable GERDA_PHASEII_DATA not set" << endl;
+		exit(EXIT_FAILURE);
+	}
+	if( MU_CAL == "" )
+	{
+		cout << "Environment variable MU_CAL not set" << endl;
+		cout << "LNGS: /nfs/gerda5/gerda-data/blind/active/meta/config/_aux/geruncfg" << endl;
+		cout << "MPIK: /lfs/l3/gerda/Daq/data-phaseII/blind/active/meta/config/_aux/geruncfg" << endl;
+		exit(EXIT_FAILURE);
 	}
 
-	// ----------------------------------------------
-	// --- fill the data vector for faster access ---
-	// ----------------------------------------------
+	// initialize run configuration manager
+	GERunConfigurationManager * RunConfManager = new GERunConfigurationManager();
+	GETRunConfiguration * RunConf = 0;
+	RunConfManager -> AllowRunConfigurationSwitch(true);
+	RunConfManager -> SetVerbosity(1);
+
+	// Here the data loader could be included...
+	gada::FileMap myMap;
+	myMap.SetRootDir( GERDA_PHASEII_DATA );
+	myMap.BuildFromListOfKeys( keylist );
+
+	gada::DataLoader l;
+	l.AddFileMap(&myMap);
+	l.BuildTier3();
+
+	TChain * chain = l.GetSharedMasterChain();
+	int nentries = chain->GetEntries();
+
+	cout << "Entries in Run: " << nentries << endl;
+
+	// set chain branches
+	int eventChannelNumber;
+	int multiplicity;
+	int isTP;
+	int isVetoedInTime;
+	unsigned long long timestamp;
+	vector<double> * energy = new vector<double>(f_ndets);
+	vector<int> * firedFlag = new vector<int>(f_ndets);
+	vector<int> * failedFlag = new vector<int>(f_ndets);
+	vector<int> * failedFlag_isPhysical = new vector<int>(fNDetectors);
+	vector<int> * failedFlag_isSaturated = new vector<int>(fNDetectors);
+
+	chain -> SetBranchAddress("eventChannelNumber", &eventChannelNumber);
+	chain -> SetBranchAddress("multiplicity",&multiplicity);
+	chain -> SetBranchAddress("isTP",&isTP);
+	chain -> SetBranchAddress("isVetoedInTime", &isVetoedInTime);
+	chain -> SetBranchAddress("timestamp",&timestamp);
+	chain -> SetBranchAddress("rawEnergyGauss",&energy);
+	chain -> SetBranchAddress("firedFlag", &firedFlag);
+	chain -> SetBranchAddress("failedFlag",&failedFlag);
+	chain -> SetBranchAddress("failedFlag_isPhysical",&failedFlag_isPhysical);
+	chain -> SetBranchAddress("failedFlag_isSaturated",&failedFlag_isSaturated);
+
+	int nTP = 0;
+
+	ProgressBar bar( nentries, '#', false );
+
+	// loop over all events
+	for (int e = 0; e < nentries; e++)
+	{
+		chain->GetEntry( e );
+
+		bar.Update();
+
+		if ( isTP ) { nTP++; continue; }
+		if ( multiplicity > 1 ) continue;
+		if ( isVetoedInTime ) 	continue;
+
+		for( auto d : detectorlist )
+		{
+			RunConf = RunConfManager -> GetRunConfiguration( timestamp );
+			int c = RunConf -> GetChannel( d.c_str() );
+
+			if( !RunConf -> IsOn( c ) ) continue;
+
+			double en = energy[c];
+
+			// fill energy spectra
+			if( ( multiplicity == 1 && !failedFlag_isPhysical[c] ||
+				!failedFlag_isSaturated[c] )
+			{
+				if( !failedFlag_isSaturated[c] ) en = 10000.;
+
+				f_hdata[d] -> Fill( energy[c] );
+				f_hdataSum -> Fill( energy[c] );
+				f_hdataSum_fine -> Fill( energy[c] );
+			}
+		}
+	}
+
+	int frequencyTP = 20;
+	dobule runLiveTimeInDays = nTP * frequencyTP / 60. / 60. / 24.;
+
+	// run live time in days
+	f_RunLiveTime.push_back( runLiveTimeInDays );
+
+	for( auto d : detectorlist )
+		f_DetectorLiveTime[d] += runLiveTimeInDays;
+
+	cout << "Run Livetime: " << runLiveTimeInDays << endl;
 
 	FillDataArray();
-
-	// ----------------------------------------------
-	// --- control output ---
-	// ----------------------------------------------
-	int channel = 0;
-
-	cout << "---------------------------------------------" << endl;
-	cout << "All selected runs combined:" << endl;
-	for( auto LT : fDetectorLiveTime )
-	{
-		cout << " " << channel << ": " << LT << endl;
-		channel++;
-	}
-
-	cout << "---------------------------------------------" << endl;
-	cout << "---------------------------------------------" << endl;
 
 	return 0;
 }
@@ -552,7 +534,7 @@ int GPIIBackgroundAlpha::AddMC( string name )
 		// Fill only MC histograms that have a corresponding data histogram
 		if( f_hdata.at(idet) != NULL )
 		{
-			double livetime = fDetectorLiveTime.at(idet);
+			double livetime = f_DetectorLiveTime.at(idet);
 
 			cout << "+ MC spectrum h" << idet << " with lifetime weight " << livetime << endl;
 
@@ -589,10 +571,7 @@ int GPIIBackgroundAlpha::AddMC( string name )
 
 	MCfile->Close();
 
-	double intInBlindedRegion = 0;
-	if( f_binsToSkip.size() > 0 )
-		henergy->Integral( f_binsToSkip.front(), f_binsToSkip.back() );
-	double scaling = henergy->Integral() - intInBlindedRegion;
+	double scaling = henergy->Integral();
 
 	henergy->Scale( 1./scaling );
 	henergy_fine->Scale( 1./scaling );
@@ -679,10 +658,7 @@ int GPIIBackgroundAlpha::AddMCSingle( string name, string histoname )
 
 	cout << "MC histo loaded" << endl;
 
-	double intInBlindedRegion = 0;
-	if( f_binsToSkip.size() > 0 )
-		intInBlindedRegion = henergy->Integral( f_binsToSkip.front(), f_binsToSkip.back() );
-	double scaling = henergy->Integral() - intInBlindedRegion;
+	double scaling = henergy->Integral();
 
 	cout << "Scaling MC " << 1./scaling << endl;
 
@@ -705,17 +681,18 @@ int GPIIBackgroundAlpha::AddMCSingle( string name, string histoname )
 
 int GPIIBackgroundAlpha::FillMCArrays()
 {
+	int nMC = f_MC.size();
 
-  for( int iMC = 0; iMC < (int)f_MC.size(); iMC++ )
-  {
-      for( int ibin = 1; ibin <= f_hnumbins; ibin++ )
-      {
-    	  double value = f_MC.at(iMC)->GetBinContent( ibin );
-    	  f_vMC.push_back(value);
-      }
-  }
+  	for( int iMC = 0; iMC < nMC; iMC++ )
+  	{
+    	for( int ibin = 1; ibin <= f_hnumbins; ibin++ )
+      	{
+    	  	double value = f_MC[iMC]->GetBinContent( ibin );
+    	  	f_vMC.push_back(value);
+      	}
+  	}
 
-  return 0;
+  	return 0;
 }
 
 // ---------------------------------------------------------
@@ -732,20 +709,17 @@ double GPIIBackgroundAlpha::LogLikelihood(const std::vector <double> & parameter
 
   for( int ibin = 0; ibin < f_hnumbins; ibin++)
   {
-	  // skip blinded region in the likelihood
-	  if( find( f_binsToSkip.begin(), f_binsToSkip.end(), ibin ) != f_binsToSkip.end() )
-		  continue;
-
 	  double lambda = 0.;
+	  int nMC = f_MC.size();
 
-	  for( int iMC = 0; iMC < (int)f_MC.size(); iMC++)
+	  for( int iMC = 0; iMC < nMC; iMC++)
 	  {
-		  lambda += parameters.at(iMC) * f_vMC[iMC*f_hnumbins + ibin];
+		  lambda += parameters[iMC] * f_vMC[iMC*f_hnumbins + ibin];
 	  }
 
-      double bincontent = f_vdata[ibin];
+      int bincontent = (int)f_vdata[ibin];
 
-      double sum = bincontent*log(lambda) - lambda - BCMath::LogFact((int)bincontent);
+      double sum = bincontent*log(lambda) - lambda - BCMath::LogFact(bincontent);
 
       logprob += sum;
   }
@@ -760,17 +734,13 @@ double GPIIBackgroundAlpha::LogAPrioriProbability(const std::vector<double> &par
    // parameters p(parameters).
 
   double logprob = 0.;
+  int nMC = f_MC.size();
 
-  // skip blinded region in the likelihood
-  int bins = f_binsToSkip.size();
-  double binsize = (f_hemax - f_hemin) / (double)f_hnumbins;
-  double skippedRange = binsize * (double)bins;
-
-  for( int iMC = 0; iMC < (int)f_MC.size(); iMC++ )
+  for( int iMC = 0; iMC < nMC; iMC++ )
   {
       double range = GetParameter(iMC)->GetRangeWidth();
       // flat prior for all contributions
-      logprob += log( 1. / ( range - skippedRange ) );
+      logprob += log( 1. / range );
   }
 
   return logprob;
@@ -804,21 +774,18 @@ double GPIIBackgroundAlpha::EstimatePValue()
 
   for( int ibin = 0; ibin < f_hnumbins; ibin++ )
   {
-	  //TODO
-	  if( find( f_binsToSkip.begin(), f_binsToSkip.end(), ibin ) != f_binsToSkip.end() )
-		  continue;
-
       double lambda = 0.;
+	  int nMC = f_MC.size();
 
-      for( int iMC = 0; iMC < (int)f_MC.size(); iMC++ )
+      for( int iMC = 0; iMC < nMC; iMC++ )
       {
-    	  lambda += parameters.at(iMC)*f_vMC[iMC*f_hnumbins+ibin];
+    	  lambda += parameters[iMC]*f_vMC[iMC*f_hnumbins+ibin];
       }
 
       int counter = ibin;
 
-      mean.at(counter) = std::max( lambda, 1e-8 );
-      nom.at(counter) = int( mean.at(counter) );
+      mean[counter] = std::max( lambda, 1e-8 );
+      nom[counter] = int( mean[counter] );
       sumlog += BCMath::LogPoisson( nom[counter], mean[counter] );
   }
 
@@ -836,9 +803,6 @@ double GPIIBackgroundAlpha::EstimatePValue()
   {
       for( int ibin = 0; ibin < f_hnumbins; ibin++)
       {
-    	  if( find( f_binsToSkip.begin(), f_binsToSkip.end(), ibin ) != f_binsToSkip.end() )
-    		  continue;
-
     	  int counter = ibin;
 
     	  if ( rand() > RAND_MAX/2 ) // Try to increase the bin content by 1
@@ -873,7 +837,7 @@ double GPIIBackgroundAlpha::EstimatePValue()
 }
 
 // ---------------------------------------------------------
-
+// FIX ME update plots and output info
 void GPIIBackgroundAlpha::DumpHistosAndInfo(std::vector<double> parameters, char* rootfilename)
 {
   TFile* rootOut = new TFile( rootfilename, "recreate" );
