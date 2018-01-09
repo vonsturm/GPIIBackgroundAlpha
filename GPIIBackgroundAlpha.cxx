@@ -79,7 +79,7 @@ GPIIBackgroundAlpha::~GPIIBackgroundAlpha()
 
 // FIX ME
 // ---------------------------------------------------------
-void GPIIBackgroundAlpha::DefineParameters( string parConfigFile )
+void GPIIBackgroundAlpha::DefineParameters()
 {
     vector<double> RangeMin_enrBEGe = {100.,0.,0.,0.,0.};
     vector<double> RangeMax_enrBEGe = {250.,50.,50.,100.,150.};
