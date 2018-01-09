@@ -1,6 +1,6 @@
 ###################################################################
 # This Makefile was created using the CreateProject.sh script
-# for project BEGE_backgrounds.
+# for project GPIIBackgroundAlpha.
 # CreateProject.sh is part of Bayesian Analysis Toolkit (BAT).
 # BAT can be downloaded from http://www.mppmu.mpg.de/bat
 ###################################################################
@@ -14,17 +14,10 @@
 #
 ###################################################################
 
-# Root variables
-ROOTCFLAGS   := $(shell root-config --cflags)
-ROOTLIBS     := $(shell root-config --libs) -lMinuit
-ROOTGLIBS    := $(shell root-config --glibs)
-
-#ROOTLIBS     += -lRooFitCore -lRooFit -lRooStats -lFoam -lMathMore
-
 # compiler and flags
-CXX          = g++ 
+CXX          = g++
 CXXFLAGS     = -g -Wall -fPIC -Wno-deprecated -O2
-LD           = g++ 
+LD           = g++
 LDFLAGS      = -g -O2
 SOFLAGS      = -shared
 
@@ -34,56 +27,52 @@ MV           = mv
 ECHO         = echo
 CINT         = rootcint
 
-# add ROOT flags
-CXXFLAGS    += $(ROOTCFLAGS) -I$(CUBA_BASE_DIR)/include
+# BAT
+CXXFLAGS += $(shell bat-config --cflags)
+LIBS := $(shell bat-config --libs)
 
-LIBS        += -L$(CUBA_BASE_DIR)/lib -lcuba
-GLIBS       += -L$(CUBA_BASE_DIR)/lib -lcuba
+# CUBA
+#CXXFLAGS += -I$(CUBA_BASE_DIR)/include
+#LIBS += -L$(CUBA_BASE_DIR)/lib -lcuba
 
+# ROOT
+CXXFLAGS += $(shell root-config --cflags)
+LIBS += $(shell root-config --libs) -lMinuit
 
-# add GERDA-ADA flags
-CXXFLAGS    += -I$(GERDA_BASE_DIR)/include/gerda-ada/
+# GERDA-ADA
+CXXFLAGS += $(shell gerda-ada-config --cflags)/gerda-ada/
+LIBS += $(shell gerda-ada-config --libs)
 
-LIBS        += -L$(GERDA_BASE_DIR)/lib -lgerda-ada-core	-lgerda-ada-calib-ged -lgerda-ada-dataprod -lgerda-ada-evtviewer -lgerda-ada-monitoring -lgerda-ada-psd-base -lgerda-ada-stats
-GLIBS       += -L$(GERDA_BASE_DIR)/lib -lgerda-ada-core -lgerda-ada-calib-ged -lgerda-ada-dataprod -lgerda-ada-evtviewer -lgerda-ada-monitoring	-lgerda-ada-psd-base -lgerda-ada-stats
+# MGDO
+CXXFLAGS += $(shell mgdo-config --cflags)
+LIBS += $(shell mgdo-config --libs)
 
-# add GELATIO flags
-CXXFLAGS    += -I$(GERDA_BASE_DIR)/include/gelatio
+# GELATIO
+CXXFLAGS += $(shell gelatio-config --cflags)
+LIBS += $(shell gelatio-config --libs)
 
-LIBS        += -L$(GERDA_BASE_DIR)/lib -lGELATIODecoders -lGELATIOManagement -lGELATIOModules -lGELATIOUtilities
-GLIBS       += -L$(GERDA_BASE_DIR)/lib -lGELATIODecoders -lGELATIOManagement -lGELATIOModules -lGELATIOUtilities
-
-
-# ----------------------------------------------------------------------
-# The following definitions depend on the setup of the system where
-# the project is being compiled. If BAT is installed in the standard
-# system search path or the installation directory is defined in the
-# BATINSTALLDIR environmental variable then the lines below are correct
-# and the compilation will work
-CXXFLAGS    += -I. -I./include -I$(shell bat-config --prefix)/include
-LIBS        += $(ROOTLIBS)  -L$(shell bat-config --prefix)/lib -lBAT -lBATmodels
-GLIBS       += $(ROOTGLIBS) -L$(shell bat-config --prefix)/lib -lBAT -lBATmodels
+# ProgressBar
+CXXFLAGS += -I/lfs/l2/gerda/Hades/Analysis/Users/sturm/BAT/progressbar
+LIBS += -L/lfs/l2/gerda/Hades/Analysis/Users/sturm/BAT/progressbar -lProgressBar
 
 # List of all classes (models) used in the program
 # Add classes to the end. Backslash indicates continuation
 # on the next line
 CXXSRCS      = \
-        BEGE_backgrounds.cxx RunPhaseII.cxx DetectorPhaseII.cxx
+	GPIIBackgroundAlpha.cxx RunPhaseII.cxx DetectorPhaseII.cxx
 
 # ----------------------------------------------------------------------
 # don't change lines below unless you know what you're doing
 #
 
 CXXOBJS      = $(patsubst %.cxx,%.o,$(CXXSRCS))
-EXEOBJS      =
-MYPROGS     = \
-        runBEGE_backgrounds test_classes
+MYPROGS      = runGPIIBackgroundAlpha test_classes
 
-GARBAGE      = $(CXXOBJS) $(EXEOBJS) *.o *~ link.d $(MYPROGS)
+GARBAGE      = $(CXXOBJS) *.o *~ link.d $(MYPROGS)
 
 
 # targets
-all : project project_test
+all : runGPIIBackgroundAlpha
 
 link.d : $(patsubst %.cxx,%.h,$(CXXSRCS))
 	$(CXX) -MM $(CXXFLAGS) $(CXXSRCS) > link.d;
@@ -96,11 +85,11 @@ link.d : $(patsubst %.cxx,%.h,$(CXXSRCS))
 clean :
 	$(RM) $(GARBAGE)
 
-project : runBEGE_backgrounds.cxx $(CXXOBJS)
+runGPIIBackgroundAlpha : runGPIIBackgroundAlpha.cxx $(CXXOBJS)
 	$(CXX) $(CXXFLAGS) -c $<
-	$(CXX) $(LDFLAGS) $(LIBS) runBEGE_backgrounds.o $(CXXOBJS) -o runBEGE_backgrounds
+	$(CXX) $(LDFLAGS) $(LIBS) runGPIIBackgroundAlpha.o $(CXXOBJS) -o runGPIIBackgroundAlpha
 
-project_test : test_classes.cxx $(CXXOBJS)
+test : test_classes.cxx $(CXXOBJS)
 	$(CXX) $(CXXFLAGS) -c $<
 	$(CXX) $(LDFLAGS) $(LIBS) test_classes.o $(CXXOBJS) -o test_classes
 
@@ -114,4 +103,3 @@ print :
 
    echo rootlibs  : $(ROOTLIBS)
    echo rootglibs : $(ROOTGLIBS)
-

@@ -5,6 +5,7 @@
 // BAT can be downloaded from http://www.mppmu.mpg.de/bat
 // ***************************************************************
 
+// BAT includes
 #include <BAT/BCLog.h>
 #include <BAT/BCAux.h>
 #include <BAT/BCSummaryTool.h>
@@ -13,38 +14,41 @@
 #include <BAT/BCModelOutput.h>
 #include <BAT/BCParameter.h>
 
+// root includes
 #include "TStyle.h"
 
-#include "BEGE_backgrounds.h"
+// own includes
+#include "GPIIBackgroundAlpha.h"
 
 using namespace std;
 
-int main()
+int main( int argc, char* argv[] )
 {
+    
 
-  // --------- set input parameters ------
+    // --------- set input parameters ------
 
-  // set nicer style for drawing than the ROOT default
-  BCAux::SetStyle();
-  gStyle->SetOptStat(0);
-  
-  // open log file
-  BCLog::OpenLog("log.txt");
-  BCLog::SetLogLevel(BCLog::detail);
-  
-  // create new BEGE_backgrounds object
-  BEGE_backgrounds* m = new BEGE_backgrounds();
-   
-  // create a new summary tool object
-  BCSummaryTool * summary = new BCSummaryTool(m);
+    // set nicer style for drawing than the ROOT default
+    BCAux::SetStyle();
+    gStyle->SetOptStat(0);
 
-  BCLog::OutSummary("Model created");
-  
-  // ==== Set precision for fit ====
-  
-  //--->
-  //---- SET HERE ----
-  const int precisionValue = 3;
+    // open log file
+    BCLog::OpenLog("log.txt");
+    BCLog::SetLogLevel(BCLog::detail);
+
+    // create new GPIIBackgroundAlpha object
+    GPIIBackgroundAlpha* m = new GPIIBackgroundAlpha();
+
+    // create a new summary tool object
+    BCSummaryTool * summary = new BCSummaryTool(m);
+
+    BCLog::OutSummary("Model created");
+
+    // ==== Set precision for fit ====
+
+    //--->
+    //---- SET HERE ----
+    const int precisionValue = 3;
   //------------------
 
   string precisionString="";
@@ -97,7 +101,7 @@ int main()
   cout << endl;
 
   // --- define data input ---
-  // read in the names of the files you want to use, 
+  // read in the names of the files you want to use,
   vector<int> runlist = { 53,54,55,56,57,58,59,60,61,62,63 };
   m->ReadDataEnrBEGe( runlist );
 
@@ -108,12 +112,12 @@ int main()
   m->DefineParameters();
 
   // to get better sensitivity on a certain parameter
-//   m->SetNbins("inverseHalflife_BEGE_backgrounds",2000);
+//   m->SetNbins("inverseHalflife_GPIIBackgroundAlpha",2000);
 //  m->SetNbins("halflife_2nbb",2000);
   // Set parameter binning
   size_t nPars = m->GetNParameters();
   cout << nPars << " Parameters in the fit." << endl;
-  for ( size_t i = 0; i < nPars; i++ )  
+  for ( size_t i = 0; i < nPars; i++ )
   {
 	m->GetParameter(i)->SetNbins(500);
   	cout << "Binning par " << i << ": " << m->GetParameter(i)->GetNbins() << endl;
@@ -123,7 +127,7 @@ int main()
 
 
 //   size_t nPars = m->GetNParameters();
-//   for (size_t i=0;i<nPars;i++)        
+//   for (size_t i=0;i<nPars;i++)
 //     m->MCMCSetFlagFillHistograms(i,false); //disable histos for nuisance parameters
 
   // create new output object
@@ -141,18 +145,18 @@ int main()
 
   // run MCMC and marginalize posterior wrt. all parameters
   // and all combinations of two parameters
-  
+
   m->MarginalizeAll();
 
   // run mode finding; by default using Minuit
   //   m->FindMode();
-  
+
   // if MCMC was run before (MarginalizeAll()) it is
   // possible to use the mode found by MCMC as
   // starting point of Minuit minimization
 
   m->FindMode( m->GetBestFitParameters() );
-   
+
   // ----------------------------------
   // write out all results, plots, ...
   // ----------------------------------
@@ -161,12 +165,12 @@ int main()
   m->PrintAllMarginalized( Form( "%s/BEGE_alphas_plots.ps", OUTPUT_DIR.c_str() ) );
 
   // print all summary plots
-//   summary->PrintParameterPlot(Form("/raid4/gerda/hemmer/BAT_BEGE_backgrounds_results_M1/%s/%dkeVBins/BEGE_backgrounds_parameters.eps",precisionString.c_str(),(int)binwidth));
-//   summary->PrintCorrelationPlot(Form("/raid4/gerda/hemmer/BAT_BEGE_backgrounds_results_M1/%s/%dkeVBins/BEGE_backgrounds_correlation.eps",precisionString.c_str(),(int)binwidth));
-//   summary->PrintKnowledgeUpdatePlots(Form("/raid4/gerda/hemmer/BAT_BEGE_backgrounds_results_M1/%s/%dkeVBins/BEGE_backgrounds_update.ps",precisionString.c_str(),(int)binwidth)); 
+//   summary->PrintParameterPlot(Form("/raid4/gerda/hemmer/BAT_GPIIBackgroundAlpha_results_M1/%s/%dkeVBins/GPIIBackgroundAlpha_parameters.eps",precisionString.c_str(),(int)binwidth));
+//   summary->PrintCorrelationPlot(Form("/raid4/gerda/hemmer/BAT_GPIIBackgroundAlpha_results_M1/%s/%dkeVBins/GPIIBackgroundAlpha_correlation.eps",precisionString.c_str(),(int)binwidth));
+//   summary->PrintKnowledgeUpdatePlots(Form("/raid4/gerda/hemmer/BAT_GPIIBackgroundAlpha_results_M1/%s/%dkeVBins/GPIIBackgroundAlpha_update.ps",precisionString.c_str(),(int)binwidth));
   // print results of the analysis into a text file
   m->PrintResults( Form( "%s/BEGE_alphas_results.txt", OUTPUT_DIR.c_str() ) );
-  
+
 
   // calculate p-value
   double pvalue = m->EstimatePValue();
@@ -186,7 +190,7 @@ int main()
 
       //Get the parameters of interest
       BCH1D* output = m->GetMarginalized(Form("par_%d_%s",i,MCnames.at(i).c_str() ));
-  
+
       double mode = output->GetMode();
       double xmin = 0., xmax = 0.;
       output->GetSmallestInterval(xmin, xmax);
@@ -198,18 +202,18 @@ int main()
       cout << "Interval: (" << xmin << " - " << xmax << ")" << endl;
       cout << "90% quantile: " << quantile << endl;
     }
-  
-  
+
+
   cout << "------------------------------------------------------------" << endl;
   cout << "************************************************************" << endl;
   cout << "------------------------------------------------------------" << endl;
 
-  
+
 //   //write additional info in the output file
 //   mout->GetFile()->cd();
 
 //   //Get the parameter of interest
-//   output = m->GetMarginalized("halflife_2nbb");  
+//   output = m->GetMarginalized("halflife_2nbb");
 //   output->GetHistogram()->Write("histo_halflife_2nbb");
 
   // close output file
@@ -222,14 +226,13 @@ int main()
   delete m;
   delete summary;
   delete mout;
-  
+
   BCLog::OutSummary("Program ran successfully");
   BCLog::OutSummary("Exiting");
-  
+
   // close log file
   BCLog::CloseLog();
-  
+
   return 0;
 
 }
-

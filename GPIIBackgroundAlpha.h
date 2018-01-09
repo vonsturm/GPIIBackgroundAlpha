@@ -4,8 +4,8 @@
 // BAT can be downloaded from http://www.mppmu.mpg.de/bat
 // ***************************************************************
 
-#ifndef __BAT__BEGE_BACKGROUNDS__H
-#define __BAT__BEGE_BACKGROUNDS__H
+#ifndef __BAT__GPIIBACKGROUNDALPHA__H
+#define __BAT__GPIIBACKGROUNDALPHA__H
 
 // C/C++ includes
 #include <vector>
@@ -20,20 +20,20 @@
 #include <BAT/BCDataPoint.h>
 
 
-// This is a BEGE_backgrounds header file.
-// Model source code is located in file BEGE_backgrounds/BEGE_backgrounds.cxx
+// This is a GPIIBackgroundAlpha header file.
+// Model source code is located in file GPIIBackgroundAlpha/GPIIBackgroundAlpha.cxx
 
 // ---------------------------------------------------------
-class BEGE_backgrounds : public BCModel
+class GPIIBackgroundAlpha : public BCModel
 {
    public:
 
       // Constructors and destructor
-      BEGE_backgrounds();
-      BEGE_backgrounds(const char * name);
-      ~BEGE_backgrounds();
+      GPIIBackgroundAlpha();
+      GPIIBackgroundAlpha(const char * name);
+      ~GPIIBackgroundAlpha();
 
-      // Methods to overload, see file BEGE_backgrounds.cxx
+      // Methods to overload, see file GPIIBackgroundAlpha.cxx
       void DefineParameters();
       double LogAPrioriProbability(const std::vector<double> &parameters);
       double LogLikelihood(const std::vector <double> & parameters);
@@ -84,9 +84,8 @@ class BEGE_backgrounds : public BCModel
 
       std::vector<double> f_lowerlimits;
       std::vector<double> f_upperlimits;
-      
+
 };
 // ---------------------------------------------------------
 
 #endif
-

@@ -37,27 +37,27 @@
 
 // own includes
 #include "RunPhaseII.h"
-#include "BEGE_backgrounds.h"
+#include "GPIIBackgroundAlpha.h"
 
 using namespace std;
 using namespace gada;
 
 // ---------------------------------------------------------
-BEGE_backgrounds::BEGE_backgrounds() : BCModel()
+GPIIBackgroundAlpha::GPIIBackgroundAlpha() : BCModel()
 {
 	f_ndets = 0;
 	DefineParameters();
 };
 
 // ---------------------------------------------------------
-BEGE_backgrounds::BEGE_backgrounds(const char * name) : BCModel(name)
+GPIIBackgroundAlpha::GPIIBackgroundAlpha(const char * name) : BCModel(name)
 {
 	f_ndets = 0;
 	DefineParameters();
 };
 
 // ---------------------------------------------------------
-BEGE_backgrounds::~BEGE_backgrounds()
+GPIIBackgroundAlpha::~GPIIBackgroundAlpha()
 {
 	for( auto i : f_hdata ) delete i;
 	f_hdata.clear();
@@ -73,7 +73,7 @@ BEGE_backgrounds::~BEGE_backgrounds()
 };
 
 // ---------------------------------------------------------
-void BEGE_backgrounds::DefineParameters()
+void GPIIBackgroundAlpha::DefineParameters()
 {
         vector<double> RangeMin_enrBEGe = {100.,0.,0.,0.,0.};
         vector<double> RangeMax_enrBEGe = {250.,50.,50.,100.,150.};
@@ -86,7 +86,7 @@ void BEGE_backgrounds::DefineParameters()
 }
 
 // ---------------------------------------------------------
-void BEGE_backgrounds::SetHistogramParameters( int hnumbins, double hemin, double hemax )
+void GPIIBackgroundAlpha::SetHistogramParameters( int hnumbins, double hemin, double hemax )
 {
 	f_hnumbins = hnumbins;
 	f_hemin = hemin;
@@ -114,7 +114,7 @@ void BEGE_backgrounds::SetHistogramParameters( int hnumbins, double hemin, doubl
 // The meta data file contains also information about the detector type
 // Here use only enrBEGe detectors
 // ---------------------------------------------------------
-int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
+int GPIIBackgroundAlpha::ReadDataEnrBEGe( std::vector<int> runlist )
 {
 	// Prepare sum histograms
 	f_hdataSum = new TH1D("henergySum",
@@ -181,7 +181,7 @@ int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
 		int nentries = chain->GetEntries();
 
 		cout << "There are " << nentries << " events in the chain!" <<endl;
-  
+
 		// fill the data in histograms
 		int eventChannelNumber;
 		unsigned long long timestamp;
@@ -220,7 +220,7 @@ int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
 			string status = det->GetDetectorAnalysisStatus();
 			string name = det->GetDetectorName();
 			int channel = det->GetDataChannel();
-			
+
 			fDetectorDynamicRange.at(channel) = det->GetDynamicRange();
 			fDetectorLiveTime.at(channel) = det->GetLiveTime();
 
@@ -328,7 +328,7 @@ int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
 	cout << "---------------------------------------------" << endl;
 	cout << "All selected runs combined:" << endl;
 	for( auto LT : fDetectorLiveTime )
-	{	
+	{
 		cout << " " << channel << ": " << LT << endl;
 		channel++;
 	}
@@ -341,16 +341,16 @@ int BEGE_backgrounds::ReadDataEnrBEGe( std::vector<int> runlist )
 
 // ---------------------------------------------------------
 
-int BEGE_backgrounds::FillDataArray()
+int GPIIBackgroundAlpha::FillDataArray()
 {
-  
+
   for(int ibin = 1; ibin <= f_hnumbins; ibin++)
   {
 	  double value = f_hdataSum->GetBinContent( ibin );
 	  f_vdata.push_back(value);
   }
-  
-  // fill also the arrays with upper and lower limits 
+
+  // fill also the arrays with upper and lower limits
   // of the bins in the data histograms
   // dont't know what they should be good for...
   for(int ibin = 1; ibin <= f_hnumbins; ibin++)
@@ -374,7 +374,7 @@ int BEGE_backgrounds::FillDataArray()
 // Best is a treatment with only smearing but the full energy of the events is
 // kept and histogramed only here
 // ---------------------------------------------------------
-int BEGE_backgrounds::ReadMCAlpha()
+int GPIIBackgroundAlpha::ReadMCAlpha()
 {
 	string MC_SMEARED_DIR = getenv("MC_SMEARED_DIR");
 
@@ -385,7 +385,7 @@ int BEGE_backgrounds::ReadMCAlpha()
 	}
 
 	// Reading MC histograms with a binning of 1keV
-  
+
 	//-------------
 	// Po210_pPlus
 	//-------------
@@ -504,7 +504,7 @@ int BEGE_backgrounds::ReadMCAlpha()
 
 // ---------------------------------------------------------
 
-int BEGE_backgrounds::AddMC( string name )
+int GPIIBackgroundAlpha::AddMC( string name )
 {
 	cout << "---------------------------------------------" << endl;
 	cout << "Adding MC component " << name << endl;
@@ -589,7 +589,7 @@ int BEGE_backgrounds::AddMC( string name )
 
 	MCfile->Close();
 
-	double intInBlindedRegion = 0; 
+	double intInBlindedRegion = 0;
 	if( f_binsToSkip.size() > 0 )
 		henergy->Integral( f_binsToSkip.front(), f_binsToSkip.back() );
 	double scaling = henergy->Integral() - intInBlindedRegion;
@@ -609,7 +609,7 @@ int BEGE_backgrounds::AddMC( string name )
 
 // ---------------------------------------------------------
 
-int BEGE_backgrounds::AddMCSingle( string name, string histoname )
+int GPIIBackgroundAlpha::AddMCSingle( string name, string histoname )
 {
 	cout << "---------------------------------------------" << endl;
 	cout << "Adding MC component " << name << endl;
@@ -703,7 +703,7 @@ int BEGE_backgrounds::AddMCSingle( string name, string histoname )
 
 // ---------------------------------------------------------
 
-int BEGE_backgrounds::FillMCArrays()
+int GPIIBackgroundAlpha::FillMCArrays()
 {
 
   for( int iMC = 0; iMC < (int)f_MC.size(); iMC++ )
@@ -719,8 +719,8 @@ int BEGE_backgrounds::FillMCArrays()
 }
 
 // ---------------------------------------------------------
-    
-double BEGE_backgrounds::LogLikelihood(const std::vector <double> & parameters)
+
+double GPIIBackgroundAlpha::LogLikelihood(const std::vector <double> & parameters)
 {
 
   // This methods returns the logarithm of the conditional probability
@@ -742,11 +742,11 @@ double BEGE_backgrounds::LogLikelihood(const std::vector <double> & parameters)
 	  {
 		  lambda += parameters.at(iMC) * f_vMC[iMC*f_hnumbins + ibin];
 	  }
-	    
+
       double bincontent = f_vdata[ibin];
-      
+
       double sum = bincontent*log(lambda) - lambda - BCMath::LogFact((int)bincontent);
-      
+
       logprob += sum;
   }
 
@@ -754,7 +754,7 @@ double BEGE_backgrounds::LogLikelihood(const std::vector <double> & parameters)
 }
 
 // ---------------------------------------------------------
-double BEGE_backgrounds::LogAPrioriProbability(const std::vector<double> &parameters)
+double GPIIBackgroundAlpha::LogAPrioriProbability(const std::vector<double> &parameters)
 {
    // This method returns the logarithm of the prior probability for the
    // parameters p(parameters).
@@ -772,12 +772,12 @@ double BEGE_backgrounds::LogAPrioriProbability(const std::vector<double> &parame
       // flat prior for all contributions
       logprob += log( 1. / ( range - skippedRange ) );
   }
-  
+
   return logprob;
 }
 // ---------------------------------------------------------
 
-double BEGE_backgrounds::EstimatePValue()
+double GPIIBackgroundAlpha::EstimatePValue()
 {
   //Allen's routine for the evaluation of p-value
   //This is derived from PRD 83 (2011) 012004, appendix
@@ -786,7 +786,7 @@ double BEGE_backgrounds::EstimatePValue()
 
   /*
     Now we initialize the Markov Chain by setting the number of entries in a bin to
-    the integer 
+    the integer
     part of the mean in that bin.  This will give the maximum possible likelihood.
   */
   double sumlog = 0;
@@ -874,7 +874,7 @@ double BEGE_backgrounds::EstimatePValue()
 
 // ---------------------------------------------------------
 
-void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* rootfilename)
+void GPIIBackgroundAlpha::DumpHistosAndInfo(std::vector<double> parameters, char* rootfilename)
 {
   TFile* rootOut = new TFile( rootfilename, "recreate" );
 
@@ -981,7 +981,7 @@ void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* r
   //the single contributions
 
   string name;
-  
+
   for(int iMC=0; iMC<(int)f_MC.size(); iMC++)
   {
       f_MC.at(iMC)->SetLineWidth(2);
@@ -1005,7 +1005,7 @@ void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* r
 
   legend->Draw();
   canvas->Write();
-      
+
   hresiduals->Add(f_hdataSum);
   hresiduals->Divide(hMC); //ratio
   hresiduals->SetLineWidth(2);
@@ -1038,4 +1038,3 @@ void BEGE_backgrounds::DumpHistosAndInfo(std::vector<double> parameters, char* r
   rootOut->Close();
 }
 // ---------------------------------------------------------
-
