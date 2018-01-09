@@ -64,7 +64,7 @@ GPIIBackgroundAlpha::GPIIBackgroundAlpha(const char * name) : BCModel(name)
 // ---------------------------------------------------------
 GPIIBackgroundAlpha::~GPIIBackgroundAlpha()
 {
-	for( auto i : f_hdata ) delete i;
+	for( auto i : f_hdata ) delete i.second;
 	f_hdata.clear();
 
 	for( auto i : f_MC ) delete i;
