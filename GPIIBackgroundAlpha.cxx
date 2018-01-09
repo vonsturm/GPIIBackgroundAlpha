@@ -10,6 +10,8 @@
 #include <fstream>
 #include <cmath>
 #include <getopt.h>
+#include <unistd.h>
+#include <cstdlib>
 
 // ROOT includes
 #include "TChain.h"
