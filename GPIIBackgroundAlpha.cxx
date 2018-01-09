@@ -146,7 +146,7 @@ int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
 			"ANG2", "ANG4", "RG2",
 			"GD00A", "GD02C", "GD79B", "GD91D", "GD32D", "GD89A", "ANG1",
 			"GTF112", "GTF32", "GTF45_2"
-		}
+		};
 
 		if( data_set == "enrBEGe" )
 		{
