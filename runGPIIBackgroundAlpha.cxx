@@ -22,9 +22,67 @@
 
 using namespace std;
 
+UsageGPIIBackgroundAlpha();
+
 int main( int argc, char* argv[] )
 {
-    
+    // arguments
+    string data_set = "enrBEGe";
+    double hMin = 3500., hMax = 7500.;  // fit range in keV
+    double hBinning = 30.;                  // bin size in keV
+    string precisionString = "kLow";
+
+    int choice = 0;
+
+    static struct option long_options[] =
+    {
+        { "help",       no_argument,       0,   'h' },
+        { "runs",       required_argument, 0,   'R' },
+        { "detectors",  required_argument, 0,   'D' },
+        { "precision",  required_argument, 0,   'P' },
+        { "dataset",    required_argument, 0,   'S'},
+        { "binning",    required_argument, 0,   'B' },
+        { "min",        required_argument, 0,   'm' },
+        { "max",        required_argument, 0,   'M' },
+        { "fit",        required_argument, 0,   'F' },
+        { 0, 0, 0, 0 }
+    };
+
+        int option_index = 0;
+
+        while( (choice = getopt_long(argc, argv, "hR:D:P:S:B:m:M:F:", long_options, &option_index)) != -1 )
+    {
+        switch (choice)
+        {
+                case 'h':
+                    UsageGPIIBackgroundAlpha();
+                    return 0;
+                case 'R':
+                    break;
+                case 'D':
+                    break;
+                case 'P':
+                    precisionString = optarg;
+                    break;
+                case 'S':
+                    break;
+                case 'B':
+                    hBinning = atof( optarg );
+                    break;
+                case 'm':
+                    hMin = atof( optarg );
+                    break;
+                case 'M':
+                    hMax = atof( optarg );
+                    break;
+                case 'F':
+                    break;
+                default:
+                    cout << "Unknown option: -" << choice << endl;
+                    UsageGPIIBackgroundAlpha();
+                    return -1;
+            }
+        }
 
     // --------- set input parameters ------
 
@@ -44,63 +102,27 @@ int main( int argc, char* argv[] )
 
     BCLog::OutSummary("Model created");
 
-    // ==== Set precision for fit ====
+    // Set the precision for the fit
+    BCEngineMCMC::Precision precision;
+    if( precisionString == "kLow" ) precision = BCEngineMCMC::kLow;
+    else if( precisionString == "kMedium" ) precision = BCEngineMCMC::kMedium;
+    else if( precisionString == "kHigh" ) precision = BCEngineMCMC::;kHigh
+    else if( precisionString == "kVeryHigh" ) precision = BCEngineMCMC::kVeryHigh;
+    m->MCMCSetPrecision(precision);
 
-    //--->
-    //---- SET HERE ----
-    const int precisionValue = 3;
-  //------------------
+    BCLog::OutSummary( Form( "Precision: %s ", precisionString.c_str() ) );
 
-  string precisionString="";
-  BCEngineMCMC::Precision precision;
-  if(precisionValue==0)
-    {
-      precisionString="kLow";
-      precision=BCEngineMCMC::kLow;
-    }
-  if(precisionValue==1)
-    {
-      precisionString="kMedium";
-      precision=BCEngineMCMC::kMedium;
-    }
-  if(precisionValue==2)
-    {
-      precisionString="kHigh";
-      precision=BCEngineMCMC::kHigh;
-    }
-  if(precisionValue==3)
-    {
-      precisionString="kVeryHigh";
-      precision=BCEngineMCMC::kVeryHigh;
-    }
+    // Set the histograms for the data spectra
+    // If hMax does not fit the bin width then lower hMax accordingly
+    int hNbins = (int) ( (hMin - hMax) / hBinning );
+    hMax = hMin + hNbins * hBinning;
 
-  cout << "Precision: " << precisionString << endl;
+    m->SetHistogramParameters(hNbins, hMin, hMax);
 
-  // set the precision for the fit
-  m->MCMCSetPrecision(precision);
+    BCLog::OutSummary( Form( "Fit Range: %.0f - %.0f keV", hMin, hMax) );
+    BCLog::OutSummary( Form( "Binning: %.0f keV", hBinning ) );
+    BCLog::OutSummary( Form( "Number of Bins: %i", hNbins ) );
 
-  // === Set the histograms for the data spectra ===
-
-  //--->
-  //---- SET HERE ----
-  double hemin=3500.; //try also 2900
-  double hemax=5300.;
-  double binwidth=50.;
-  //------------------
-
-  int hnumbins=(int)((hemax-hemin)/binwidth);
-
-  m->SetHistogramParameters(hnumbins, hemin, hemax);
-
-  cout << endl;
-  cout << "**********************************************" << endl;
-  cout << "ENERGY RANGE AND BINWIDTH INFORMATION" << endl;
-  cout << "Energy range: (" << hemin << " - " << hemax << ")keV" << endl;
-  cout << "Binwidth: " << binwidth << endl;
-  cout << "**********************************************" << endl;
-  cout << endl;
-
-  // --- define data input ---
   // read in the names of the files you want to use,
   vector<int> runlist = { 53,54,55,56,57,58,59,60,61,62,63 };
   m->ReadDataEnrBEGe( runlist );
@@ -119,8 +141,8 @@ int main( int argc, char* argv[] )
   cout << nPars << " Parameters in the fit." << endl;
   for ( size_t i = 0; i < nPars; i++ )
   {
-	m->GetParameter(i)->SetNbins(500);
-  	cout << "Binning par " << i << ": " << m->GetParameter(i)->GetNbins() << endl;
+    m->GetParameter(i)->SetNbins(500);
+      cout << "Binning par " << i << ": " << m->GetParameter(i)->GetNbins() << endl;
   }
 
   //m->SetNbins(2000);
@@ -235,4 +257,22 @@ int main( int argc, char* argv[] )
 
   return 0;
 
+}
+
+
+
+UsageGPIIBackgroundAlpha()
+{
+    cout << "Usage: runGPIIBackgroundAlpha" << endl;
+    cout << "\tOptions" << endl;
+    cout << "\t\t-h : this help menu" << endl;
+    cout << "\t\t-R : run selection from file" << endl;
+    cout << "\t\t-D : detector selection from file" << endl;
+    cout << "\t\t-P : precision [kLow(default)|kMedium|kHigh|kVeryHigh]" << endl;
+    cout << "\t\t-S : dataset [enrBEGe(default)|enrCoax|natCoax]" << endl;
+    cout << "\t\t-B : binning in keV" << endl;
+    cout << "\t\t-m : lower histogram limit in keV" << endl;
+    cout << "\t\t-M : upper histogram limit in keV" << endl;
+    cout << "\t\t-F : pdf selection to fit [Po210]" << endl;
+    return;
 }

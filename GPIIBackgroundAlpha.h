@@ -41,9 +41,11 @@ class GPIIBackgroundAlpha : public BCModel
 
       // my own methods
       void SetHistogramParameters(int hnumbins, double hemin, double hemax);
+      int ReadData( std::string runlist ); //wrapper
       int ReadDataEnrBEGe( std::vector<int> runlist );
       int ReadDataEnrCoax( std::vector<int> runlist );
       int ReadDataNatCoax( std::vector<int> runlist );
+
       int FillDataArray();
       int ReadMCAlpha();
       int AddMC( std::string name );
