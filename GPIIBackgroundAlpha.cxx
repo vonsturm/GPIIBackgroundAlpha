@@ -8,7 +8,8 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <math.h>
+#include <cmath>
+#include <getopt.h>
 
 // ROOT includes
 #include "TChain.h"
