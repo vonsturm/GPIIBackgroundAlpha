@@ -91,7 +91,7 @@ void GPIIBackgroundAlpha::DefineParameters()
 	}
 }
 
-int InitializeHistograms( vector<string> detectorlist )
+int GPIIBackgroundAlpha::InitializeHistograms( vector<string> detectorlist )
 {
 	string name = "hSum";
 	string name_fine = name; name_fine += "_fine";
