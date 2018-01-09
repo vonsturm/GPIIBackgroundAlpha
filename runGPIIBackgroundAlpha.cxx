@@ -5,6 +5,8 @@
 // BAT can be downloaded from http://www.mppmu.mpg.de/bat
 // ***************************************************************
 
+#include <getopt.h>
+
 // BAT includes
 #include <BAT/BCLog.h>
 #include <BAT/BCAux.h>
