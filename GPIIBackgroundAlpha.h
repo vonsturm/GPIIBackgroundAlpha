@@ -46,7 +46,7 @@ class GPIIBackgroundAlpha : public BCModel
           f_hemin = hemin;
           f_hemax = hemax;
       }
-      int InitializeHistograms();
+      int InitializeHistograms( std::vector<std::string> detectorlist );
 
       // Read Data
       int ReadData( std::string runlist, std::string data_set,
