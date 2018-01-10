@@ -55,6 +55,10 @@ LIBS += $(shell gelatio-config --libs)
 CXXFLAGS += -I/lfs/l2/gerda/Hades/Analysis/Users/sturm/BAT/progressbar
 LIBS += -L/lfs/l2/gerda/Hades/Analysis/Users/sturm/BAT/progressbar -lProgressBar
 
+# jsoncpp
+CXXFLAGS += -I/lfs/l2/gerda/Hades/Analysis/Users/sturm/BAT/.install/jsoncpp/linux-scientific-7.3-x86_64/1.8.4/include/
+LIBS += -L/lfs/l2/gerda/Hades/Analysis/Users/sturm/BAT/.install/jsoncpp/linux-scientific-7.3-x86_64/1.8.4/lib -ljsoncpp
+
 # List of all classes (models) used in the program
 # Add classes to the end. Backslash indicates continuation
 # on the next line

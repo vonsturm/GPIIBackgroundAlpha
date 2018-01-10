@@ -31,11 +31,11 @@ int main( int argc, char* argv[] )
     // arguments
     string data_set = "enrBEGe";
     string precisionString = "kLow";
-    string runlist;
+    string runlist = "default_runlist.dat";
     string detectorlist = "";
     bool useDetectorList = false;
 
-    double hMin = 3500., hMax = 7500.;  // fit range in keV
+    double hMin = 3500., hMax = 5300.;  // fit range in keV
     double hBinning = 30.;              // bin size in keV
 
     int choice = 0;
@@ -138,6 +138,7 @@ int main( int argc, char* argv[] )
     // read in the names of the files you want to use,
     m->ReadData( runlist, data_set, detectorlist, useDetectorList );
 
+    m->ReadMCParConfigFile();
 
 /*
     // --- read in the MC histograms ---

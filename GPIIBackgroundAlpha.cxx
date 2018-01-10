@@ -10,6 +10,9 @@
 #include <fstream>
 #include <math.h>
 
+// jsoncpp
+#include "json/value.h"
+
 // ROOT includes
 #include "TChain.h"
 #include "TROOT.h"
@@ -347,6 +350,26 @@ int GPIIBackgroundAlpha::FillDataArray()
   }
 
   return 0;
+}
+
+// Read MC configuration file
+// json file
+// ---------------------------------------------------------
+int GPIIBackgroundAlpha::ReadMCParConfigFile()
+{
+	ifstream confFile( f_parConfigFile, ifstream::binary );
+
+	if( !confFile.is_open() )
+	{
+		cout << "Parameter config file not set." << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	Json::Value parameters;
+
+	cout << parameters;
+
+	return 0;
 }
 
 /*
