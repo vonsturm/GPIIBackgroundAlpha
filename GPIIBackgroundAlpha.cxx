@@ -12,6 +12,7 @@
 
 // jsoncpp
 #include "json/value.h"
+#include "json/json.h"
 
 // ROOT includes
 #include "TChain.h"
@@ -369,7 +370,7 @@ int GPIIBackgroundAlpha::ReadMCParConfigFile()
 
 	confFile >> parameters;
 
-	cout << parameters;
+	// cout << parameters;
 
 	return 0;
 }
