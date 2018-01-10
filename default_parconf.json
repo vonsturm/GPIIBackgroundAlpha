@@ -6,7 +6,6 @@
             "min" : 0.0,
             "max" : 100.0,
             "binning" : 100,
-            "correlations" : 2,
             "histonames" : [ "h1", "h2" ],
             "filename" : [ "f1", "f2" ]
         },
@@ -15,7 +14,6 @@
             "min" : 0.0,
             "max" : 100.0,
             "binning" : 100,
-            "correlations" : 1,
             "histonames" : [ "h1" ],
             "filename" : [ "f1" ]
         },

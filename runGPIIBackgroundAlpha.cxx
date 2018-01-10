@@ -31,8 +31,8 @@ int main( int argc, char* argv[] )
     // arguments
     string data_set = "enrBEGe";
     string precisionString = "kLow";
-    string runlist = "default_runlist.dat";
-    string detectorlist = "";
+    string runlist = "default_runlist.json";
+    string detectorlist = "default_detlist.json";
     bool useDetectorList = false;
     string parConfigFile = "default_parconf.json"
 
@@ -137,10 +137,10 @@ int main( int argc, char* argv[] )
     BCLog::OutSummary( Form( "Number of Bins: %i", hNbins ) );
 
     // read in the names of the files you want to use,
+
     m->ReadData( runlist, data_set, detectorlist, useDetectorList );
 
-    m->SetParConfigFile( parConfigFile );
-    m->ReadMCParConfigFile();
+    m->ReadMCParConfigFile( parConfigFile );
 
 /*
     // --- read in the MC histograms ---

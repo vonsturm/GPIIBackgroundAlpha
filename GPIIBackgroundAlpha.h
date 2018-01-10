@@ -57,8 +57,8 @@ class GPIIBackgroundAlpha : public BCModel
       // Read MC pdfs
       void SetParConfigFile( std::string name ){ f_parConfigFile = name; return; };
       std::string GetParConfigFile(){ return f_parConfigFile; };
-      int ReadMCParConfigFile();
-      
+      int ReadMCParConfigFile( string parConfigFile );
+
       int ReadMC();
       int AddMC( std::string name );
       int AddMCSingle( std::string name, std::string histoname );

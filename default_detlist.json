@@ -1,0 +1,12 @@
+{
+    "detectors" :
+    [
+        "GD91A", "GD35B", "GD02B", "GD00B", "GD61A", "GD89B", "GD02D", "GD91C",
+		"ANG5", "RG1", "ANG3",
+		"GD02A", "GD32B", "GD32A", "GD32C", "GD89C", "GD61C", "GD76B", "GD00C",
+		"GD35C", "GD76C", "GD89D", "GD00D", "GD79C", "GD35A", "GD91B", "GD61B",
+		"ANG2", "ANG4", "RG2",
+		"GD00A", "GD02C", "GD79B", "GD91D", "GD32D", "GD89A", "ANG1",
+		"GTF112", "GTF32", "GTF45_2"
+    ]
+}

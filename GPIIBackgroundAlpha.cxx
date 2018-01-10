@@ -356,8 +356,10 @@ int GPIIBackgroundAlpha::FillDataArray()
 // Read MC configuration file
 // json file
 // ---------------------------------------------------------
-int GPIIBackgroundAlpha::ReadMCParConfigFile()
+int GPIIBackgroundAlpha::ReadMCParConfigFile( string parConfigFile )
 {
+	SetParConfigFile( parConfigFile );
+
 	ifstream confFile( f_parConfigFile, ifstream::binary );
 
 	if( !confFile.is_open() )
