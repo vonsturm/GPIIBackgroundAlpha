@@ -114,6 +114,8 @@ int GPIIBackgroundAlpha::InitializeHistograms( vector<string> detectorlist )
 		f_DetectorLiveTime[det] = 0.;
 	}
 
+	cout << "Histograms initialized" << endl;
+
 	return 0;
 }
 
@@ -182,7 +184,7 @@ int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
 
 	for( int r = 0; r < nruns; r++ )
 	{
-		int run = j_runlist[r].asInt();
+		int run = j_runlist["runs"][r].asInt();
 
 		string keylist = GERDA_DATA_SETS;
 		keylist += "/run"; keylist += Form( "%04d", run );
@@ -1040,11 +1042,15 @@ Json::Value GPIIBackgroundAlpha::GetJsonValueFromFile( string filename )
 		exit(EXIT_FAILURE);
 	}
 
+	cout << "Reading JSON file:" << filename << endl;
+
 	Json::Value val;
 
 	file >> val;
 
 	file.close();
+
+	cout << val;
 
 	return val;
 }

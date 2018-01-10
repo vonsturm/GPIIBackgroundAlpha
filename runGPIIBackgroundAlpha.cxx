@@ -127,7 +127,7 @@ int main( int argc, char* argv[] )
 
     // Set the histograms for the data spectra
     // If hMax does not fit the bin width then lower hMax accordingly
-    int hNbins = (int) ( (hMin - hMax) / hBinning );
+    int hNbins = (int) ( (hMax - hMin) / hBinning );
     hMax = hMin + hNbins * hBinning;
 
     m->SetHistogramParameters(hNbins, hMin, hMax);
@@ -137,8 +137,7 @@ int main( int argc, char* argv[] )
     BCLog::OutSummary( Form( "Number of Bins: %i", hNbins ) );
 
     // read in the names of the files you want to use,
-
-    m->ReadData( runlist, data_set, detectorlist, useDetectorList );
+    m->ReadData( runlist, data_set, detectorlist, useDetectorList, 1 );
 
     // --- read in the MC histograms ---
     m->SetParConfigFile( parConfigFile );
