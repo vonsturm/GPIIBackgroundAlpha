@@ -73,6 +73,8 @@ class GPIIBackgroundAlpha : public BCModel
       double EstimatePValue();
       void DumpHistosAndInfo(std::vector<double> parameters, char* rootfilename);
 
+      Json::Value GetJsonValueFromFile( std::string filename );
+
  private:
 
       int f_ndets;

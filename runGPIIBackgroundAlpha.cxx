@@ -34,7 +34,7 @@ int main( int argc, char* argv[] )
     string runlist = "default_runlist.json";
     string detectorlist = "default_detlist.json";
     bool useDetectorList = false;
-    string parConfigFile = "default_parconf.json"
+    string parConfigFile = "default_parconf.json";
 
     double hMin = 3500., hMax = 5300.;  // fit range in keV
     double hBinning = 30.;              // bin size in keV
@@ -147,7 +147,7 @@ int main( int argc, char* argv[] )
 //    m->ReadMCAlpha();
 //    m->DefineParameters();
 
-
+/*
 
   // to get better sensitivity on a certain parameter
 //   m->SetNbins("inverseHalflife_GPIIBackgroundAlpha",2000);

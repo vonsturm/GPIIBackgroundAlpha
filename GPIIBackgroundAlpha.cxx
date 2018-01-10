@@ -84,13 +84,13 @@ void GPIIBackgroundAlpha::DefineParameters()
 {
 	int npars = f_j_parameters.size();
 
-	for( int p = 0; p < npas; p++ )
+	for( int p = 0; p < npars; p++ )
 	{
 		string name = f_j_parameters[p]["name"].asString();
 		double min = f_j_parameters[p]["min"].asDouble();
 		double max = f_j_parameters[p]["max"].asDouble();
 
-		AddParameter( name, min, max );
+		AddParameter( name.c_str(), min, max );
 	}
 }
 
@@ -353,7 +353,7 @@ int GPIIBackgroundAlpha::FillDataArray()
 // Read MC configuration file
 // json file
 // ---------------------------------------------------------
-void GPIIBackgroundAlpha::SetParConfigFile( string name );
+void GPIIBackgroundAlpha::SetParConfigFile( string name )
 {
 	f_parConfigFile = name;
 
@@ -1030,7 +1030,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(std::vector<double> parameters, char
 */
 
 // ---------------------------------------------------------
-Json::Value GetJsonValueFromFile( string filename )
+Json::Value GPIIBackgroundAlpha::GetJsonValueFromFile( string filename )
 {
 	ifstream file( filename, ifstream::binary );
 
