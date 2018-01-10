@@ -34,6 +34,7 @@ int main( int argc, char* argv[] )
     string runlist = "default_runlist.dat";
     string detectorlist = "";
     bool useDetectorList = false;
+    string parConfigFile = "default_parconf.json"
 
     double hMin = 3500., hMax = 5300.;  // fit range in keV
     double hBinning = 30.;              // bin size in keV
@@ -87,7 +88,7 @@ int main( int argc, char* argv[] )
                 hMax = atof( optarg );
                 break;
             case 'C':
-                m->SetParConfigFile( optarg );
+                parConfigFile = optarg;
                 break;
             default:
                 cout << "Unknown option: -" << choice << endl;
@@ -138,6 +139,7 @@ int main( int argc, char* argv[] )
     // read in the names of the files you want to use,
     m->ReadData( runlist, data_set, detectorlist, useDetectorList );
 
+    m->SetParConfigFile( parConfigFile );
     m->ReadMCParConfigFile();
 
 /*
