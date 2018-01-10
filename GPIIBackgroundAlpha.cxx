@@ -367,6 +367,8 @@ int GPIIBackgroundAlpha::ReadMCParConfigFile()
 
 	Json::Value parameters;
 
+	confFile >> parameters;
+
 	cout << parameters;
 
 	return 0;
