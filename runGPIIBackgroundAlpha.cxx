@@ -140,14 +140,14 @@ int main( int argc, char* argv[] )
 
     m->ReadData( runlist, data_set, detectorlist, useDetectorList );
 
-    m->ReadMCParConfigFile( parConfigFile );
-
-/*
     // --- read in the MC histograms ---
-    m->ReadMCAlpha();
+    m->SetParConfigFile( parConfigFile );
+    m->DefineParameters();
 
-  // --- define parameters ---
-  m->DefineParameters();
+//    m->ReadMCAlpha();
+//    m->DefineParameters();
+
+
 
   // to get better sensitivity on a certain parameter
 //   m->SetNbins("inverseHalflife_GPIIBackgroundAlpha",2000);

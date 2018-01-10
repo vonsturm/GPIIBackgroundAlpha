@@ -55,14 +55,12 @@ using namespace gada;
 GPIIBackgroundAlpha::GPIIBackgroundAlpha() : BCModel()
 {
 	f_ndets = 0;
-	DefineParameters();
 };
 
 // ---------------------------------------------------------
 GPIIBackgroundAlpha::GPIIBackgroundAlpha(const char * name) : BCModel(name)
 {
 	f_ndets = 0;
-	DefineParameters();
 };
 
 // ---------------------------------------------------------
@@ -81,17 +79,18 @@ GPIIBackgroundAlpha::~GPIIBackgroundAlpha()
 	f_vMC.clear();
 };
 
-// FIX ME
 // ---------------------------------------------------------
 void GPIIBackgroundAlpha::DefineParameters()
 {
-    vector<double> RangeMin_enrBEGe = {100.,0.,0.,0.,0.};
-    vector<double> RangeMax_enrBEGe = {250.,50.,50.,100.,150.};
+	int npars = f_j_parameters.size();
 
-	// Add all MC histograms as fit parameters
-	for(int iMC = 0; iMC < (int)f_MC.size(); iMC++)
+	for( int p = 0; p < npas; p++ )
 	{
-                AddParameter( Form( "par_%d_%s",iMC,f_MCname.at(iMC).c_str() ), RangeMin_enrBEGe.at(iMC), RangeMax_enrBEGe.at(iMC) );
+		string name = f_j_parameters[p]["name"].asString();
+		double min = f_j_parameters[p]["min"].asDouble();
+		double max = f_j_parameters[p]["max"].asDouble();
+
+		AddParameter( name, min, max );
 	}
 }
 
@@ -119,7 +118,6 @@ int GPIIBackgroundAlpha::InitializeHistograms( vector<string> detectorlist )
 }
 
 // ---------------------------------------------------------
-
 int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
 	std::string detectorlistname, bool useDetectorList, int verbosity )
 {
@@ -128,16 +126,15 @@ int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
 
 	if( useDetectorList )
 	{
-		ifstream detectorlist( detectorlistname );
-		string det; detectorlist >> det;
+		Json::Value j_detectorlist = GetJsonValueFromFile( detectorlistname );
 
-		while( detectorlist.eof() )
+		f_ndets = j_detectorlist.size();
+
+		for( int d = 0; d < f_ndets; d++ )
 		{
+			string det = j_detectorlist[d].asString();
 			detlist.push_back( det );
-			detectorlist >> det;
 		}
-
-		detectorlist.close();
 	}
 	else
 	{
@@ -178,11 +175,15 @@ int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
 	// read analysis key lists of each run
 	string GERDA_DATA_SETS = getenv( "GERDA_DATA_SETS" );
 	vector<string> keylist;
-	ifstream filerunlist( runlist );
-	int run; filerunlist >> run;
 
-	while( !filerunlist.eof() )
+	Json::Value j_runlist = GetJsonValueFromFile( runlist );
+
+	int nruns = j_runlist.size();
+
+	for( int r = 0; r < nruns; r++ )
 	{
+		int run = j_runlist[r].asInt();
+
 		string keylist = GERDA_DATA_SETS;
 		keylist += "/run"; keylist += Form( "%04d", run );
 		keylist += "-phy-analysis.txt";
@@ -190,11 +191,7 @@ int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
 		if(verbosity > 0) cout << "\tkeylist" << endl;
 
 		ReadRunData( keylist, detlist );
-
-		filerunlist >> run;
 	}
-
-	filerunlist.close();
 
 	if(verbosity > 0)
 	{
@@ -356,26 +353,16 @@ int GPIIBackgroundAlpha::FillDataArray()
 // Read MC configuration file
 // json file
 // ---------------------------------------------------------
-int GPIIBackgroundAlpha::ReadMCParConfigFile( string parConfigFile )
+void GPIIBackgroundAlpha::SetParConfigFile( string name );
 {
-	SetParConfigFile( parConfigFile );
+	f_parConfigFile = name;
 
-	ifstream confFile( f_parConfigFile, ifstream::binary );
+	f_j_parameters = GetJsonValueFromFile( f_parConfigFile );
 
-	if( !confFile.is_open() )
-	{
-		cout << "Parameter config file not set." << endl;
-		exit(EXIT_FAILURE);
-	}
+	cout << f_j_parameters << endl;
 
-	Json::Value parameters;
-
-	confFile >> parameters;
-
-	// cout << parameters;
-
-	return 0;
-}
+	return;
+};
 
 /*
 
@@ -389,6 +376,7 @@ int GPIIBackgroundAlpha::ReadMCParConfigFile( string parConfigFile )
 // ---------------------------------------------------------
 int GPIIBackgroundAlpha::ReadMC()
 {
+
 	string MC_SMEARED_DIR = getenv("MC_SMEARED_DIR");
 
 	if( MC_SMEARED_DIR.empty() )
@@ -744,10 +732,13 @@ double GPIIBackgroundAlpha::LogLikelihood(const std::vector <double> & parameter
   {
 	  double lambda = 0.;
 	  int nMC = f_MC.size();
+	  int nHistosRead = 0;
 
 	  for( int iMC = 0; iMC < nMC; iMC++)
 	  {
-		  lambda += parameters[iMC] * f_vMC[iMC*f_hnumbins + ibin];
+		  int ncorrelations = f_j_parameters[iMC]["histonames"].size();
+		  lambda += parameters[iMC] * f_vMC[ nHistosRead * f_hnumbins + ibin ];
+		  nHistosRead += ncorrelations;
 	  }
 
       int bincontent = (int)f_vdata[ibin];
@@ -778,8 +769,8 @@ double GPIIBackgroundAlpha::LogAPrioriProbability(const std::vector<double> &par
 
   return logprob;
 }
-// ---------------------------------------------------------
 
+// ---------------------------------------------------------
 double GPIIBackgroundAlpha::EstimatePValue()
 {
   //Allen's routine for the evaluation of p-value
@@ -1037,3 +1028,23 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(std::vector<double> parameters, char
 }
 // ---------------------------------------------------------
 */
+
+// ---------------------------------------------------------
+Json::Value GetJsonValueFromFile( string filename )
+{
+	ifstream file( filename, ifstream::binary );
+
+	if( !file.is_open() )
+	{
+		cout << "Cannot open file " << filename << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	Json::Value val;
+
+	file >> val;
+
+	file.close();
+
+	return val;
+}

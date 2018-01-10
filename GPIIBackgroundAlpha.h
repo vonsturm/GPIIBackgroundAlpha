@@ -11,6 +11,9 @@
 #include <vector>
 #include <map>
 
+// jsoncpp
+#include "json/value.h"
+
 // ROOT includes
 #include "TH1D.h"
 #include "TChain.h"
@@ -55,9 +58,8 @@ class GPIIBackgroundAlpha : public BCModel
       int FillDataArray();
 
       // Read MC pdfs
-      void SetParConfigFile( std::string name ){ f_parConfigFile = name; return; };
+      void SetParConfigFile( std::string name );
       std::string GetParConfigFile(){ return f_parConfigFile; };
-      int ReadMCParConfigFile( string parConfigFile );
 
       int ReadMC();
       int AddMC( std::string name );
@@ -79,6 +81,7 @@ class GPIIBackgroundAlpha : public BCModel
       double f_hemax;
 
       std::string f_parConfigFile;
+      Json::Value f_j_parameters;
 
       std::vector<double> f_RunLiveTime;
       std::map<std::string,double> f_DetectorLiveTime;
