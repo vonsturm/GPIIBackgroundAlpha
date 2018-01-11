@@ -72,7 +72,6 @@ GPIIBackgroundAlpha::~GPIIBackgroundAlpha()
 	for( auto i : f_MC ) delete i;
 	f_MC.clear();
 
-	f_MCname.clear();
 	f_vdata.clear();
 	f_lowerlimits.clear();
 	f_upperlimits.clear();
@@ -103,14 +102,16 @@ void GPIIBackgroundAlpha::DefineParameters()
 }
 
 // ---------------------------------------------------------
-int GPIIBackgroundAlpha::InitializeHistograms( vector<string> detectorlist )
+int GPIIBackgroundAlpha::InitializeDataHistograms( vector<string> detectorlist )
 {
 	string name = "hSum";
 	string name_fine = name; name_fine += "_fine";
-	int bins = int(f_hemax-f_hemin);
+	string name_all = name; name_fine += "_all";
+	int bins = (int)f_hemax-f_hemin;
 
 	f_hdataSum = new TH1D( name.c_str(), name.c_str(), f_hnumbins, f_hemin, f_hemax);
 	f_hdataSum_fine = new TH1D( name_fine.c_str(), name_fine.c_str(), bins, f_hemin, f_hemax);
+	f_hdataSum_all = new TH1D( name_all.c_str(), name_all.c_str(), (int)f_hemax, f_hemin, f_hemax);
 
 	for( auto det : detectorlist )
 	{
@@ -181,7 +182,7 @@ int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
 
 	f_ndets = detlist.size();
 	if( f_verbosity > 0 ) cout << "Fitting data of " << f_ndets << "detectors" << endl;
-	InitializeHistograms( detlist );
+	InitializeDataHistograms( detlist );
 
 	// read analysis key lists of each run
 	string GERDA_DATA_SETS = getenv( "GERDA_DATA_SETS" );
@@ -375,7 +376,40 @@ void GPIIBackgroundAlpha::SetParConfigFile( string name )
 	f_j_parameters = GetJsonValueFromFile( f_parConfigFile );
 
 	return;
-};
+}
+
+int GPIIBackgroundAlpha::InitializeMCHistograms()
+{
+	int nMChistos = 0;
+	int npars = f_j_parameters["parameters"].size();
+
+	for( int p = 0; p < npars; p++ )
+	{
+		string pname = f_j_parameters["parameters"][p]["name"].asString();
+		int ncorrelations = f_j_parameters["parameters"][p]["mc"].size();
+		nMChistos += ncorrelations;
+
+		for( int c = 0; c < ncorrelations; c++ )
+		{
+			string hname = f_j_parameters["parameters"][p]["mc"][c]["histoname"].asString();
+			string fname = f_j_parameters["parameters"][p]["mc"][c]["filename"].asString();
+
+			string name = pname; name += "_n"; name += c;
+			string title = fname; title += " : "; title += hname;
+			int bins = (int)f_hemax-f_hemin;
+
+			TH1D * hmc = new TH1D( name.c_str(), title.c_str(), f_hnumbins, f_hemin, f_hemax);
+			TH1D * hmc_fine = new TH1D( name.c_str(), title.c_str(), bins, f_hemin, f_hemax);
+			TH1D * hmc_all = new TH1D( name.c_str(), title.c_str(), (int)f_hemax, f_hemin, f_hemax);
+
+			f_MC.push_back( hmc );
+			f_MC_fine.push_back( hmc_fine );
+			f_MC_all.push_back( hmc_all );
+		}
+	}
+
+	return 0;
+}
 
 /*
 
@@ -604,9 +638,8 @@ int GPIIBackgroundAlpha::AddMC( string name )
 	henergy_all->Scale( 1./scaling );
 
 	f_MC.push_back( henergy );
-	f_MCfine.push_back( henergy_fine );
+	f_MC_fine.push_back( henergy_fine );
 	f_MCall.push_back( henergy_all );
-	f_MCname.push_back( name );
 
 	return 0;
 }
@@ -693,9 +726,8 @@ int GPIIBackgroundAlpha::AddMCSingle( string name, string histoname )
 	henergy_all->Scale( 1./scaling );
 
 	f_MC.push_back( henergy );
-	f_MCfine.push_back( henergy_fine );
+	f_MC_fine.push_back( henergy_fine );
 	f_MCall.push_back( henergy_all );
-	f_MCname.push_back( name );
 
 	MCfile->Close();
 
@@ -896,15 +928,15 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(std::vector<double> parameters, char
   {
 	  // prepare the histograms
       f_MC.at(iMC)->Scale( parameters.at(iMC) );
-      f_MCfine.at(iMC)->Scale( parameters.at(iMC) );
+      f_MC_fine.at(iMC)->Scale( parameters.at(iMC) );
       f_MCall.at(iMC)->Scale( parameters.at(iMC) );
 
       f_MC.at(iMC)->Write();
-      f_MCfine.at(iMC)->Write();
+      f_MC_fine.at(iMC)->Write();
       f_MCall.at(iMC)->Write();
 
       hMC->Add( f_MC.at(iMC) );
-      hMC_fine->Add( f_MCfine.at(iMC) );
+      hMC_fine->Add( f_MC_fine.at(iMC) );
       hMC_all->Add( f_MCall.at(iMC) );
 
       // count the events
@@ -993,7 +1025,6 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(std::vector<double> parameters, char
       f_MC.at(iMC)->Draw("same");
       f_MC.at(iMC)->GetXaxis()->SetTitle("Energy (keV)");
       f_MC.at(iMC)->GetYaxis()->SetTitle(Form("Events/(%d keV)",(int)binwidth_hMC));
-      name=f_MCname.at(iMC);
       legend->AddEntry(f_MC.at(iMC),Form("%s",name.c_str()),"l");
 
       f_MC.at(iMC)->Write();
@@ -1016,9 +1047,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(std::vector<double> parameters, char
   for( int iMC = 0; iMC < (int)eventsMC.size(); iMC++ )
   {
       cout << "Events: " << endl;
-      cout << f_MCname.at(iMC) << ": " << eventsMC.at(iMC) << endl;
       cout << "In total spectrum from (0 - 7500) keV" << endl;
-      cout << f_MCname.at(iMC) << ": " << eventsMC_all.at(iMC) << endl;
   }
   cout << "Total events in MC: " << hMC->Integral() << endl;
   cout << endl;

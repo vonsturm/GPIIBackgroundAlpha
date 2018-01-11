@@ -144,31 +144,17 @@ int main( int argc, char* argv[] )
     m->SetParConfigFile( parConfigFile );
     m->DefineParameters();
 
-    m->PrepareMCHistograms();
+    m->InitializeMCHistograms();
 
-//m->ReadMCAlpha();
-
-/*
-
-  // to get better sensitivity on a certain parameter
-//   m->SetNbins("inverseHalflife_GPIIBackgroundAlpha",2000);
-//  m->SetNbins("halflife_2nbb",2000);
-  // Set parameter binning
-  size_t nPars = m->GetNParameters();
-  cout << nPars << " Parameters in the fit." << endl;
-  for ( size_t i = 0; i < nPars; i++ )
-  {
-    m->GetParameter(i)->SetNbins(500);
-      cout << "Binning par " << i << ": " << m->GetParameter(i)->GetNbins() << endl;
-  }
-
-  //m->SetNbins(2000);
+    //m->ReadMCAlpha();
 
 
+//disable histos for nuisance parameters
 //   size_t nPars = m->GetNParameters();
 //   for (size_t i=0;i<nPars;i++)
-//     m->MCMCSetFlagFillHistograms(i,false); //disable histos for nuisance parameters
+//   m->MCMCSetFlagFillHistograms(i,false);
 
+/*
   // create new output object
   string OUTPUT_DIR = "/opt/exp_software/gerda/gerda_gpfs/vonsturm/BAT/BEGE_alphas/ModelOutput/";
   OUTPUT_DIR += precisionString;

@@ -51,7 +51,7 @@ class GPIIBackgroundAlpha : public BCModel
           f_hemin = hMin;
           f_hemax = hMax;
       }
-      int InitializeHistograms( std::vector<std::string> detectorlist );
+      int InitializeDataHistograms( std::vector<std::string> detectorlist );
 
       // Read Data
       int ReadData( std::string runlist, std::string data_set,
@@ -63,12 +63,13 @@ class GPIIBackgroundAlpha : public BCModel
       void SetParConfigFile( std::string name );
       std::string GetParConfigFile(){ return f_parConfigFile; };
 
+      int InitializeMCHistograms();
       int ReadMC();
       int AddMC( std::string name );
       int AddMCSingle( std::string name, std::string histoname );
       int FillMCArrays();
 
-      std::vector<std::string> GetMCParNames(){ return f_MCname; };
+      std::vector<std::string> GetMCParNames();
 
       double getndets() {return f_ndets;};
 
@@ -100,13 +101,13 @@ class GPIIBackgroundAlpha : public BCModel
       std::map<std::string,TH1D*> f_hdata;
       TH1D* f_hdataSum;
       TH1D* f_hdataSum_fine;
+      TH1D* f_hdataSum_all;
 
       std::string f_MC_FileName;
 
       std::vector<TH1D*> f_MC;
-      std::vector<TH1D*> f_MCfine;
-      std::vector<TH1D*> f_MCall;
-      std::vector<std::string> f_MCname;
+      std::vector<TH1D*> f_MC_fine;
+      std::vector<TH1D*> f_MC_all;
 
       std::vector<double> f_vdata;
       std::vector<double> f_vMC;
