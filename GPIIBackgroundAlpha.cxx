@@ -8,7 +8,8 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <math.h>
+#include <cmath>
+#include <string>
 
 // jsoncpp
 #include "json/value.h"
@@ -230,12 +231,12 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist, vector<string> detectorlis
 	string GERDA_PHASEII_DATA = getenv("GERDA_PHASEII_DATA");
 	string MU_CAL = getenv("MU_CAL");
 
-	if( GERDA_PHASEII_DATA == "" )
+	if( GERDA_PHASEII_DATA.empty() )
 	{
 		cout << "Environment variable GERDA_PHASEII_DATA not set" << endl;
 		exit(EXIT_FAILURE);
 	}
-	if( MU_CAL == "" )
+	if( MU_CAL.empty() )
 	{
 		cout << "Environment variable MU_CAL not set" << endl;
 		cout << "LNGS: /nfs/gerda5/gerda-data/blind/active/meta/config/_aux/geruncfg" << endl;
@@ -394,13 +395,15 @@ int GPIIBackgroundAlpha::InitializeMCHistograms()
 			string hname = f_j_parameters["parameters"][p]["mc"][c]["histoname"].asString();
 			string fname = f_j_parameters["parameters"][p]["mc"][c]["filename"].asString();
 
-			string name = pname; name += "_n"; name += c;
+			string name = pname; name += "_n"; name += to_string(c);
+			string name_fine = name; name_fine += "_fine";
+			string name_all = name; name_all += "_all";
 			string title = fname; title += " : "; title += hname;
 			int bins = (int)f_hemax-f_hemin;
 
 			TH1D * hmc = new TH1D( name.c_str(), title.c_str(), f_hnumbins, f_hemin, f_hemax);
-			TH1D * hmc_fine = new TH1D( name.c_str(), title.c_str(), bins, f_hemin, f_hemax);
-			TH1D * hmc_all = new TH1D( name.c_str(), title.c_str(), (int)f_hemax, f_hemin, f_hemax);
+			TH1D * hmc_fine = new TH1D( name_fine.c_str(), title.c_str(), bins, f_hemin, f_hemax);
+			TH1D * hmc_all = new TH1D( name_all.c_str(), title.c_str(), (int)f_hemax, f_hemin, f_hemax);
 
 			f_MC.push_back( hmc );
 			f_MC_fine.push_back( hmc_fine );
@@ -411,27 +414,27 @@ int GPIIBackgroundAlpha::InitializeMCHistograms()
 	return 0;
 }
 
-/*
 
-// Use the premade spc_ files from the gerda-mage-sim data structure
+// FIX ME
 // ---------------------------------------------------------
 int GPIIBackgroundAlpha::ReadMC()
 {
+	string GERDA_MC_PDFS = getenv("GERDA_MC_PDFS");
 
-	string MC_SMEARED_DIR = getenv("MC_SMEARED_DIR");
-
-	if( MC_SMEARED_DIR.empty() )
+	if( GERDA_MC_PDFS.empty() )
 	{
-		cout << "ERROR: environment variable MC_SMEARED_DIR not set!" << endl;
+		cout << "ERROR: environment variable GERDA_MC_PDFS not set!" << endl;
 		return -1;
 	}
+
+	
 
 	// Reading MC histograms with a binning of 1keV
 
 	//-------------
 	// Po210_pPlus
 	//-------------
-	f_MC_FileName = MC_SMEARED_DIR;
+	f_MC_FileName = GERDA_MC_PDFS;
 	f_MC_FileName += "/histograms_Po210_onPplusSurface.root";
 //	AddMCSingle( "Po210_pPlus_dl0nm", "hist_dl0nm" );
 //	AddMCSingle( "Po210_pPlus_dl100nm", "hist_dl100nm" );
@@ -448,7 +451,7 @@ int GPIIBackgroundAlpha::ReadMC()
 //      //------------------
 //	// Ra226chain_pPlus
 //	//------------------
-	f_MC_FileName = MC_SMEARED_DIR;
+	f_MC_FileName = GERDA_MC_PDFS;
 //	f_MC_FileName += "/Ra226chain_onPplusSurface_PhaseI.root";
 //	AddMCSingle("Ra226_pPlus","h_Ra226_onPplusSurface");
 //	AddMCSingle("Rn222_pPlus","h_Rn222_onPplusSurface");
@@ -470,7 +473,7 @@ int GPIIBackgroundAlpha::ReadMC()
 //	AddMCSingle( "Ra226_pPlus_dl900nm", "hist_dl900nm" );
 //	AddMCSingle( "Ra226_pPlus_dl1000nm", "hist_dl1000nm" );
 
-	f_MC_FileName = MC_SMEARED_DIR;
+	f_MC_FileName = GERDA_MC_PDFS;
 	f_MC_FileName += "/histograms_Rn222_onPplusSurface.root";
 
 //	AddMCSingle( "Rn222_pPlus_dl0nm", "hist_dl0nm" );
@@ -489,7 +492,7 @@ int GPIIBackgroundAlpha::ReadMC()
 //	//--------------------
 //	// Ra226chain_inLArBH
 //	//--------------------
-	f_MC_FileName = MC_SMEARED_DIR;
+	f_MC_FileName = GERDA_MC_PDFS;
 	f_MC_FileName += "/Ra226chain_inLArBH_PhaseI.root";
 //	AddMCSingle("Ra226_chain_inLArBH","h_Ra226chain_inLArBH");
 
