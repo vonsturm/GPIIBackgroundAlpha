@@ -84,16 +84,26 @@ void GPIIBackgroundAlpha::DefineParameters()
 {
 	int npars = f_j_parameters["parameters"].size();
 
+	if( f_verbosity > 0 ) cout << "Defining parameters" << endl;
+
 	for( int p = 0; p < npars; p++ )
 	{
 		string name = f_j_parameters["parameters"][p]["name"].asString();
 		double min = f_j_parameters["parameters"][p]["min"].asDouble();
 		double max = f_j_parameters["parameters"][p]["max"].asDouble();
+		int nbins = f_j_parameters["parameters"][p]["nbins"];
 
 		AddParameter( name.c_str(), min, max );
+		GetParameter( name.c_str() )->SetNBins( nbins );
+
+		if( f_verbosity > 0 )
+		{
+			cout << "\t" << name << ": " << "[" nbins << "|" << min << ":" << max << "]" << endl;
+		}
 	}
 }
 
+// ---------------------------------------------------------
 int GPIIBackgroundAlpha::InitializeHistograms( vector<string> detectorlist )
 {
 	string name = "hSum";

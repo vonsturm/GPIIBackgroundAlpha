@@ -145,7 +145,6 @@ int main( int argc, char* argv[] )
     m->DefineParameters();
 
 //    m->ReadMCAlpha();
-//    m->DefineParameters();
 
 /*
 
