@@ -8,6 +8,10 @@ alpha_timeDistribution.C
 
 files/
 ModelOutput/
+pdfs/
 
-runBEGE_backgrounds
 test_classes
+runGPIIBackgroundAlpha
+
+*_orig*
+
