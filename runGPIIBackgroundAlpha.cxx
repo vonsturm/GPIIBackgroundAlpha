@@ -109,7 +109,7 @@ int main( int argc, char* argv[] )
 
     // create new GPIIBackgroundAlpha object
     GPIIBackgroundAlpha * m = new GPIIBackgroundAlpha();
-//    m -> SetVerbosity(1);
+    m -> SetVerbosity(1);
 
     // create a new summary tool object
     BCSummaryTool * summary = new BCSummaryTool(m);
@@ -144,7 +144,9 @@ int main( int argc, char* argv[] )
     m->SetParConfigFile( parConfigFile );
     m->DefineParameters();
 
-//    m->ReadMCAlpha();
+    m->PrepareMCHistograms();
+
+//m->ReadMCAlpha();
 
 /*
 

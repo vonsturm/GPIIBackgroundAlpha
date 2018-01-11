@@ -91,14 +91,13 @@ void GPIIBackgroundAlpha::DefineParameters()
 		string name = f_j_parameters["parameters"][p]["name"].asString();
 		double min = f_j_parameters["parameters"][p]["min"].asDouble();
 		double max = f_j_parameters["parameters"][p]["max"].asDouble();
-		int nbins = f_j_parameters["parameters"][p]["nbins"];
+		int nbins = f_j_parameters["parameters"][p]["nbins"].asInt();
 
 		AddParameter( name.c_str(), min, max );
-		GetParameter( name.c_str() )->SetNBins( nbins );
-
+		GetParameter( name.c_str() )->SetNbins( nbins );
 		if( f_verbosity > 0 )
 		{
-			cout << "\t" << name << ": " << "[" nbins << "|" << min << ":" << max << "]" << endl;
+			cout << "\t" << name << ": " << "[" << nbins << "|" << min << ":" << max << "]" << endl;
 		}
 	}
 }
