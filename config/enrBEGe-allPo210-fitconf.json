@@ -1,4 +1,5 @@
 {
+	"fitoverflow" : true,
 	"parconf" : "allPo210-parconf.json",
 	"runconf" : "test-runlist.json",
 	"detconf" : "enrBEGe-detlist.json"

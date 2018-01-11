@@ -1,0 +1,8 @@
+{
+    "detectors" :
+    [
+		"ANG5", "RG1", "ANG3",
+		"ANG2", "ANG4", "RG2",
+        "ANG1"
+    ]
+}
