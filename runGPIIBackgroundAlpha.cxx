@@ -36,6 +36,8 @@ int main( int argc, char* argv[] )
     bool useDetectorList = false;
     string parConfigFile = "default_parconf.json";
 
+    string masterfileJSON = "default-masterconf.json";
+
     double hMin = 3500., hMax = 5300.;  // fit range in keV
     double hBinning = 30.;              // bin size in keV
 
@@ -52,6 +54,7 @@ int main( int argc, char* argv[] )
         { "min",        required_argument, 0,   'm' },
         { "max",        required_argument, 0,   'M' },
         { "parconfig",  required_argument, 0,   'C' },
+        { "master",     required_argument, 0,   'Z' }, // master json config file
         { 0, 0, 0, 0 }
     };
 

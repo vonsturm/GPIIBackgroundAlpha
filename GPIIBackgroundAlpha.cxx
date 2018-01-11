@@ -112,7 +112,7 @@ int GPIIBackgroundAlpha::InitializeDataHistograms( vector<string> detectorlist )
 
 	f_hdataSum = new TH1D( name.c_str(), name.c_str(), f_hnumbins, f_hemin, f_hemax);
 	f_hdataSum_fine = new TH1D( name_fine.c_str(), name_fine.c_str(), bins, f_hemin, f_hemax);
-	f_hdataSum_all = new TH1D( name_all.c_str(), name_all.c_str(), (int)f_hemax, f_hemin, f_hemax);
+	f_hdataSum_all = new TH1D( name_all.c_str(), name_all.c_str(), 7500, 0., 7500.);
 
 	for( auto det : detectorlist )
 	{
@@ -221,10 +221,7 @@ int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
 	return 0;
 }
 
-// Here goes a file list with keys
-// Of each run we need to load the proper data based on the detector status meta data
-// The meta data file contains also information about the detector type
-// Here use only enrBEGe detectors
+// FIX ME: Write histograms to files so they can be read faster
 // ---------------------------------------------------------
 int GPIIBackgroundAlpha::ReadRunData( string keylist, vector<string> detectorlist )
 {
@@ -403,7 +400,7 @@ int GPIIBackgroundAlpha::InitializeMCHistograms()
 
 			TH1D * hmc = new TH1D( name.c_str(), title.c_str(), f_hnumbins, f_hemin, f_hemax);
 			TH1D * hmc_fine = new TH1D( name_fine.c_str(), title.c_str(), bins, f_hemin, f_hemax);
-			TH1D * hmc_all = new TH1D( name_all.c_str(), title.c_str(), (int)f_hemax, f_hemin, f_hemax);
+			TH1D * hmc_all = new TH1D( name_all.c_str(), title.c_str(), 7500, 0., 7500.);
 
 			f_MC.push_back( hmc );
 			f_MC_fine.push_back( hmc_fine );
@@ -427,31 +424,37 @@ int GPIIBackgroundAlpha::ReadMC()
 		return -1;
 	}
 
-	
+	// loop over parameters
+	int index = 0;
+
+	int npars = GetNParameters();
+
+	for( int p = 0; p < npars; p++ )
+	{
+		int ncorr = f_j_parameters["parameters"][p]["mc"].size();
+
+		for( int c = 0; c < ncorr; c++ )
+		{
+			string histoname = f_j_parameters["parameters"][p]["mc"]["histoname"][c].asString();
+			string filename = GERDA_MC_PDFS; filename += "/";
+			filename += f_j_parameters["parameters"][p]["mc"]["filename"][c].asString();
+
+			ReadSingleMC( index, histoname, filename );
+
+			index++;
+		}
+	}
 
 	// Reading MC histograms with a binning of 1keV
 
 	//-------------
 	// Po210_pPlus
 	//-------------
-	f_MC_FileName = GERDA_MC_PDFS;
 	f_MC_FileName += "/histograms_Po210_onPplusSurface.root";
-//	AddMCSingle( "Po210_pPlus_dl0nm", "hist_dl0nm" );
-//	AddMCSingle( "Po210_pPlus_dl100nm", "hist_dl100nm" );
-//	AddMCSingle( "Po210_pPlus_dl200nm", "hist_dl200nm" );
-//	AddMCSingle( "Po210_pPlus_dl300nm", "hist_dl300nm" );
-//	AddMCSingle( "Po210_pPlus_dl400nm", "hist_dl400nm" );
-//	AddMCSingle( "Po210_pPlus_dl500nm", "hist_dl500nm" );
-	AddMCSingle( "Po210_pPlus_dl600nm", "hist_dl600nm" );
-//	AddMCSingle( "Po210_pPlus_dl700nm", "hist_dl700nm" );
-//	AddMCSingle( "Po210_pPlus_dl800nm", "hist_dl800nm" );
-//	AddMCSingle( "Po210_pPlus_dl900nm", "hist_dl900nm" );
-//	AddMCSingle( "Po210_pPlus_dl1000nm", "hist_dl1000nm" );
 
 //      //------------------
 //	// Ra226chain_pPlus
 //	//------------------
-	f_MC_FileName = GERDA_MC_PDFS;
 //	f_MC_FileName += "/Ra226chain_onPplusSurface_PhaseI.root";
 //	AddMCSingle("Ra226_pPlus","h_Ra226_onPplusSurface");
 //	AddMCSingle("Rn222_pPlus","h_Rn222_onPplusSurface");
@@ -554,28 +557,6 @@ int GPIIBackgroundAlpha::AddMC( string name )
 	cout << "---------------------------------------------" << endl;
 	cout << "Adding MC component " << name << endl;
 	cout << "---------------------------------------------" << endl;
-
-	TH1D* henergy = new TH1D(Form("h_%s",name.c_str()),
-			Form("%s",name.c_str()),
-			f_hnumbins, f_hemin, f_hemax);
-
-	int bins = int( f_hemax - f_hemin );
-
-	string namefine = name;
-	namefine.append("_fine");
-
-	TH1D* henergy_fine = new TH1D(Form("h_%s",namefine.c_str()),
-			Form("%s",namefine.c_str()),
-			bins, f_hemin, f_hemax);
-
-	int allbins = 7500;
-
-	string nameall = name;
-	nameall.append("_all");
-
-	TH1D* henergy_all = new TH1D(Form("h_%s",nameall.c_str()),
-			Form("%s",nameall.c_str()),
-			allbins, 0., 7500.);
 
 	// initialize the histogram arrays
 	for( int i = 1; i <= f_hnumbins; i++ )
