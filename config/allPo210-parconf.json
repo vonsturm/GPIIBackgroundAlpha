@@ -1,0 +1,148 @@
+{
+    "parameters" :
+    [
+        {
+            "name" : "par0_Po210_pPlus_0nm",
+            "min" : 0.0,
+            "max" : 100.0,
+            "binning" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl0nm",
+                    "filename" : "histos_Po210_pPlus.root"
+                }
+            ]
+        },
+        {
+            "name" : "par1_Po210_pPlus_100nm",
+            "min" : 0.0,
+            "max" : 100.0,
+            "binning" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl100nm",
+                    "filename" : "histos_Po210_pPlus.root"
+                }
+            ]
+        },
+        {
+            "name" : "par2_Po210_pPlus_200nm",
+            "min" : 0.0,
+            "max" : 100.0,
+            "binning" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl200nm" ,
+                    "filename" : "histos_Po210_pPlus.root"
+                }
+            ]
+        },
+        {
+            "name" : "par3_Po210_pPlus_300nm",
+            "min" : 0.0,
+            "max" : 100.0,
+            "binning" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl300nm",
+                    "filename" : "histos_Po210_pPlus.root"
+                }
+            ]
+        },
+        {
+            "name" : "par4_Po210_pPlus_400nm",
+            "min" : 0.0,
+            "max" : 100.0,
+            "binning" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl400nm",
+                    "filename" : "histos_Po210_pPlus.root"
+                }
+            ]
+        },
+        {
+            "name" : "par5_Po210_pPlus_500nm",
+            "min" : 0.0,
+            "max" : 100.0,
+            "binning" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl500nm",
+                    "filename" : "histos_Po210_pPlus.root"
+                }
+            ]
+        },
+        {
+            "name" : "par6_Po210_pPlus_600nm",
+            "min" : 0.0,
+            "max" : 100.0,
+            "binning" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl600nm",
+                    "filename" : "histos_Po210_pPlus.root"
+                }
+            ]
+        },
+        {
+            "name" : "par7_Po210_pPlus_700nm",
+            "min" : 0.0,
+            "max" : 100.0,
+            "binning" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl700nm",
+                    "filename" : "histos_Po210_pPlus.root"
+                }
+            ]
+        },
+        {
+            "name" : "par8_Po210_pPlus_800nm",
+            "min" : 0.0,
+            "max" : 100.0,
+            "binning" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl800nm",
+                    "filename" : "histos_Po210_pPlus.root"
+                }
+            ]
+        },
+        {
+            "name" : "par9_Po210_pPlus_900nm",
+            "min" : 0.0,
+            "max" : 100.0,
+            "binning" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl900nm",
+                    "filename" : "histos_Po210_pPlus.root"
+                }
+            ]
+        },
+        {
+            "name" : "par10_Po210_pPlus_1000nm",
+            "min" : 0.0,
+            "max" : 100.0,
+            "binning" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl1000nm",
+                    "filename" : "histos_Po210_pPlus.root"
+                }
+            ]
+        }
+    ]
+}
