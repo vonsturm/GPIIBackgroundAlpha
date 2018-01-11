@@ -108,7 +108,8 @@ int main( int argc, char* argv[] )
     BCLog::SetLogLevel(BCLog::detail);
 
     // create new GPIIBackgroundAlpha object
-    GPIIBackgroundAlpha* m = new GPIIBackgroundAlpha();
+    GPIIBackgroundAlpha * m = new GPIIBackgroundAlpha();
+//    m -> SetVerbosity(1);
 
     // create a new summary tool object
     BCSummaryTool * summary = new BCSummaryTool(m);
@@ -137,7 +138,7 @@ int main( int argc, char* argv[] )
     BCLog::OutSummary( Form( "Number of Bins: %i", hNbins ) );
 
     // read in the names of the files you want to use,
-    m->ReadData( runlist, data_set, detectorlist, useDetectorList, 1 );
+    m->ReadData( runlist, data_set, detectorlist, useDetectorList );
 
     // --- read in the MC histograms ---
     m->SetParConfigFile( parConfigFile );

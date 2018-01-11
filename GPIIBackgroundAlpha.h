@@ -23,6 +23,8 @@
 #include <BAT/BCDataSet.h>
 #include <BAT/BCDataPoint.h>
 
+// gerda ada
+#include "GETRunConfiguration.hh"
 
 // This is a GPIIBackgroundAlpha header file.
 // Model source code is located in file GPIIBackgroundAlpha/GPIIBackgroundAlpha.cxx
@@ -53,7 +55,7 @@ class GPIIBackgroundAlpha : public BCModel
 
       // Read Data
       int ReadData( std::string runlist, std::string data_set,
-          std::string detectorlistname, bool useDetectorList, int verbosity = 0 );
+          std::string detectorlistname, bool useDetectorList );
       int ReadRunData( std::string keylist, std::vector<std::string> detectorlist );
       int FillDataArray();
 
@@ -74,6 +76,12 @@ class GPIIBackgroundAlpha : public BCModel
       void DumpHistosAndInfo(std::vector<double> parameters, char* rootfilename);
 
       Json::Value GetJsonValueFromFile( std::string filename );
+
+      bool IsOn( GETRunConfiguration * RunConf, std::string det );
+      int GetChannel( GETRunConfiguration * RunConf, std::string det );
+
+      void SetVerbosity( int v ) { f_verbosity = v; return; };
+      int GetVerbosity() { return f_verbosity; };
 
  private:
 
@@ -105,6 +113,8 @@ class GPIIBackgroundAlpha : public BCModel
 
       std::vector<double> f_lowerlimits;
       std::vector<double> f_upperlimits;
+
+      int f_verbosity;
 
 };
 // ---------------------------------------------------------

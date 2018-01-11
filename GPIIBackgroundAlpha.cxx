@@ -82,13 +82,13 @@ GPIIBackgroundAlpha::~GPIIBackgroundAlpha()
 // ---------------------------------------------------------
 void GPIIBackgroundAlpha::DefineParameters()
 {
-	int npars = f_j_parameters.size();
+	int npars = f_j_parameters["parameters"].size();
 
 	for( int p = 0; p < npars; p++ )
 	{
-		string name = f_j_parameters[p]["name"].asString();
-		double min = f_j_parameters[p]["min"].asDouble();
-		double max = f_j_parameters[p]["max"].asDouble();
+		string name = f_j_parameters["parameters"][p]["name"].asString();
+		double min = f_j_parameters["parameters"][p]["min"].asDouble();
+		double max = f_j_parameters["parameters"][p]["max"].asDouble();
 
 		AddParameter( name.c_str(), min, max );
 	}
@@ -114,14 +114,14 @@ int GPIIBackgroundAlpha::InitializeHistograms( vector<string> detectorlist )
 		f_DetectorLiveTime[det] = 0.;
 	}
 
-	cout << "Histograms initialized" << endl;
+	if( f_verbosity > 0 ) cout << "Histograms initialized" << endl;
 
 	return 0;
 }
 
 // ---------------------------------------------------------
 int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
-	std::string detectorlistname, bool useDetectorList, int verbosity )
+	std::string detectorlistname, bool useDetectorList )
 {
 	// make list of detectors
 	vector<string> detlist;
@@ -130,11 +130,11 @@ int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
 	{
 		Json::Value j_detectorlist = GetJsonValueFromFile( detectorlistname );
 
-		f_ndets = j_detectorlist.size();
+		f_ndets = j_detectorlist["detectors"].size();
 
 		for( int d = 0; d < f_ndets; d++ )
 		{
-			string det = j_detectorlist[d].asString();
+			string det = j_detectorlist["detectors"][d].asString();
 			detlist.push_back( det );
 		}
 	}
@@ -171,7 +171,7 @@ int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
 	}
 
 	f_ndets = detlist.size();
-	if( verbosity > 0 ) cout << "Fitting data of " << f_ndets << "detectors" << endl;
+	if( f_verbosity > 0 ) cout << "Fitting data of " << f_ndets << "detectors" << endl;
 	InitializeHistograms( detlist );
 
 	// read analysis key lists of each run
@@ -180,7 +180,9 @@ int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
 
 	Json::Value j_runlist = GetJsonValueFromFile( runlist );
 
-	int nruns = j_runlist.size();
+	int nruns = j_runlist["runs"].size();
+
+	if( f_verbosity > 0 ) cout << "Reading run data: " << endl;
 
 	for( int r = 0; r < nruns; r++ )
 	{
@@ -190,18 +192,20 @@ int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
 		keylist += "/run"; keylist += Form( "%04d", run );
 		keylist += "-phy-analysis.txt";
 
-		if(verbosity > 0) cout << "\tkeylist" << endl;
+		if( f_verbosity > 0 ) cout << "\t" << keylist << endl;
 
 		ReadRunData( keylist, detlist );
 	}
 
-	if(verbosity > 0)
+	if( f_verbosity > 0 )
 	{
 		cout << "Detector LiveTimes: " << endl;
 
 		for( auto d : detlist )
 			cout << "\t" << d << ": " << f_DetectorLiveTime[d] << endl;
 	}
+
+	FillDataArray();
 
 	return 0;
 }
@@ -273,27 +277,33 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist, vector<string> detectorlis
 	chain -> SetBranchAddress("failedFlag_isSaturated",&failedFlag_isSaturated);
 
 	int nTP = 0;
+	double frequencyTP = 1./20.;
 
 	ProgressBar bar( nentries, '#', false );
 
 	// loop over all events
 	for (int e = 0; e < nentries; e++)
 	{
-		chain->GetEntry( e );
-
 		bar.Update();
 
-		if ( isTP ) { nTP++; continue; }
+		chain->GetEntry( e );
+
+		RunConf = RunConfManager -> GetRunConfiguration( timestamp );
+
+		if ( isTP )
+		{
+			nTP++;
+			for( auto d : detectorlist ){ if( IsOn( RunConf, d ) ) f_DetectorLiveTime[d] += 1./(frequencyTP*60.*60.*24.); }
+			continue;
+		}
 		if ( multiplicity > 1 ) continue;
 		if ( isVetoedInTime ) 	continue;
 
 		for( auto d : detectorlist )
 		{
-			RunConf = RunConfManager -> GetRunConfiguration( timestamp );
-			GEChannel * channel = RunConf -> GetChannel( d.c_str() );
-			int c = channel -> GetChannelNumber();
+			if( !IsOn( RunConf, d ) ) continue;
 
-			if( !RunConf -> IsOn( c ) ) continue;
+			int c = GetChannel( RunConf, d );
 
 			double en = energy->at(c);
 
@@ -310,18 +320,12 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist, vector<string> detectorlis
 		}
 	}
 
-	int frequencyTP = 20;
-	double runLiveTimeInDays = nTP * frequencyTP / 60. / 60. / 24.;
+	double runLiveTimeInDays = nTP /( frequencyTP * 60. * 60. * 24. );
 
 	// run live time in days
 	f_RunLiveTime.push_back( runLiveTimeInDays );
 
-	for( auto d : detectorlist )
-		f_DetectorLiveTime[d] += runLiveTimeInDays;
-
-	cout << "Run Livetime: " << runLiveTimeInDays << endl;
-
-	FillDataArray();
+	if( f_verbosity > 0 ) cout << "Run Livetime: " << runLiveTimeInDays << endl;
 
 	return 0;
 }
@@ -361,20 +365,12 @@ void GPIIBackgroundAlpha::SetParConfigFile( string name )
 
 	f_j_parameters = GetJsonValueFromFile( f_parConfigFile );
 
-	cout << f_j_parameters << endl;
-
 	return;
 };
 
 /*
 
-// This part is a bit tricky
-// Either we put the full MC files here (but they are kind of large)
-// Or we treat them beforehand by smearing and histograming
-// That could be difficult however based on the binning chosen for the data
-// it is possible to make errors with the MC spectra
-// Best is a treatment with only smearing but the full energy of the events is
-// kept and histogramed only here
+// Use the premade spc_ files from the gerda-mage-sim data structure
 // ---------------------------------------------------------
 int GPIIBackgroundAlpha::ReadMC()
 {
@@ -738,7 +734,7 @@ double GPIIBackgroundAlpha::LogLikelihood(const std::vector <double> & parameter
 
 	  for( int iMC = 0; iMC < nMC; iMC++)
 	  {
-		  int ncorrelations = f_j_parameters[iMC]["histonames"].size();
+		  int ncorrelations = f_j_parameters["parameters"][iMC]["histonames"].size();
 		  lambda += parameters[iMC] * f_vMC[ nHistosRead * f_hnumbins + ibin ];
 		  nHistosRead += ncorrelations;
 	  }
@@ -1050,7 +1046,28 @@ Json::Value GPIIBackgroundAlpha::GetJsonValueFromFile( string filename )
 
 	file.close();
 
-	cout << val;
+	if( f_verbosity > 0 ) cout << val << "\n";
 
 	return val;
+}
+
+// ---------------------------------------------------------
+bool GPIIBackgroundAlpha::IsOn( GETRunConfiguration * RunConf, string det )
+{
+	int c = GetChannel( RunConf, det );
+
+        if( RunConf -> IsOn( c ) )
+		return true;
+
+	return false;
+}
+
+
+// ---------------------------------------------------------
+int GPIIBackgroundAlpha::GetChannel( GETRunConfiguration * RunConf, string det )
+{
+	GEChannel * channel = RunConf -> GetChannel( det.c_str() );
+        int c = channel -> GetChannelNumber();
+
+	return c;
 }
