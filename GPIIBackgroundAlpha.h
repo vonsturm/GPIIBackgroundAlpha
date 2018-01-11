@@ -22,6 +22,7 @@
 #include <BAT/BCModel.h>
 #include <BAT/BCDataSet.h>
 #include <BAT/BCDataPoint.h>
+#include <BAT/BCLog.h>
 
 // gerda ada
 #include "GETRunConfiguration.hh"
@@ -37,86 +38,123 @@ class GPIIBackgroundAlpha : public BCModel
       // Constructors and destructor
       GPIIBackgroundAlpha();
       GPIIBackgroundAlpha(const char * name);
+      GPIIBackgroundAlpha(string masterconfname);
       ~GPIIBackgroundAlpha();
 
-      // Methods to overload, see file GPIIBackgroundAlpha.cxx
+      // Methods to overload
       void DefineParameters();
       double LogAPrioriProbability(const std::vector<double> &parameters);
       double LogLikelihood(const std::vector <double> & parameters);
+      double EstimatePValue();
 
       // Histograms
+      void SetHistogramParameters(double hBinning, double hMin, double hMax);
       void SetHistogramParameters(int hNbins, double hMin, double hMax)
       {
           f_hnumbins = hNbins;
           f_hemin = hMin;
           f_hemax = hMax;
-      }
-      int InitializeDataHistograms( std::vector<std::string> detectorlist );
+      };
 
       // Read Data
-      int ReadData( std::string runlist, std::string data_set,
-          std::string detectorlistname, bool useDetectorList );
+      int InitializeDataHistograms( std::vector<std::string> detectorlist );
+      int ReadData();
       int ReadRunData( std::string keylist, std::vector<std::string> detectorlist );
       int FillDataArray();
 
       // Read MC pdfs
-      void SetParConfigFile( std::string name );
-      std::string GetParConfigFile(){ return f_parConfigFile; };
-
       int InitializeMCHistograms();
       int ReadMC();
       int AddMC( std::string name );
       int AddMCSingle( std::string name, std::string histoname );
       int FillMCArrays();
 
+      //---- GETTERS AND SETTERS ----
+      void SetVerbosity( int v ) { f_verbosity = v; return; };
+      int GetVerbosity() { return f_verbosity; };
+      //
+      void SetPrecision( std::string precisionString );
+      //
+      void SetNdetectors( int n ){ return; };
+      int GetNdetectors(){ return f_ndets; };
+      //
       std::vector<std::string> GetMCParNames();
 
-      double getndets() {return f_ndets;};
-
-      double EstimatePValue();
-      void DumpHistosAndInfo(std::vector<double> parameters, char* rootfilename);
-
+      //---- NICE TO HAVE ----
       Json::Value GetJsonValueFromFile( std::string filename );
 
       bool IsOn( GETRunConfiguration * RunConf, std::string det );
       int GetChannel( GETRunConfiguration * RunConf, std::string det );
 
-      void SetVerbosity( int v ) { f_verbosity = v; return; };
-      int GetVerbosity() { return f_verbosity; };
+      // FIX ME
+      void DumpHistosAndInfo(std::vector<double> parameters, char* rootfilename);
 
  private:
 
-      int f_ndets;
-      int f_hnumbins;
-      double f_hemin;
-      double f_hemax;
+     //----- METHODS -----
 
-      std::string f_parConfigFile;
-      Json::Value f_j_parameters;
+     // Set json config file
+     void SetMasterConf( std::string masterconfname ); // wrapps all of them
+     void SetDetConf( std::string detconfname )
+     {
+         f_j_detconf = GetJsonValueFromFile( detconfname );
+         f_ndets = f_j_detconf.size();
+         return;
+     };
+     void SetRunConf( std::string runconfname )
+     {
+         f_j_runconf = GetJsonValueFromFile( runconfname );
+         f_nruns = f_j_runconf.size();
+         return;
+     };
+     void SetParConf( std::string parconfname )
+     {
+         f_j_parconf = GetJsonValueFromFile( parconfname );
+         f_npars = f_j_parconf.size();
+         return;
+     };
+     void SetEnvConf( std::string envconfname ){ f_j_envconf = GetJsonValueFromFile( envconfname ); return; };
 
-      std::vector<double> f_RunLiveTime;
-      std::map<std::string,double> f_DetectorLiveTime;
-      //std::vector<int> fDetectorDynamicRange;
+     void UnwrapMasterConf();
 
-      std::map<std::string,TH1D*> f_hdata;
-      TH1D* f_hdataSum;
-      TH1D* f_hdataSum_fine;
-      TH1D* f_hdataSum_all;
+     //----- PARAMETERS -----
 
-      std::string f_MC_FileName;
+     std::string f_masterconfname;
 
-      std::vector<TH1D*> f_MC;
-      std::vector<TH1D*> f_MC_fine;
-      std::vector<TH1D*> f_MC_all;
+     Json::Value f_j_masterconf;
+     Json::Value f_j_detconf;
+     Json::Value f_j_runconf;
+     Json::Value f_j_parconf;
+     Json::Value f_j_envconf;
 
-      std::vector<double> f_vdata;
-      std::vector<double> f_vMC;
+     int f_ndets;
+     int f_nruns;
+     int f_npars;
+     
+     int f_hnumbins;
+     double f_hemin;
+     double f_hemax;
 
-      std::vector<double> f_lowerlimits;
-      std::vector<double> f_upperlimits;
+     std::vector<double> f_RunLiveTime;
+     std::map<std::string,double> f_DetectorLiveTime;
+     //std::vector<int> fDetectorDynamicRange;
 
-      int f_verbosity;
+     std::map<std::string,TH1D*> f_hdata;
+     TH1D* f_hdataSum;
+     TH1D* f_hdataSum_fine;
+     TH1D* f_hdataSum_all;
 
+     std::vector<TH1D*> f_MC;
+     std::vector<TH1D*> f_MC_fine;
+     std::vector<TH1D*> f_MC_all;
+
+     std::vector<double> f_vdata;
+     std::vector<double> f_vMC;
+
+     std::vector<double> f_lowerlimits;
+     std::vector<double> f_upperlimits;
+
+     int f_verbosity;
 };
 // ---------------------------------------------------------
 

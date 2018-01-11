@@ -55,13 +55,21 @@ using namespace gada;
 // ---------------------------------------------------------
 GPIIBackgroundAlpha::GPIIBackgroundAlpha() : BCModel()
 {
-	f_ndets = 0;
+    f_verbosity = 0;
 };
 
 // ---------------------------------------------------------
 GPIIBackgroundAlpha::GPIIBackgroundAlpha(const char * name) : BCModel(name)
 {
-	f_ndets = 0;
+    f_verbosity = 0;
+};
+
+// ---------------------------------------------------------
+GPIIBackgroundAlpha::GPIIBackgroundAlpha(string masterconfname) : BCModel()
+{
+	SetMasterConf( masterconfname );
+    UwrapMasterConf();
+    DefineParameters();
 };
 
 // ---------------------------------------------------------
@@ -79,6 +87,63 @@ GPIIBackgroundAlpha::~GPIIBackgroundAlpha()
 	f_vMC.clear();
 };
 
+// ---------------------------------------------------------
+void GPIIBackgroundAlpha::SetMasterConf( string masterconfname )
+{
+	f_masterconfname = masterconfname;
+
+	f_j_masterconf  = GetJsonValueFromFile( f_masterconfname );
+	SetParConf( f_j_masterconf["parconf"].asString() );
+	SetDetConf( f_j_masterconf["detconf"].asString() );
+	SetRunConf( f_j_masterconf["runconf"].asString() );
+	SetEnvConf( f_j_masterconf["envconf"].asString() );
+
+	return;
+}
+
+// ---------------------------------------------------------
+void GPIIBackgroundAlpha::UnwrapMasterConf()
+{
+    SetVerbosity( f_j_masterconf["verbosity"].asBool() );
+    SetPrecision( f_j_masterconf["precision"].asString() );
+    SetHistogramParameters(
+        f_j_masterconf["histo"]["binning"],
+        f_j_masterconf["histo"]["min"],
+        f_j_masterconf["histo"]["max"]
+    );
+
+    return;
+}
+
+// ---------------------------------------------------------
+void GPIIBackgroundAlpha::SetPrecision( string precisionString )
+{
+    BCEngineMCMC::Precision precision;
+    if( precisionString == "kLow" ) precision = BCEngineMCMC::kLow;
+    else if( precisionString == "kMedium" ) precision = BCEngineMCMC::kMedium;
+    else if( precisionString == "kHigh" ) precision = BCEngineMCMC::kHigh;
+    else if( precisionString == "kVeryHigh" ) precision = BCEngineMCMC::kVeryHigh;
+
+    m->MCMCSetPrecision(precision);
+
+    return;
+}
+
+void GPIIBackgroundAlpha::SetHistogramParameters(double hBinning, double hMin, double hMax);
+{
+    int hNbins = (int) ( (hMax - hMin) / hBinning );
+    hMax = hMin + hNbins * hBinning;
+
+    m->SetHistogramParameters(hNbins, hMin, hMax);
+
+    BCLog::OutSummary( Form( "Fit Range: %.0f - %.0f keV", hMin, hMax) );
+    BCLog::OutSummary( Form( "Binning: %.0f keV", hBinning ) );
+    BCLog::OutSummary( Form( "Number of Bins: %i", hNbins ) );
+
+    return;
+}
+
+// FIX ME: Read also weight between the histograms e.g. Bi212, Tl208 branching ratio is ~0.36
 // ---------------------------------------------------------
 void GPIIBackgroundAlpha::DefineParameters()
 {
@@ -131,73 +196,29 @@ int GPIIBackgroundAlpha::InitializeDataHistograms( vector<string> detectorlist )
 }
 
 // ---------------------------------------------------------
-int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
-	std::string detectorlistname, bool useDetectorList )
+int GPIIBackgroundAlpha::ReadData()
 {
 	// make list of detectors
 	vector<string> detlist;
 
-	if( useDetectorList )
+	for( int d = 0; d < f_ndets; d++ )
 	{
-		Json::Value j_detectorlist = GetJsonValueFromFile( detectorlistname );
-
-		f_ndets = j_detectorlist["detectors"].size();
-
-		for( int d = 0; d < f_ndets; d++ )
-		{
-			string det = j_detectorlist["detectors"][d].asString();
-			detlist.push_back( det );
-		}
-	}
-	else
-	{
-		vector<string> alldetlist =
-		{
-			"GD91A", "GD35B", "GD02B", "GD00B", "GD61A", "GD89B", "GD02D", "GD91C",
-			"ANG5", "RG1", "ANG3",
-			"GD02A", "GD32B", "GD32A", "GD32C", "GD89C", "GD61C", "GD76B", "GD00C",
-			"GD35C", "GD76C", "GD89D", "GD00D", "GD79C", "GD35A", "GD91B", "GD61B",
-			"ANG2", "ANG4", "RG2",
-			"GD00A", "GD02C", "GD79B", "GD91D", "GD32D", "GD89A", "ANG1",
-			"GTF112", "GTF32", "GTF45_2"
-		};
-
-		if( data_set == "enrBEGe" )
-		{
-			for( auto d : alldetlist ){ if( d.find("GD") == 0 ) detlist.push_back(d); }
-		}
-		else if( data_set == "enrCoax" )
-		{
-			for( auto d : alldetlist ){ if( d.find("RG") == 0 || d.find("ANG") == 0 ) detlist.push_back(d); }
-		}
-		else if( data_set == "natCoax" )
-		{
-			for( auto d : alldetlist ) { if( d.find("GTF") == 0 ) detlist.push_back(d); }
-		}
-		else
-		{
-			cout << "Unknown data set " << data_set << endl;
-			exit(EXIT_FAILURE);
-		}
+		string det = f_j_detconf["detectors"][d].asString();
+		detlist.push_back( det );
 	}
 
-	f_ndets = detlist.size();
 	if( f_verbosity > 0 ) cout << "Fitting data of " << f_ndets << "detectors" << endl;
 	InitializeDataHistograms( detlist );
 
 	// read analysis key lists of each run
-	string GERDA_DATA_SETS = getenv( "GERDA_DATA_SETS" );
+	string GERDA_DATA_SETS = f_j_envconf["GERDA_DATA_SETS"].asString();
 	vector<string> keylist;
-
-	Json::Value j_runlist = GetJsonValueFromFile( runlist );
-
-	int nruns = j_runlist["runs"].size();
 
 	if( f_verbosity > 0 ) cout << "Reading run data: " << endl;
 
-	for( int r = 0; r < nruns; r++ )
+	for( int r = 0; r < f_nruns; r++ )
 	{
-		int run = j_runlist["runs"][r].asInt();
+		int run = f_j_runconf["runs"][r].asInt();
 
 		string keylist = GERDA_DATA_SETS;
 		keylist += "/run"; keylist += Form( "%04d", run );
@@ -225,8 +246,8 @@ int GPIIBackgroundAlpha::ReadData( std::string runlist, std::string data_set,
 // ---------------------------------------------------------
 int GPIIBackgroundAlpha::ReadRunData( string keylist, vector<string> detectorlist )
 {
-	string GERDA_PHASEII_DATA = getenv("GERDA_PHASEII_DATA");
-	string MU_CAL = getenv("MU_CAL");
+	string GERDA_PHASEII_DATA = f_j_envconf["GERDA_PHASEII_DATA"].asString();
+	string MU_CAL = f_j_envconf["MU_CAL"].asString();
 
 	if( GERDA_PHASEII_DATA.empty() )
 	{
@@ -364,24 +385,12 @@ int GPIIBackgroundAlpha::FillDataArray()
   return 0;
 }
 
-// Read MC configuration file
-// json file
-// ---------------------------------------------------------
-void GPIIBackgroundAlpha::SetParConfigFile( string name )
-{
-	f_parConfigFile = name;
-
-	f_j_parameters = GetJsonValueFromFile( f_parConfigFile );
-
-	return;
-}
 
 int GPIIBackgroundAlpha::InitializeMCHistograms()
 {
 	int nMChistos = 0;
-	int npars = f_j_parameters["parameters"].size();
 
-	for( int p = 0; p < npars; p++ )
+	for( int p = 0; p < f_npars; p++ )
 	{
 		string pname = f_j_parameters["parameters"][p]["name"].asString();
 		int ncorrelations = f_j_parameters["parameters"][p]["mc"].size();
@@ -416,7 +425,7 @@ int GPIIBackgroundAlpha::InitializeMCHistograms()
 // ---------------------------------------------------------
 int GPIIBackgroundAlpha::ReadMC()
 {
-	string GERDA_MC_PDFS = getenv("GERDA_MC_PDFS");
+	string GERDA_MC_PDFS = f_j_envconf["GERDA_MC_PDFS"].asString();
 
 	if( GERDA_MC_PDFS.empty() )
 	{
@@ -427,9 +436,7 @@ int GPIIBackgroundAlpha::ReadMC()
 	// loop over parameters
 	int index = 0;
 
-	int npars = GetNParameters();
-
-	for( int p = 0; p < npars; p++ )
+	for( int p = 0; p < f_npars; p++ )
 	{
 		int ncorr = f_j_parameters["parameters"][p]["mc"].size();
 
@@ -444,131 +451,31 @@ int GPIIBackgroundAlpha::ReadMC()
 			index++;
 		}
 	}
-
+/*
 	// Reading MC histograms with a binning of 1keV
-
 	//-------------
 	// Po210_pPlus
 	//-------------
 	f_MC_FileName += "/histograms_Po210_onPplusSurface.root";
-
-//      //------------------
-//	// Ra226chain_pPlus
-//	//------------------
-//	f_MC_FileName += "/Ra226chain_onPplusSurface_PhaseI.root";
+    f_MC_FileName += "/histograms_Ra226_onPplusSurface.root";
+    f_MC_FileName += "/histograms_Rn222_onPplusSurface.root";
+    f_MC_FileName += "/Ra226chain_inLArBH_PhaseI.root";
 //	AddMCSingle("Ra226_pPlus","h_Ra226_onPplusSurface");
 //	AddMCSingle("Rn222_pPlus","h_Rn222_onPplusSurface");
 //	AddMCSingle("Po214_pPlus","h_Po214_onPplusSurface");
 //	AddMCSingle("Po218_pPlus","h_Po218_onPplusSurface");
-
-	f_MC_FileName += "/histograms_Ra226_onPplusSurface.root";
-//	AddMCSingle("Ra226_chain_pPlus","h_Ra226chain_onPplusSurface");
-
-//	AddMCSingle( "Ra226_pPlus_dl0nm", "hist_dl0nm" );
-//	AddMCSingle( "Ra226_pPlus_dl100nm", "hist_dl100nm" );
-//	AddMCSingle( "Ra226_pPlus_dl200nm", "hist_dl200nm" );
-//	AddMCSingle( "Ra226_pPlus_dl300nm", "hist_dl300nm" );
-//	AddMCSingle( "Ra226_pPlus_dl400nm", "hist_dl400nm" );
-//	AddMCSingle( "Ra226_pPlus_dl500nm", "hist_dl500nm" );
-	AddMCSingle( "Ra226_pPlus_dl600nm", "hist_dl600nm" );
-//	AddMCSingle( "Ra226_pPlus_dl700nm", "hist_dl700nm" );
-//	AddMCSingle( "Ra226_pPlus_dl800nm", "hist_dl800nm" );
-//	AddMCSingle( "Ra226_pPlus_dl900nm", "hist_dl900nm" );
-//	AddMCSingle( "Ra226_pPlus_dl1000nm", "hist_dl1000nm" );
-
-	f_MC_FileName = GERDA_MC_PDFS;
-	f_MC_FileName += "/histograms_Rn222_onPplusSurface.root";
-
-//	AddMCSingle( "Rn222_pPlus_dl0nm", "hist_dl0nm" );
-//	AddMCSingle( "Rn222_pPlus_dl100nm", "hist_dl100nm" );
-//	AddMCSingle( "Rn222_pPlus_dl200nm", "hist_dl200nm" );
-//	AddMCSingle( "Rn222_pPlus_dl300nm", "hist_dl300nm" );
-//	AddMCSingle( "Rn222_pPlus_dl400nm", "hist_dl400nm" );
-//	AddMCSingle( "Rn222_pPlus_dl500nm", "hist_dl500nm" );
-	AddMCSingle( "Rn222_pPlus_dl600nm", "hist_dl600nm" );
-//	AddMCSingle( "Rn222_pPlus_dl700nm", "hist_dl700nm" );
-//	AddMCSingle( "Rn222_pPlus_dl800nm", "hist_dl800nm" );
-//	AddMCSingle( "Rn222_pPlus_dl900nm", "hist_dl900nm" );
-//	AddMCSingle( "Rn222_pPlus_dl1000nm", "hist_dl1000nm" );
-
-
-//	//--------------------
-//	// Ra226chain_inLArBH
-//	//--------------------
-	f_MC_FileName = GERDA_MC_PDFS;
-	f_MC_FileName += "/Ra226chain_inLArBH_PhaseI.root";
-//	AddMCSingle("Ra226_chain_inLArBH","h_Ra226chain_inLArBH");
-
-	AddMCSingle("Ra226_inLArBH","h_Ra226_inLArBH");
-//	AddMCSingle("Rn222_inLArBH","h_Rn222_inLArBH");
-//	AddMCSingle("Po214_inLArBH","h_Po214_inLArBH");
-//	AddMCSingle("Po218_inLArBH","h_Po218_inLArBH");
-
-
-//	//------------------
-//	// Ra226chain_pPlus
-//	//------------------
-//	// --- Ra226 ---
-//	f_MC_FileName = "";
-//	AddMC("Ra226_pPlus");
-//
-//	// --- Rn222 ---
-//	f_MC_FileName = "";
-//	AddMC("Rn222_pPlus");
-//
-//	// --- Po218 ---
-//	f_MC_FileName = "";
-//	AddMC("Po218_pPlus");
-//
-//	// --- Po214 ---
-//	f_MC_FileName = "";
-//	AddMC("Po214_pPlus");
-//
-//
-//	//--------------------
-//	// Ra226chain_inLArBH
-//	//--------------------
-//	// --- Ra226 ---
-//	f_MC_FileName = "";
-//	AddMC("Ra226_inLArBH");
-//
-//	// --- Rn222 ---
-//	f_MC_FileName = "";
-//	AddMC("Rn222_inLArBH");
-//
-//	// --- Po218 ---
-//	f_MC_FileName = "";
-//	AddMC("Po218_inLArBH");
-//
-//	// --- Po214 ---
-//	f_MC_FileName = "";
-//	AddMC("Po214_inLArBH");
-
-	// copy MC information in arrays to make program faster
+*/
 	FillMCArrays();
 
 	return 0;
 }
-
+/*
 // ---------------------------------------------------------
-
 int GPIIBackgroundAlpha::AddMC( string name )
 {
 	cout << "---------------------------------------------" << endl;
 	cout << "Adding MC component " << name << endl;
 	cout << "---------------------------------------------" << endl;
-
-	// initialize the histogram arrays
-	for( int i = 1; i <= f_hnumbins; i++ )
-		henergy->SetBinContent( i, 0 );
-	for( int i = 1; i <= bins; i++ )
-		henergy_fine->SetBinContent( i, 0 );
-	for( int i = 1; i <= allbins; i++ )
-		henergy_all->SetBinContent( i, 0 );
-
-	henergy->GetXaxis()->SetCanExtend( false );
-	henergy_fine->GetXaxis()->SetCanExtend( false );
-	henergy_all->GetXaxis()->SetCanExtend( false );
 
 	// loop over all channels
 	TFile * MCfile = new TFile( f_MC_FileName.c_str() );
@@ -616,10 +523,6 @@ int GPIIBackgroundAlpha::AddMC( string name )
 	MCfile->Close();
 
 	double scaling = henergy->Integral();
-
-	henergy->Scale( 1./scaling );
-	henergy_fine->Scale( 1./scaling );
-	henergy_all->Scale( 1./scaling );
 
 	f_MC.push_back( henergy );
 	f_MC_fine.push_back( henergy_fine );
@@ -718,6 +621,7 @@ int GPIIBackgroundAlpha::AddMCSingle( string name, string histoname )
 	return 0;
 }
 
+*/
 
 // ---------------------------------------------------------
 
@@ -737,30 +641,34 @@ int GPIIBackgroundAlpha::FillMCArrays()
   	return 0;
 }
 
-*/
 
+// FIX ME add weight of histograms to likelihood
 // ---------------------------------------------------------
-
 double GPIIBackgroundAlpha::LogLikelihood(const std::vector <double> & parameters)
 {
+    // This methods returns the logarithm of the conditional probability
+    // p(data|parameters). This is where you have to define your model.
+    //
+    // For this method to not be alpha specific we have to exclude the blinding region from the likelihood
 
-  // This methods returns the logarithm of the conditional probability
-  // p(data|parameters). This is where you have to define your model.
-  //
-  // For this method to not be alpha specific we have to exclude the blinding region from the likelihood
+    double logprob = 0.;
 
-  double logprob = 0.;
+    for( int ibin = 0; ibin < f_hnumbins; ibin++)
+    {
+        double lambda = 0.;
+        int nMC = f_MC.size();
+        int nHistosRead = 0;
 
-  for( int ibin = 0; ibin < f_hnumbins; ibin++)
-  {
-	  double lambda = 0.;
-	  int nMC = f_MC.size();
-	  int nHistosRead = 0;
+        for( int iMC = 0; iMC < nMC; iMC++)
+        {
+            int ncorrelations = f_j_parameters["parameters"][iMC]["mc"].size();
 
-	  for( int iMC = 0; iMC < nMC; iMC++)
-	  {
-		  int ncorrelations = f_j_parameters["parameters"][iMC]["histonames"].size();
-		  lambda += parameters[iMC] * f_vMC[ nHistosRead * f_hnumbins + ibin ];
+            for( int c = 0; c < ncorrelations, c++ )
+            {
+                double weight = f_j_parameters["parameters"][iMC]["mc"].get("weight",1.).asDouble();
+		        lambda += parameters[iMC] * weight * f_vMC[ (nHistosRead + c)* f_hnumbins + ibin ];
+            }
+
 		  nHistosRead += ncorrelations;
 	  }
 
@@ -793,6 +701,7 @@ double GPIIBackgroundAlpha::LogAPrioriProbability(const std::vector<double> &par
   return logprob;
 }
 
+//FIX ME
 // ---------------------------------------------------------
 double GPIIBackgroundAlpha::EstimatePValue()
 {

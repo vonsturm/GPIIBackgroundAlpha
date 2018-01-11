@@ -1,9 +1,6 @@
 {
-    "env" :
-    {
-		"GERDA_MC_PDFS" :         "/lfs/l2/gerda/Hades/Analysis/Users/sturm/BAT/GIIBackgroundAlpha/pdfs",
-		"GERDA_DATA_SETS" :       "/lfs/l3/gerda/Daq/data-phaseII/blind/v03.00/meta/data-sets/phy/",
-		"GERDA_PHASEII_DATA" :    "/lfs/l3/gerda/Daq/data-phaseII/blind/v03.00/gen",
-		"MU_CAL" :                "/lfs/l3/gerda/Daq/data-phaseII/blind/v03.00/meta/config/_aux/geruncfg"
-    }
+	"GERDA_MC_PDFS" :         "/lfs/l2/gerda/Hades/Analysis/Users/sturm/BAT/GIIBackgroundAlpha/pdfs",
+	"GERDA_DATA_SETS" :       "/lfs/l3/gerda/Daq/data-phaseII/blind/v03.00/meta/data-sets/phy/",
+	"GERDA_PHASEII_DATA" :    "/lfs/l3/gerda/Daq/data-phaseII/blind/v03.00/gen",
+	"MU_CAL" :                "/lfs/l3/gerda/Daq/data-phaseII/blind/v03.00/meta/config/_aux/geruncfg"
 }

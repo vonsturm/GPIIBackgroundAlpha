@@ -28,70 +28,28 @@ void UsageGPIIBackgroundAlpha();
 
 int main( int argc, char* argv[] )
 {
-    // arguments
-    string data_set = "enrBEGe";
-    string precisionString = "kLow";
-    string runlist = "default_runlist.json";
-    string detectorlist = "default_detlist.json";
-    bool useDetectorList = false;
-    string parConfigFile = "default_parconf.json";
-
-    string masterfileJSON = "default-masterconf.json";
-
-    double hMin = 3500., hMax = 5300.;  // fit range in keV
-    double hBinning = 30.;              // bin size in keV
+    string masterfileJSON = "./config/default-masterconf.json";
 
     int choice = 0;
 
     static struct option long_options[] =
     {
-        { "runlist",    required_argument, 0,   'R' },
         { "help",       no_argument,       0,   'h' },
-        { "detectors",  required_argument, 0,   'D' },
-        { "precision",  required_argument, 0,   'P' },
-        { "dataset",    required_argument, 0,   'S'},
-        { "binning",    required_argument, 0,   'B' },
-        { "min",        required_argument, 0,   'm' },
-        { "max",        required_argument, 0,   'M' },
-        { "parconfig",  required_argument, 0,   'C' },
         { "master",     required_argument, 0,   'Z' }, // master json config file
         { 0, 0, 0, 0 }
     };
 
     int option_index = 0;
 
-    while( (choice = getopt_long(argc, argv, "hR:D:P:S:B:m:M:C:", long_options, &option_index)) != -1 )
+    while( (choice = getopt_long(argc, argv, "hZ:", long_options, &option_index)) != -1 )
     {
         switch (choice)
         {
             case 'h':
                 UsageGPIIBackgroundAlpha();
                 return 0;
-            case 'R':
-                runlist = optarg;
-                break;
-            case 'D':
-                detectorlist = optarg;
-                useDetectorList = true;
-                break;
-            case 'P':
-                precisionString = optarg;
-                break;
-            case 'S':
-                data_set = optarg;
-                useDetectorList = false;
-                break;
-            case 'B':
-                hBinning = atof( optarg );
-                break;
-            case 'm':
-                hMin = atof( optarg );
-                break;
-            case 'M':
-                hMax = atof( optarg );
-                break;
-            case 'C':
-                parConfigFile = optarg;
+            case 'Z':
+                masterfileJSON = optarg;
                 break;
             default:
                 cout << "Unknown option: -" << choice << endl;
@@ -111,43 +69,16 @@ int main( int argc, char* argv[] )
     BCLog::SetLogLevel(BCLog::detail);
 
     // create new GPIIBackgroundAlpha object
-    GPIIBackgroundAlpha * m = new GPIIBackgroundAlpha();
-    m -> SetVerbosity(1);
+    GPIIBackgroundAlpha * m = new GPIIBackgroundAlpha( masterfileJSON );
 
     // create a new summary tool object
     BCSummaryTool * summary = new BCSummaryTool(m);
 
     BCLog::OutSummary("Model created");
 
-    // Set the precision for the fit
-    BCEngineMCMC::Precision precision;
-    if( precisionString == "kLow" ) precision = BCEngineMCMC::kLow;
-    else if( precisionString == "kMedium" ) precision = BCEngineMCMC::kMedium;
-    else if( precisionString == "kHigh" ) precision = BCEngineMCMC::kHigh;
-    else if( precisionString == "kVeryHigh" ) precision = BCEngineMCMC::kVeryHigh;
-    m->MCMCSetPrecision(precision);
-
-    BCLog::OutSummary( Form( "Precision: %s ", precisionString.c_str() ) );
-
-    // Set the histograms for the data spectra
-    // If hMax does not fit the bin width then lower hMax accordingly
-    int hNbins = (int) ( (hMax - hMin) / hBinning );
-    hMax = hMin + hNbins * hBinning;
-
-    m->SetHistogramParameters(hNbins, hMin, hMax);
-
-    BCLog::OutSummary( Form( "Fit Range: %.0f - %.0f keV", hMin, hMax) );
-    BCLog::OutSummary( Form( "Binning: %.0f keV", hBinning ) );
-    BCLog::OutSummary( Form( "Number of Bins: %i", hNbins ) );
-
     // read in the names of the files you want to use,
-    m->ReadData( runlist, data_set, detectorlist, useDetectorList );
-
-    // --- read in the MC histograms ---
-    m->SetParConfigFile( parConfigFile );
-    m->DefineParameters();
-
-    m->InitializeMCHistograms();
+    m->ReadData();
+//    m->InitializeMCHistograms();
 
     //m->ReadMCAlpha();
 
@@ -269,16 +200,9 @@ int main( int argc, char* argv[] )
 
 void UsageGPIIBackgroundAlpha()
 {
-    cout << "Usage: runGPIIBackgroundAlpha" << endl;
-    cout << "\tOptions" << endl;
-    cout << "\t\t-h : this help menu" << endl;
-    cout << "\t\t-R : run selection from file" << endl;
-    cout << "\t\t-D : detector selection from file" << endl;
-    cout << "\t\t-P : precision [kLow(default)|kMedium|kHigh|kVeryHigh]" << endl;
-    cout << "\t\t-S : dataset [enrBEGe(default)|enrCoax|natCoax]" << endl;
-    cout << "\t\t-B : binning in keV" << endl;
-    cout << "\t\t-m : lower histogram limit in keV" << endl;
-    cout << "\t\t-M : upper histogram limit in keV" << endl;
-    cout << "\t\t-F : pdf selection to fit [Po210]" << endl;
+    cout << "Usage: runGPIIBackgroundAlpha -Z masterconf.json" << endl;
+    cout << "\Options" << endl;
+    cout << "\t\t-h : print this help menu" << endl;
+    cout << "\t\t-Z : set master json config file (./config/default-masterconf.json)" << endl;
     return;
 }
