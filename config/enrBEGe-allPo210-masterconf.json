@@ -12,5 +12,5 @@
 	"parconf" : "./config/allPo210-parconf.json",
 	"runconf" : "./config/test-runlist.json",
 	"detconf" : "./config/enrBEGe-detlist.json",
-	"envconf" : "./config/mpik-env.json",
+	"envconf" : "./config/mpik-env.json"
 }
