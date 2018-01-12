@@ -678,7 +678,6 @@ double GPIIBackgroundAlpha::LogLikelihood(const std::vector <double> & parameter
 
             for( int c = 0; c < ncorrelations; c++ )
             {
-                cout << "test" << endl;
                 double weight = f_j_parconf["parameters"][p]["mc"][c].get("weight",1.0).asDouble();
 		        lambda += parameters[p-nParametersSkipped] * weight * f_vMC[ (nHistosRead + c)* f_hnumbins + ibin ];
             }
