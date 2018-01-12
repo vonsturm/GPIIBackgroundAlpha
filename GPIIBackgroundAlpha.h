@@ -57,8 +57,11 @@ class GPIIBackgroundAlpha : public BCModel
       };
 
       // Read Data
-      int InitializeDataHistograms( std::vector<std::string> detectorlist );
-      int ReadData();
+      int InitializeDataHistograms();
+      int ReadData(); //WRAPPER
+      int ReadDataFromHistogram( std::string infilename );
+      int ReadDataFromEvents( std::string outfilename );
+      int WriteDataToFileForFastAccess( std::string outfilename );
       int ReadRunData( std::string keylist, std::vector<std::string> detectorlist );
       int FillDataArray();
 

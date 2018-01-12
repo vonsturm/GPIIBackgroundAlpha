@@ -166,7 +166,7 @@ void GPIIBackgroundAlpha::DefineParameters()
 }
 
 // ---------------------------------------------------------
-int GPIIBackgroundAlpha::InitializeDataHistograms( vector<string> detectorlist )
+int GPIIBackgroundAlpha::InitializeDataHistograms()
 {
 	string name = "hSum";
 	string name_fine = name; name_fine += "_fine";
@@ -177,12 +177,13 @@ int GPIIBackgroundAlpha::InitializeDataHistograms( vector<string> detectorlist )
 	f_hdataSum_fine = new TH1D( name_fine.c_str(), name_fine.c_str(), bins, f_hemin, f_hemax);
 	f_hdataSum_all = new TH1D( name_all.c_str(), name_all.c_str(), 7500, 0., 7500.);
 
-	for( auto det : detectorlist )
+	for( int d = 0; d < f_ndets; d++ )
 	{
+        string det = f_j_detconf["detectors"][d].asString();
+
 		string name_single = Form( "hSingle_%s", det.c_str() );
 
-		TH1D * henergy = new TH1D( name_single.c_str(), name_single.c_str(),
-			f_hnumbins, f_hemin, f_hemax);
+		TH1D * henergy = new TH1D( name_single.c_str(), name_single.c_str(), 7500, 0., 7500.);
 
 		f_hdata[det] = henergy;
 		f_DetectorLiveTime[det] = 0.;
@@ -193,20 +194,43 @@ int GPIIBackgroundAlpha::InitializeDataHistograms( vector<string> detectorlist )
 	return 0;
 }
 
+// WRAPPER
 // ---------------------------------------------------------
 int GPIIBackgroundAlpha::ReadData()
 {
-	// make list of detectors
-	vector<string> detlist;
+    InitializeDataHistograms();
 
-	for( int d = 0; d < f_ndets; d++ )
-	{
-		string det = f_j_detconf["detectors"][d].asString();
-		detlist.push_back( det );
-	}
+    int stat;
 
-	if( f_verbosity > 0 ) cout << "Fitting data of " << f_ndets << "detectors" << endl;
-	InitializeDataHistograms( detlist );
+    string filename = f_j_masterconf["reprocess-data"]["filename"].asString();
+
+    if( f_j_masterconf["reprocess-data"]["force"].asBool() )
+        stat = ReadDataFromEvents( filename );
+    else
+        stat = ReadDataFromHistogram( filename );
+
+    return stat;
+}
+
+// ---------------------------------------------------------
+int GPIIBackgroundAlpha::ReadDataFromHistogram( string infilename )
+{
+    // read * detector live times (from json file)
+    //      * run livetimes (from json file),
+    //      * histogram from file (from root file) with binning possibly changed
+
+    cout << "IMPLEMENT ME" << endl;
+    exit(EXIT_SUCCESS);
+
+    return 0;
+}
+
+// ---------------------------------------------------------
+int GPIIBackgroundAlpha::ReadDataFromEvents( string outfilename )
+{
+    // write * detector live times (to json file)
+    //       * run livetimes (to json file),
+    //       * histograms from file (to root file)
 
 	// read analysis key lists of each run
 	string GERDA_DATA_SETS = f_j_envconf["GERDA_DATA_SETS"].asString();
@@ -235,12 +259,73 @@ int GPIIBackgroundAlpha::ReadData()
 			cout << "\t" << d << ": " << f_DetectorLiveTime[d] << endl;
 	}
 
+    WriteDataToFileForFastAccess( outfilename );
+
 	FillDataArray();
 
 	return 0;
 }
 
-// FIX ME: Write histograms to files so they can be read faster
+// ---------------------------------------------------------
+int GPIIBackgroundAlpha::WriteDataToFileForFastAccess( string outfilename );
+{
+    TFile * outfile( outfilename.c_str(), "RECREATE" );
+
+    for( int d = 0; d < f_ndets; d++ )
+    {
+        string det = f_j_detconf["detectors"][d].asString();
+        f_hdata[det]->Write();
+    }
+
+    f_hdataSum->Write();
+    f_hdataSum_fine->Write();
+    f_hdataSum_all->Write();
+
+    outfile->Close();
+
+    // Write to run livetimes to json files
+    Json::Value j_RunLiveTime;
+
+    for( int r = 0; r < f_nruns; r++ )
+    {
+        int run = f_j_runconf["runs"][r].asInt();
+
+        j_RunLiveTime[ itoa(run) ] = f_RunLiveTime[r];
+    }
+
+    string runconfname = f_j_masterconf["runconf"].asString()
+    string runLTconfname = runconfname.substr( 0, runconfname.find_last_of('.') );
+    runLTconfname += "-livetimes.json"
+
+    ofstream runLTconf( runLTconfname );
+
+    runLTconf << j_RunLiveTime;
+
+    runLTconf.close();
+
+    // Write to detector livetimes to json files
+    Json::Value j_DetectorLiveTime;
+
+    for( int d = 0; d < f_ndets; d++ )
+    {
+        string det = f_j_detconf["detectors"][d].asString();
+
+        j_DetectorLiveTime[ det ] = f_DetectorLiveTime[det];
+    }
+
+    string detconfname = f_j_masterconf["detconf"].asString()
+    string detLTconfname = detconfname.substr( 0, detconfname.find_last_of('.') );
+    detLTconfname += "-livetimes.json"
+
+    ofstream detLTconf( detLTconfname );
+
+    detLTconf << j_DetectorLiveTime;
+
+    detLTconf.close();
+
+    return 0;
+}
+
 // ---------------------------------------------------------
 int GPIIBackgroundAlpha::ReadRunData( string keylist, vector<string> detectorlist )
 {
