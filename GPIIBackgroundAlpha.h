@@ -42,8 +42,8 @@ class GPIIBackgroundAlpha : public BCModel
       ~GPIIBackgroundAlpha();
 
       // Methods to overload
-      void DefineParameters();
-      double LogAPrioriProbability(const std::vector<double> &parameters);
+      void DefineParameters(); // Priors are defined here
+//      double LogAPrioriProbability(const std::vector<double> &parameters); // ONLY NEEDED IF PRIORS ARE MORE COMPLICATED
       double LogLikelihood(const std::vector <double> & parameters);
       double EstimatePValue();
 
