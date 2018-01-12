@@ -1022,7 +1022,6 @@ string GPIIBackgroundAlpha::GetOutputDirectory()
 
     string precision = f_j_masterconf["precision"].asString();
 
-
     string OUTDIR = f_j_masterconf["output-directory"].asString();
     OUTDIR += "/";
     OUTDIR += dir_parconf;
@@ -1040,8 +1039,47 @@ string GPIIBackgroundAlpha::GetOutputDirectory()
 // ---------------------------------------------------------
 std::string GetOutputFilenameBase()
 {
-    cout << "IMPLEMENT ME" << endl;
-    exit(EXIT_SUCCESS);
+    string parconf = f_j_masterconf["parconf"].asString();
+    int from = parconf.find_last_of('/')+1;
+    int length = parconf.find_last_of("-parconf.json") - from;
+    string dir_parconf = parconf.substr( from, length );
 
-    return "NA";
+    string detconf = f_j_masterconf["detconf"].asString();
+    int from = detconf.find_last_of('/')+1;
+    int length = detconf.find_last_of("-detconf.json") - from;
+    string dir_detconf = detconf.substr( from, length );
+
+    string runconf = f_j_masterconf["runconf"].asString();
+    int from = runconf.find_last_of('/')+1;
+    int length = runconf.find_last_of("-runconf.json") - from;
+    string dir_runconf = runconf.substr( from, length );
+
+    string precision = f_j_masterconf["precision"].asString();
+
+    double binning = f_j_masterconf["histo"]["binning"].asDouble();
+
+    bool fitoverflow = f_j_masterconf["fitoverflow"].asBool();
+    string s_fitoverflow = "overflowbin";
+
+    if( fitoverflow )   s_fitoverflow = "yof";
+    else                s_fitoverflow = "nof";
+
+    string filename_base = "BATOutput_";
+    filename_base += dir_parconf;
+    filename_base += "_";
+    filename_base += dir_detconf;
+    filename_base += "_";
+    filename_base += dir_runconf;
+    filename_base += "_";
+    filename_base += precision
+    filename_base += "_";
+    filename_base += to_string( (int)binning );
+    filename_base += "_";
+    filename_base += to_string( (int)f_hemin );
+    filename_base += "_";
+    filename_base += to_string( (int)f_hemax );
+    filename_base += "_";
+    filename_base += s_fitoverflow
+
+    return filename_base;
 }

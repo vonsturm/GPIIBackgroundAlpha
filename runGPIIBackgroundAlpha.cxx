@@ -83,24 +83,24 @@ int main( int argc, char* argv[] )
     m->ReadMC();
 
     string OUTPUT_DIR = m->GetOutputDirectory();
-    string OUT_FILE_BASE = m->GetOutputFilenameBase();
+    string OUT_FILE_BASE = OUTPUT_DIR; OUT_FILE_BASE += "/"; OUT_FILE_BASE += m->GetOutputFilenameBase();
 
     // create directory if it does not exist
     string cmd = "mkdir -p "; cmd += OUTPUT_DIR;
     system( cmd );
 
-    string mout_filename = OUTPUT_DIR; mout_filename += "/"; mout_filename += OUT_FILE_BASE; mout_filename += "model.root"
-
+    string mout_filename = OUT_FILE_BASE; mout_filename += "_model.root";
     BCModelOutput* mout = new BCModelOutput( m, mout_filename.c_str() );
 
     // write MCMC chain if requested
     mout->WriteMarkovChain( m->GetWriteMCMCChain() );
 
     // normalize distributions
+    m->SetIntegrationMethod(BCIntegrate::kIntDefault);
     m->Normalize();
 
     // Marginalize all
-    m->MarginalizeAll();
+    m->MarginalizeAll(BCIntegrate::kMargMetropolis);
 
     // find mode using Minuit using MCMC mode as starting point
     m->FindMode( m->GetBestFitParameters() );
@@ -109,85 +109,45 @@ int main( int argc, char* argv[] )
     // write results
     // ----------------------------------
 
-//    string
-/*
+    // output summary
+    BCSummaryTool * summary = new BCSummaryTool(m);
 
-  // draw all marginalized distributions into a PostScript file
-  m->PrintAllMarginalized( Form( "%s/BEGE_alphas_plots.ps", OUTPUT_DIR.c_str() ) );
+    string updatefilename = OUT_FILE_BASE; updatefilename += "_update.pdf";
+	summary -> PrintKnowledgeUpdatePlots( updatefilename.c_str() );
 
-  // print all summary plots
-//   summary->PrintParameterPlot(Form("/raid4/gerda/hemmer/BAT_GPIIBackgroundAlpha_results_M1/%s/%dkeVBins/GPIIBackgroundAlpha_parameters.eps",precisionString.c_str(),(int)binwidth));
-//   summary->PrintCorrelationPlot(Form("/raid4/gerda/hemmer/BAT_GPIIBackgroundAlpha_results_M1/%s/%dkeVBins/GPIIBackgroundAlpha_correlation.eps",precisionString.c_str(),(int)binwidth));
-//   summary->PrintKnowledgeUpdatePlots(Form("/raid4/gerda/hemmer/BAT_GPIIBackgroundAlpha_results_M1/%s/%dkeVBins/GPIIBackgroundAlpha_update.ps",precisionString.c_str(),(int)binwidth));
-  // print results of the analysis into a text file
-  m->PrintResults( Form( "%s/BEGE_alphas_results.txt", OUTPUT_DIR.c_str() ) );
+    string paramfilename = OUT_FILE_BASE; paramfilename += "_param.pdf";
+	summary -> PrintParameterPlot( paramfilename.c_str() );
 
+    string corrfilename = OUT_FILE_BASE; corrfilename += "_correlations.pdf";
+	summary -> PrintCorrelationPlot( corrfilename.c_str() );
 
-  // calculate p-value
-  double pvalue = m->EstimatePValue();
-  BCLog::OutSummary(Form(" --> p-value : %.6g", pvalue));
+    string corrmatrixfilename = OUT_FILE_BASE; corrmatrixfilename += "_corrmatrix.pdf";
+	summary -> PrintCorrelationMatrix( corrmatrixfilename.c_str() );
 
-  // -----------------------------------------------
-  // write out user defined plots, information, ...
-  // -----------------------------------------------
+//    string marg_filename = OUT_FILE_BASE; marg_filename += "_plots.pdf";
+//    m->PrintAllMarginalized( marg_filename.c_str() );
 
-  cout << "------------------------------------------------------------" << endl;
-  cout << "************************************************************" << endl;
-  cout << "------------------------------------------------------------" << endl;
+    string resu_filename = OUT_FILE_BASE; marg_filename += "_results.txt";
+    m->PrintResults( resu_filename.c_str() );
 
-  for( int i = 0; i < (int)nPars; i++ )
-  {
-      vector<string> MCnames = m->GetMCParNames();
+//    m->DumpHistosAndInfo( m->GetBestFitParameters() );
 
-      //Get the parameters of interest
-      BCH1D* output = m->GetMarginalized(Form("par_%d_%s",i,MCnames.at(i).c_str() ));
+    // Caluculate p-Value
+//    double pvalue = m->EstimatePValue();
+//    BCLog::OutSummary( Form(" --> p-value : %.6g", pvalue) );
 
-      double mode = output->GetMode();
-      double xmin = 0., xmax = 0.;
-      output->GetSmallestInterval(xmin, xmax);
+    BCLog::OutSummary("Program ran successfully");
+    BCLog::OutSummary("Exiting");
 
-      double quantile = output->GetQuantile(0.90);
+    delete m;
+    delete summary;
+    delete mout;
 
-      cout << "Parameter " << i << " " << MCnames.at(i) << ":" << endl;
-      cout << "Mode: " << mode << " + " << xmax-mode << " - " << mode-xmin << endl;
-      cout << "Interval: (" << xmin << " - " << xmax << ")" << endl;
-      cout << "90% quantile: " << quantile << endl;
-    }
+    // close log file
+    BCLog::CloseLog();
 
-
-  cout << "------------------------------------------------------------" << endl;
-  cout << "************************************************************" << endl;
-  cout << "------------------------------------------------------------" << endl;
-
-
-//   //write additional info in the output file
-//   mout->GetFile()->cd();
-
-//   //Get the parameter of interest
-//   output = m->GetMarginalized("halflife_2nbb");
-//   output->GetHistogram()->Write("histo_halflife_2nbb");
-
-  // close output file
-  mout->Close();
-
-  // dump event information and plots for best fit parameters
-  char* rootOutput = Form( "%s/BEGE_alphas_histograms.root", OUTPUT_DIR.c_str() );
-  m->DumpHistosAndInfo(m->GetBestFitParameters(), rootOutput);
-
-  delete m;
-  delete summary;
-  delete mout;
-
-  BCLog::OutSummary("Program ran successfully");
-  BCLog::OutSummary("Exiting");
-
-  // close log file
-  BCLog::CloseLog();
-*/
-  return 0;
-
+    return 0;
 }
-
 
 
 void UsageGPIIBackgroundAlpha()

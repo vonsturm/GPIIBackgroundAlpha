@@ -7,9 +7,10 @@
 	"histo" : { "min" : 3500.0, "max" : 5300.0, "binning" : 30.0 },
     "MCMC-fill-histograms" : true,
     "MCMC-write-chain" : true,
+    "ROI" : { "from" : 2014.0, "to" : 2064.0 },
 	"precision" : "kLow",
 	"parconf" : "./config/allPo210-parconf.json",
 	"runconf" : "./config/test-runlist.json",
 	"detconf" : "./config/enrBEGe-detlist.json",
-	"envconf" : "./config/mpik-env.json"
+	"envconf" : "./config/mpik-env.json",
 }
