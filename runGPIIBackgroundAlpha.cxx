@@ -82,42 +82,35 @@ int main( int argc, char* argv[] )
     // initialize MC histograms and read MC pdfs
     m->ReadMC();
 
-//disable histos for nuisance parameters
-//   size_t nPars = m->GetNParameters();
-//   for (size_t i=0;i<nPars;i++)
-//   m->MCMCSetFlagFillHistograms(i,false);
+    string OUTPUT_DIR = m->GetOutputDirectory();
+    string OUT_FILE_BASE = m->GetOutputFilenameBase();
 
+    // create directory if it does not exist
+    string cmd = "mkdir -p "; cmd += OUTPUT_DIR;
+    system( cmd );
+
+    string mout_filename = OUTPUT_DIR; mout_filename += "/"; mout_filename += OUT_FILE_BASE; mout_filename += "model.root"
+
+    BCModelOutput* mout = new BCModelOutput( m, mout_filename.c_str() );
+
+    // write MCMC chain if requested
+    mout->WriteMarkovChain( m->GetWriteMCMCChain() );
+
+    // normalize distributions
+    m->Normalize();
+
+    // Marginalize all
+    m->MarginalizeAll();
+
+    // find mode using Minuit using MCMC mode as starting point
+    m->FindMode( m->GetBestFitParameters() );
+
+    // ----------------------------------
+    // write results
+    // ----------------------------------
+
+//    string
 /*
-  // create new output object
-  string OUTPUT_DIR = "/opt/exp_software/gerda/gerda_gpfs/vonsturm/BAT/BEGE_alphas/ModelOutput/";
-  OUTPUT_DIR += precisionString;
-
-  BCModelOutput* mout = new BCModelOutput( m, Form( "%s/BEGE_alphas_model.root", OUTPUT_DIR.c_str() ) );
-
-  // switch writing of Markov Chains on
-  mout->WriteMarkovChain(true);
-
-  // normalize the posterior, i.e. integrate posterior
-  // over the full parameter space
-  m->Normalize();
-
-  // run MCMC and marginalize posterior wrt. all parameters
-  // and all combinations of two parameters
-
-  m->MarginalizeAll();
-
-  // run mode finding; by default using Minuit
-  //   m->FindMode();
-
-  // if MCMC was run before (MarginalizeAll()) it is
-  // possible to use the mode found by MCMC as
-  // starting point of Minuit minimization
-
-  m->FindMode( m->GetBestFitParameters() );
-
-  // ----------------------------------
-  // write out all results, plots, ...
-  // ----------------------------------
 
   // draw all marginalized distributions into a PostScript file
   m->PrintAllMarginalized( Form( "%s/BEGE_alphas_plots.ps", OUTPUT_DIR.c_str() ) );

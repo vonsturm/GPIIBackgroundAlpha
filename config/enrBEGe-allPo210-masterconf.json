@@ -1,10 +1,12 @@
 {
 	"verbosity" : 1,
 	"reprocess-data" : { "force" : true, "filename" : "./data/enrBEGe-data.root" },
+    "output-directory" : "./results",
 	"fitoverflow" : true,
 	"skipblinded" : { "do" : false, "from" : 2000.0, "to" : 2150.0 },
 	"histo" : { "min" : 3500.0, "max" : 5300.0, "binning" : 30.0 },
     "MCMC-fill-histograms" : true,
+    "MCMC-write-chain" : true,
 	"precision" : "kLow",
 	"parconf" : "./config/allPo210-parconf.json",
 	"runconf" : "./config/test-runlist.json",

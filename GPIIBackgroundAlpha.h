@@ -88,6 +88,12 @@ class GPIIBackgroundAlpha : public BCModel
       bool IsOn( GETRunConfiguration * RunConf, std::string det );
       int GetChannel( GETRunConfiguration * RunConf, std::string det );
 
+      // Output directory and filename
+      std::string GetOutputDirectory();
+      std::string GetOutputFilenameBase();
+
+      bool GetWriteMCMCChain(){ return f_j_masterconf["MCMC-write-chain"].asBool(); };
+
       // FIX ME
       void DumpHistosAndInfo(std::vector<double> parameters, char* rootfilename);
 

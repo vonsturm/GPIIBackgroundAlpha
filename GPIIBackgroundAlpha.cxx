@@ -999,3 +999,49 @@ int GPIIBackgroundAlpha::GetChannel( GETRunConfiguration * RunConf, string det )
 
 	return c;
 }
+
+// dir structure
+// OUTDIR/parconf/detconf/runconf/precision/
+// ---------------------------------------------------------
+string GPIIBackgroundAlpha::GetOutputDirectory()
+{
+    string parconf = f_j_masterconf["parconf"].asString();
+    int from = parconf.find_last_of('/')+1;
+    int length = parconf.find_last_of("-parconf.json") - from;
+    string dir_parconf = parconf.substr( from, length );
+
+    string detconf = f_j_masterconf["detconf"].asString();
+    int from = detconf.find_last_of('/')+1;
+    int length = detconf.find_last_of("-detconf.json") - from;
+    string dir_detconf = detconf.substr( from, length );
+
+    string runconf = f_j_masterconf["runconf"].asString();
+    int from = runconf.find_last_of('/')+1;
+    int length = runconf.find_last_of("-runconf.json") - from;
+    string dir_runconf = runconf.substr( from, length );
+
+    string precision = f_j_masterconf["precision"].asString();
+
+
+    string OUTDIR = f_j_masterconf["output-directory"].asString();
+    OUTDIR += "/";
+    OUTDIR += dir_parconf;
+    OUTDIR += "/";
+    OUTDIR += dir_detconf;
+    OUTDIR += "/";
+    OUTDIR += dir_runconf;
+    OUTDIR += "/";
+    OUTDIR += precision;
+
+    return OUTDIR;
+}
+
+// FIX ME
+// ---------------------------------------------------------
+std::string GetOutputFilenameBase()
+{
+    cout << "IMPLEMENT ME" << endl;
+    exit(EXIT_SUCCESS);
+
+    return "NA";
+}
