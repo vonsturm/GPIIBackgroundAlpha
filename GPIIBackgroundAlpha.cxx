@@ -668,7 +668,7 @@ double GPIIBackgroundAlpha::LogLikelihood(const std::vector <double> & parameter
         int nHistosRead = 0;
         int nParametersSkipped = 0;
 
-        for( int p = 0; p < f_npars; p++)
+        for( int p = 0; p < f_npars; p++ )
         {
             // skip parameter if requested
             bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
@@ -678,7 +678,8 @@ double GPIIBackgroundAlpha::LogLikelihood(const std::vector <double> & parameter
 
             for( int c = 0; c < ncorrelations; c++ )
             {
-                double weight = f_j_parconf["parameters"][p]["mc"].get("weight",1.).asDouble();
+                cout << "test" << endl;
+                double weight = f_j_parconf["parameters"][p]["mc"].get("weight",1.0).asDouble();
 		        lambda += parameters[p-nParametersSkipped] * weight * f_vMC[ (nHistosRead + c)* f_hnumbins + ibin ];
             }
 
