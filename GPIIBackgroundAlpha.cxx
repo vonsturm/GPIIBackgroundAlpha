@@ -815,7 +815,7 @@ double GPIIBackgroundAlpha::EstimatePValue()
 
     double pvalue = double(Pgood)/double(nloops);
 
-    if( verbosity > 0) cout << "p-value is " << pvalue << endl;
+    if( f_verbosity > 0) cout << "p-value is " << pvalue << endl;
 
     return pvalue;
 }
