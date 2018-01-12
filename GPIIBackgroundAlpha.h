@@ -62,7 +62,7 @@ class GPIIBackgroundAlpha : public BCModel
       int ReadDataFromHistogram( std::string infilename );
       int ReadDataFromEvents( std::string outfilename );
       int WriteDataToFileForFastAccess( std::string outfilename );
-      int ReadRunData( std::string keylist, std::vector<std::string> detectorlist );
+      int ReadRunData( std::string keylist );
       int FillDataArray();
 
       // Read MC pdfs

@@ -248,7 +248,7 @@ int GPIIBackgroundAlpha::ReadDataFromEvents( string outfilename )
 
 		if( f_verbosity > 0 ) cout << "\t" << keylist << endl;
 
-		ReadRunData( keylist, detlist );
+		ReadRunData( keylist );
 	}
 
 	if( f_verbosity > 0 )
@@ -327,7 +327,7 @@ int GPIIBackgroundAlpha::WriteDataToFileForFastAccess( string outfilename );
 }
 
 // ---------------------------------------------------------
-int GPIIBackgroundAlpha::ReadRunData( string keylist, vector<string> detectorlist )
+int GPIIBackgroundAlpha::ReadRunData( string keylist )
 {
 	string GERDA_PHASEII_DATA = f_j_envconf["GERDA_PHASEII_DATA"].asString();
 	string MU_CAL = f_j_envconf["MU_CAL"].asString();
@@ -405,17 +405,22 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist, vector<string> detectorlis
 		if ( isTP )
 		{
 			nTP++;
-			for( auto d : detectorlist ){ if( IsOn( RunConf, d ) ) f_DetectorLiveTime[d] += 1./(frequencyTP*60.*60.*24.); }
+			for( int d = 0; d < f_ndets; d++ )
+            {
+                string det = f_j_detconf["detectors"][d].asString();
+                if( IsOn( RunConf, det ) ) f_DetectorLiveTime[det] += 1./(frequencyTP*60.*60.*24.);
+            }
 			continue;
 		}
 		if ( multiplicity > 1 ) continue;
 		if ( isVetoedInTime ) 	continue;
 
-		for( auto d : detectorlist )
+		for( int d = 0; d < f_ndets; d++  )
 		{
-			if( !IsOn( RunConf, d ) ) continue;
+            string det = f_j_detconf["detectors"][d].asString();
+            if( !IsOn( RunConf, det ) ) continue;
 
-			int c = GetChannel( RunConf, d );
+			int c = GetChannel( RunConf, det );
 
 			double en = energy->at(c);
 
@@ -425,7 +430,7 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist, vector<string> detectorlis
 			{
 				if( !failedFlag_isSaturated->at(c) ) en = 10000.;
 
-				f_hdata[d] -> Fill( en );
+				f_hdata[det] -> Fill( en );
 				f_hdataSum -> Fill( en );
 				f_hdataSum_fine -> Fill( en );
 			}
