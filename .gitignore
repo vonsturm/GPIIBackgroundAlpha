@@ -9,9 +9,11 @@ alpha_timeDistribution.C
 files/
 ModelOutput/
 pdfs/
+data/
 
 test_classes
 runGPIIBackgroundAlpha
 
 *_orig*
-
+*-DetLT.json
+*-RunLT.json

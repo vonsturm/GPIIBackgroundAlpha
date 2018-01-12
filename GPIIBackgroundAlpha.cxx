@@ -255,8 +255,11 @@ int GPIIBackgroundAlpha::ReadDataFromEvents( string outfilename )
 	{
 		cout << "Detector LiveTimes: " << endl;
 
-		for( auto d : detlist )
-			cout << "\t" << d << ": " << f_DetectorLiveTime[d] << endl;
+		for( int d = 0; d < f_ndets; d++ )
+		{
+			string det = f_j_detconf["detectors"][d].asString();
+			cout << "\t" << det << ": " << f_DetectorLiveTime[det] << endl;
+		}
 	}
 
     WriteDataToFileForFastAccess( outfilename );
@@ -267,9 +270,9 @@ int GPIIBackgroundAlpha::ReadDataFromEvents( string outfilename )
 }
 
 // ---------------------------------------------------------
-int GPIIBackgroundAlpha::WriteDataToFileForFastAccess( string outfilename );
+int GPIIBackgroundAlpha::WriteDataToFileForFastAccess( string outfilename )
 {
-    TFile * outfile( outfilename.c_str(), "RECREATE" );
+    TFile * outfile = new TFile( outfilename.c_str(), "RECREATE" );
 
     for( int d = 0; d < f_ndets; d++ )
     {
@@ -290,12 +293,12 @@ int GPIIBackgroundAlpha::WriteDataToFileForFastAccess( string outfilename );
     {
         int run = f_j_runconf["runs"][r].asInt();
 
-        j_RunLiveTime[ itoa(run) ] = f_RunLiveTime[r];
+        j_RunLiveTime[ to_string(run) ] = f_RunLiveTime[r];
     }
 
-    string runconfname = f_j_masterconf["runconf"].asString()
+    string runconfname = f_j_masterconf["runconf"].asString();
     string runLTconfname = runconfname.substr( 0, runconfname.find_last_of('.') );
-    runLTconfname += "-livetimes.json"
+    runLTconfname += "-RunLT.json";
 
     ofstream runLTconf( runLTconfname );
 
@@ -313,9 +316,8 @@ int GPIIBackgroundAlpha::WriteDataToFileForFastAccess( string outfilename );
         j_DetectorLiveTime[ det ] = f_DetectorLiveTime[det];
     }
 
-    string detconfname = f_j_masterconf["detconf"].asString()
-    string detLTconfname = detconfname.substr( 0, detconfname.find_last_of('.') );
-    detLTconfname += "-livetimes.json"
+    string detLTconfname = runconfname.substr( 0, runconfname.find_last_of('.') );
+    detLTconfname += "-DetLT.json";
 
     ofstream detLTconf( detLTconfname );
 
