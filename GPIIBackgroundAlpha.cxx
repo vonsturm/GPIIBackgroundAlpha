@@ -68,7 +68,7 @@ GPIIBackgroundAlpha::GPIIBackgroundAlpha(const char * name) : BCModel(name)
 GPIIBackgroundAlpha::GPIIBackgroundAlpha(string masterconfname) : BCModel()
 {
 	SetMasterConf( masterconfname );
-    UwrapMasterConf();
+    UnwrapMasterConf();
     DefineParameters();
 };
 
@@ -107,9 +107,9 @@ void GPIIBackgroundAlpha::UnwrapMasterConf()
     SetVerbosity( f_j_masterconf["verbosity"].asBool() );
     SetPrecision( f_j_masterconf["precision"].asString() );
     SetHistogramParameters(
-        f_j_masterconf["histo"]["binning"],
-        f_j_masterconf["histo"]["min"],
-        f_j_masterconf["histo"]["max"]
+        f_j_masterconf["histo"]["binning"].asDouble(),
+        f_j_masterconf["histo"]["min"].asDouble(),
+        f_j_masterconf["histo"]["max"].asDouble()
     );
 
     return;
@@ -118,23 +118,23 @@ void GPIIBackgroundAlpha::UnwrapMasterConf()
 // ---------------------------------------------------------
 void GPIIBackgroundAlpha::SetPrecision( string precisionString )
 {
-    BCEngineMCMC::Precision precision;
+    BCEngineMCMC::Precision precision = BCEngineMCMC::kLow;
     if( precisionString == "kLow" ) precision = BCEngineMCMC::kLow;
     else if( precisionString == "kMedium" ) precision = BCEngineMCMC::kMedium;
     else if( precisionString == "kHigh" ) precision = BCEngineMCMC::kHigh;
     else if( precisionString == "kVeryHigh" ) precision = BCEngineMCMC::kVeryHigh;
 
-    m->MCMCSetPrecision(precision);
+    MCMCSetPrecision(precision);
 
     return;
 }
 
-void GPIIBackgroundAlpha::SetHistogramParameters(double hBinning, double hMin, double hMax);
+void GPIIBackgroundAlpha::SetHistogramParameters(double hBinning, double hMin, double hMax)
 {
     int hNbins = (int) ( (hMax - hMin) / hBinning );
     hMax = hMin + hNbins * hBinning;
 
-    m->SetHistogramParameters(hNbins, hMin, hMax);
+    SetHistogramParameters(hNbins, hMin, hMax);
 
     BCLog::OutSummary( Form( "Fit Range: %.0f - %.0f keV", hMin, hMax) );
     BCLog::OutSummary( Form( "Binning: %.0f keV", hBinning ) );
@@ -147,16 +147,16 @@ void GPIIBackgroundAlpha::SetHistogramParameters(double hBinning, double hMin, d
 // ---------------------------------------------------------
 void GPIIBackgroundAlpha::DefineParameters()
 {
-	int npars = f_j_parameters["parameters"].size();
+	int npars = f_j_parconf["parameters"].size();
 
 	if( f_verbosity > 0 ) cout << "Defining parameters" << endl;
 
 	for( int p = 0; p < npars; p++ )
 	{
-		string name = f_j_parameters["parameters"][p]["name"].asString();
-		double min = f_j_parameters["parameters"][p]["min"].asDouble();
-		double max = f_j_parameters["parameters"][p]["max"].asDouble();
-		int nbins = f_j_parameters["parameters"][p]["nbins"].asInt();
+		string name = f_j_parconf["parameters"][p]["name"].asString();
+		double min = f_j_parconf["parameters"][p]["min"].asDouble();
+		double max = f_j_parconf["parameters"][p]["max"].asDouble();
+		int nbins = f_j_parconf["parameters"][p]["nbins"].asInt();
 
 		AddParameter( name.c_str(), min, max );
 		GetParameter( name.c_str() )->SetNbins( nbins );
@@ -392,14 +392,14 @@ int GPIIBackgroundAlpha::InitializeMCHistograms()
 
 	for( int p = 0; p < f_npars; p++ )
 	{
-		string pname = f_j_parameters["parameters"][p]["name"].asString();
-		int ncorrelations = f_j_parameters["parameters"][p]["mc"].size();
+		string pname = f_j_parconf["parameters"][p]["name"].asString();
+		int ncorrelations = f_j_parconf["parameters"][p]["mc"].size();
 		nMChistos += ncorrelations;
 
 		for( int c = 0; c < ncorrelations; c++ )
 		{
-			string hname = f_j_parameters["parameters"][p]["mc"][c]["histoname"].asString();
-			string fname = f_j_parameters["parameters"][p]["mc"][c]["filename"].asString();
+			string hname = f_j_parconf["parameters"][p]["mc"][c]["histoname"].asString();
+			string fname = f_j_parconf["parameters"][p]["mc"][c]["filename"].asString();
 
 			string name = pname; name += "_n"; name += to_string(c);
 			string name_fine = name; name_fine += "_fine";
@@ -438,15 +438,15 @@ int GPIIBackgroundAlpha::ReadMC()
 
 	for( int p = 0; p < f_npars; p++ )
 	{
-		int ncorr = f_j_parameters["parameters"][p]["mc"].size();
+		int ncorr = f_j_parconf["parameters"][p]["mc"].size();
 
 		for( int c = 0; c < ncorr; c++ )
 		{
-			string histoname = f_j_parameters["parameters"][p]["mc"]["histoname"][c].asString();
+			string histoname = f_j_parconf["parameters"][p]["mc"]["histoname"][c].asString();
 			string filename = GERDA_MC_PDFS; filename += "/";
-			filename += f_j_parameters["parameters"][p]["mc"]["filename"][c].asString();
+			filename += f_j_parconf["parameters"][p]["mc"]["filename"][c].asString();
 
-			ReadSingleMC( index, histoname, filename );
+			//ReadSingleMC( index, histoname, filename );
 
 			index++;
 		}
@@ -661,11 +661,11 @@ double GPIIBackgroundAlpha::LogLikelihood(const std::vector <double> & parameter
 
         for( int iMC = 0; iMC < nMC; iMC++)
         {
-            int ncorrelations = f_j_parameters["parameters"][iMC]["mc"].size();
+            int ncorrelations = f_j_parconf["parameters"][iMC]["mc"].size();
 
-            for( int c = 0; c < ncorrelations, c++ )
+            for( int c = 0; c < ncorrelations; c++ )
             {
-                double weight = f_j_parameters["parameters"][iMC]["mc"].get("weight",1.).asDouble();
+                double weight = f_j_parconf["parameters"][iMC]["mc"].get("weight",1.).asDouble();
 		        lambda += parameters[iMC] * weight * f_vMC[ (nHistosRead + c)* f_hnumbins + ibin ];
             }
 

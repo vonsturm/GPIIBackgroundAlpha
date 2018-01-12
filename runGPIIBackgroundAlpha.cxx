@@ -201,7 +201,7 @@ int main( int argc, char* argv[] )
 void UsageGPIIBackgroundAlpha()
 {
     cout << "Usage: runGPIIBackgroundAlpha -Z masterconf.json" << endl;
-    cout << "\Options" << endl;
+    cout << "\tOptions" << endl;
     cout << "\t\t-h : print this help menu" << endl;
     cout << "\t\t-Z : set master json config file (./config/default-masterconf.json)" << endl;
     return;

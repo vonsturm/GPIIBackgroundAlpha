@@ -38,7 +38,7 @@ class GPIIBackgroundAlpha : public BCModel
       // Constructors and destructor
       GPIIBackgroundAlpha();
       GPIIBackgroundAlpha(const char * name);
-      GPIIBackgroundAlpha(string masterconfname);
+      GPIIBackgroundAlpha(std::string masterconfname);
       ~GPIIBackgroundAlpha();
 
       // Methods to overload
