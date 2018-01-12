@@ -147,11 +147,9 @@ void GPIIBackgroundAlpha::SetHistogramParameters(double hBinning, double hMin, d
 // ---------------------------------------------------------
 void GPIIBackgroundAlpha::DefineParameters()
 {
-	int npars = f_j_parconf["parameters"].size();
-
 	if( f_verbosity > 0 ) cout << "Defining parameters" << endl;
 
-	for( int p = 0; p < npars; p++ )
+	for( int p = 0; p < f_npars; p++ )
 	{
 		string name = f_j_parconf["parameters"][p]["name"].asString();
 		double min = f_j_parconf["parameters"][p]["min"].asDouble();
