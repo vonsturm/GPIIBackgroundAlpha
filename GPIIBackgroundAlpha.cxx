@@ -550,9 +550,9 @@ int GPIIBackgroundAlpha::ReadMC()
 
 		for( int c = 0; c < ncorr; c++ )
 		{
-			string histoname = f_j_parconf["parameters"][p]["mc"]["histoname"][c].asString();
+			string histoname = f_j_parconf["parameters"][p]["mc"][c]["histoname"].asString();
 			string filename = GERDA_MC_PDFS; filename += "/";
-			filename += f_j_parconf["parameters"][p]["mc"]["filename"][c].asString();
+			filename += f_j_parconf["parameters"][p]["mc"][c]["filename"].asString();
 
 			//ReadSingleMC( index, histoname, filename );
 
@@ -573,7 +573,7 @@ int GPIIBackgroundAlpha::ReadMC()
 //	AddMCSingle("Po214_pPlus","h_Po214_onPplusSurface");
 //	AddMCSingle("Po218_pPlus","h_Po218_onPplusSurface");
 */
-	FillMCArrays();
+	// FillMCArrays();
 
 	return 0;
 }
