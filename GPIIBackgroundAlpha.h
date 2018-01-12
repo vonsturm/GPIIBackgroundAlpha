@@ -68,8 +68,7 @@ class GPIIBackgroundAlpha : public BCModel
       // Read MC pdfs
       int InitializeMCHistograms();
       int ReadMC();
-      int AddMC( std::string name );
-      int AddMCSingle( std::string name, std::string histoname );
+      int ReadSingleMC( int par_index, int local_index, int global_index, std::string histoname, std::string filename );
       int FillMCArrays();
 
       //---- GETTERS AND SETTERS ----

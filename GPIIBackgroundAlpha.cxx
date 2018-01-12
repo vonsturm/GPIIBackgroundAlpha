@@ -533,6 +533,8 @@ int GPIIBackgroundAlpha::ReadMC()
 {
     InitializeMCHistograms();
 
+    BCLog::OutSummary( "Read MC pdfs" );
+
 	string GERDA_MC_PDFS = f_j_envconf["GERDA_MC_PDFS"].asString();
 
 	if( GERDA_MC_PDFS.empty() )
@@ -554,7 +556,7 @@ int GPIIBackgroundAlpha::ReadMC()
 			string filename = GERDA_MC_PDFS; filename += "/";
 			filename += f_j_parconf["parameters"][p]["mc"][c]["filename"].asString();
 
-			//ReadSingleMC( index, histoname, filename );
+			ReadSingleMC( p, c, index, histoname, filename );
 
 			index++;
 		}
@@ -573,166 +575,56 @@ int GPIIBackgroundAlpha::ReadMC()
 //	AddMCSingle("Po214_pPlus","h_Po214_onPplusSurface");
 //	AddMCSingle("Po218_pPlus","h_Po218_onPplusSurface");
 */
-	// FillMCArrays();
-
-	return 0;
-}
-/*
-// ---------------------------------------------------------
-int GPIIBackgroundAlpha::AddMC( string name )
-{
-	cout << "---------------------------------------------" << endl;
-	cout << "Adding MC component " << name << endl;
-	cout << "---------------------------------------------" << endl;
-
-	// loop over all channels
-	TFile * MCfile = new TFile( f_MC_FileName.c_str() );
-
-	for( int idet = 0; idet < f_ndets; idet++ )
-    {
-		// Fill only MC histograms that have a corresponding data histogram
-		if( f_hdata.at(idet) != NULL )
-		{
-			double livetime = f_DetectorLiveTime.at(idet);
-
-			cout << "+ MC spectrum h" << idet << " with lifetime weight " << livetime << endl;
-
-			TH1D* MC_raw = (TH1D*)MCfile->Get( Form( "h%i", idet ) );
-			MC_raw->Scale(livetime);
-
-			int start_deleting = MC_raw->FindBin( (double)fDetectorDynamicRange.at( idet ) + 0.5  );
-			int last_bin = MC_raw->GetNbinsX();
-
-			for( int b = start_deleting; b <= last_bin; b++ )
-			{
-				MC_raw->SetBinContent( b, 0 );
-			}
-
-			for( int i = 1; i < last_bin; i++ )
-			{
-				double bincontent = MC_raw->GetBinContent( i );
-				double bincenter = MC_raw->GetBinCenter( i );
-
-				if( henergy->FindBin( bincenter ) > 0 && henergy->FindBin( bincenter ) <= f_hnumbins )
-					henergy->SetBinContent( henergy->FindBin( bincenter ),
-							henergy->GetBinContent( henergy->FindBin( bincenter ) ) + bincontent );
-
-				if( henergy_fine->FindBin( bincenter ) > 0 && henergy_fine->FindBin( bincenter ) <= bins )
-					henergy_fine->SetBinContent( henergy_fine->FindBin( bincenter ),
-							henergy_fine->GetBinContent( henergy_fine->FindBin( bincenter ) ) + bincontent );
-
-				if( henergy_all->FindBin( bincenter ) > 0 && henergy_all->FindBin( bincenter ) <= allbins )
-					henergy_all->SetBinContent( henergy_all->FindBin( bincenter ),
-							henergy_all->GetBinContent( henergy_all->FindBin( bincenter ) ) + bincontent );
-			}
-		}
-	}
-
-	MCfile->Close();
-
-	double scaling = henergy->Integral();
-
-	f_MC.push_back( henergy );
-	f_MC_fine.push_back( henergy_fine );
-	f_MCall.push_back( henergy_all );
+	FillMCArrays();
 
 	return 0;
 }
 
-
 // ---------------------------------------------------------
-
-int GPIIBackgroundAlpha::AddMCSingle( string name, string histoname )
+int GPIIBackgroundAlpha::ReadSingleMC( int par_index, int local_index, int global_index, string histoname, string filename )
 {
-	cout << "---------------------------------------------" << endl;
-	cout << "Adding MC component " << name << endl;
-	cout << "---------------------------------------------" << endl;
+    BCLog::OutSummary( "--------------------------------------------" );
+    BCLog::OutSummary(  Form( "parameter: %d", par_index  ) );
+    BCLog::OutSummary(  Form( "local index: %d", local_index ) );
+    BCLog::OutSummary(  Form( "global index: %d", global_index ) );
+    BCLog::OutSummary(  Form( "File: %s", filename.c_str() );
+    BCLog::OutSummary(  Form( "Histogram: %s", histoname.c_str() );
 
-	// set the first BEGE channel
-	TH1D* henergy = new TH1D(Form("h_%s",name.c_str()),
-			Form("%s",name.c_str()),
-			f_hnumbins, f_hemin, f_hemax);
+    // open file
+	TFile * MCfile = new TFile( filename.c_str() );
 
-	int bins = int( f_hemax - f_hemin );
+    // get histogram [7500|0:7500]
+    TH1D * MChisto = MCfile->Get( histoname.c_str() );
 
-	string namefine = name;
-	namefine.append("_fine");
+    int nbins = MChisto->GetNbinsX();
 
-	TH1D* henergy_fine = new TH1D(Form("h_%s",namefine.c_str()),
-			Form("%s",namefine.c_str()),
-			bins, f_hemin, f_hemax);
-
-	int allbins = 7500;
-
-	string nameall = name;
-	nameall.append("_all");
-
-	TH1D* henergy_all = new TH1D(Form("h_%s",nameall.c_str()),
-			Form("%s",nameall.c_str()),
-			allbins, 0., 7500.);
-
-	// initialize the histogram arrays
-	for( int i = 1; i <= f_hnumbins; i++ )
-		henergy->SetBinContent( i, 0 );
-	for( int i = 1; i <= bins; i++ )
-		henergy_fine->SetBinContent( i, 0 );
-	for( int i = 1; i <= allbins; i++ )
-		henergy_all->SetBinContent( i, 0 );
-
-	henergy->GetXaxis()->SetCanExtend( false );
-	henergy_fine->GetXaxis()->SetCanExtend( false );
-	henergy_all->GetXaxis()->SetCanExtend( false );
-
-	// loop over all channels
-	TFile * MCfile = new TFile( f_MC_FileName.c_str() );
-
-	// get histo from file
-	TH1D* MC_raw = (TH1D*)MCfile->Get( histoname.c_str() );
-	int last_bin = MC_raw->GetNbinsX();
-
-	cout << "+ MC spectrum " << histoname << endl;
-
-	for( int i = 1; i <= last_bin; i++ )
+	for( int b = 1; b <= nbins; b++ )
 	{
-		double bincontent = MC_raw->GetBinContent( i );
-		double bincenter = MC_raw->GetBinCenter( i );
+		double bincontent = MChisto->GetBinContent( b );
+		double bincenter = MChisto->GetBinCenter( b );
 
-		if( henergy->FindBin( bincenter ) > 0 && henergy->FindBin( bincenter ) <= f_hnumbins )
-			henergy->SetBinContent( henergy->FindBin( bincenter ),
-					henergy->GetBinContent( henergy->FindBin( bincenter ) ) + bincontent );
+        f_MC[global_index]      ->Fill( f_MC[global_index]      ->FindBin( bincenter ), bincontent );
+        f_MC_fine[global_index] ->Fill( f_MC_fine[global_index] ->FindBin( bincenter ), bincontent );
+        f_MC_all[global_index]  ->Fill( f_MC_all[global_index]  ->FindBin( bincenter ), bincontent );
+    }
 
-		if( henergy_fine->FindBin( bincenter ) > 0 && henergy_fine->FindBin( bincenter ) <= bins )
-			henergy_fine->SetBinContent( henergy_fine->FindBin( bincenter ),
-					henergy_fine->GetBinContent( henergy_fine->FindBin( bincenter ) ) + bincontent );
+    MCfile->Close();
 
-		if( henergy_all->FindBin( bincenter ) > 0 && henergy_all->FindBin( bincenter ) <= allbins )
-			henergy_all->SetBinContent( henergy_all->FindBin( bincenter ),
-					henergy_all->GetBinContent( henergy_all->FindBin( bincenter ) ) + bincontent );
-	}
+    // scale histograms with number of primaries
+	double primaries = f_j_parconf["parameters"][p]["mc"][c]["primaries"];
 
-	cout << "MC histo loaded" << endl;
+    BCLog::OutSummary( Form( "Primaries: %.0f", primaries ) );
 
-	double scaling = henergy->Integral();
+    f_MC[global_index]      ->Scale(1./primaries);
+    f_MC_fine[global_index] ->Scale(1./primaries);
+    f_MC_all[global_index]  ->Scale(1./primaries);
 
-	cout << "Scaling MC " << 1./scaling << endl;
-
-	henergy->Scale( 1./scaling );
-	henergy_fine->Scale( 1./scaling );
-	henergy_all->Scale( 1./scaling );
-
-	f_MC.push_back( henergy );
-	f_MC_fine.push_back( henergy_fine );
-	f_MCall.push_back( henergy_all );
-
-	MCfile->Close();
+    BCLog::OutSummary( "--------------------------------------------" );
 
 	return 0;
 }
 
-*/
-
 // ---------------------------------------------------------
-
 int GPIIBackgroundAlpha::FillMCArrays()
 {
 	int nMC = f_MC.size();
@@ -749,8 +641,6 @@ int GPIIBackgroundAlpha::FillMCArrays()
   	return 0;
 }
 
-
-// FIX ME add weight of histograms to likelihood
 // ---------------------------------------------------------
 double GPIIBackgroundAlpha::LogLikelihood(const std::vector <double> & parameters)
 {
@@ -1100,7 +990,6 @@ bool GPIIBackgroundAlpha::IsOn( GETRunConfiguration * RunConf, string det )
 
 	return false;
 }
-
 
 // ---------------------------------------------------------
 int GPIIBackgroundAlpha::GetChannel( GETRunConfiguration * RunConf, string det )
