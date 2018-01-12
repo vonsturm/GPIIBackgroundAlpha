@@ -145,17 +145,18 @@ void GPIIBackgroundAlpha::SetHistogramParameters(double hBinning, double hMin, d
     return;
 }
 
-// FIX ME: Read also weight between the histograms e.g. Bi212, Tl208 branching ratio is ~0.36
 // ---------------------------------------------------------
 void GPIIBackgroundAlpha::DefineParameters()
 {
 	if( f_verbosity > 0 ) cout << "Defining parameters" << endl;
 
+    int nParametersSkipped = 0;
+
 	for( int p = 0; p < f_npars; p++ )
 	{
         // skip parameter if requested
         bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
-        if( !useparameter ) continue;
+        if( !useparameter ) { nParametersSkipped++; continue; }
 
 		string name = f_j_parconf["parameters"][p]["name"].asString();
 		double min = f_j_parconf["parameters"][p]["min"].asDouble();
@@ -165,12 +166,15 @@ void GPIIBackgroundAlpha::DefineParameters()
         // add parameter, set range and binning
 		AddParameter( name.c_str(), min, max );
 		GetParameter( name.c_str() )->SetNbins( nbins );
+        SetPriorConstant( p-nParametersSkipped );
 
 		if( f_verbosity > 0 )
 		{
 			cout << "\t" << name << ": " << "[" << nbins << "|" << min << ":" << max << "]" << endl;
 		}
 	}
+
+
 }
 
 // ---------------------------------------------------------
@@ -527,7 +531,9 @@ int GPIIBackgroundAlpha::InitializeMCHistograms()
 }
 
 
-// FIX ME
+// FIX ME: LOW
+// for now only single histogram MC pdfs can be read
+// would be nice to construct them from single detector histograms scaled by detector live time
 // ---------------------------------------------------------
 int GPIIBackgroundAlpha::ReadMC()
 {
@@ -654,17 +660,21 @@ double GPIIBackgroundAlpha::LogLikelihood(const std::vector <double> & parameter
     for( int ibin = 0; ibin < f_hnumbins; ibin++)
     {
         double lambda = 0.;
-        int nMC = f_MC.size();
         int nHistosRead = 0;
+        int nParametersSkipped = 0;
 
-        for( int iMC = 0; iMC < nMC; iMC++)
+        for( int p = 0; p < f_npars; p++)
         {
-            int ncorrelations = f_j_parconf["parameters"][iMC]["mc"].size();
+            // skip parameter if requested
+            bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
+            if( !useparameter ) { nParametersSkipped++; continue; }
+
+            int ncorrelations = f_j_parconf["parameters"][p]["mc"].size();
 
             for( int c = 0; c < ncorrelations; c++ )
             {
-                double weight = f_j_parconf["parameters"][iMC]["mc"].get("weight",1.).asDouble();
-		        lambda += parameters[iMC] * weight * f_vMC[ (nHistosRead + c)* f_hnumbins + ibin ];
+                double weight = f_j_parconf["parameters"][p]["mc"].get("weight",1.).asDouble();
+		        lambda += parameters[p-nParametersSkipped] * weight * f_vMC[ (nHistosRead + c)* f_hnumbins + ibin ];
             }
 
 		  nHistosRead += ncorrelations;
@@ -680,6 +690,8 @@ double GPIIBackgroundAlpha::LogLikelihood(const std::vector <double> & parameter
   return logprob;
 }
 
+/*
+// ONLY NEEDED IF THE PRIOR PROBABILITY IS MORE COMPLICATED
 // ---------------------------------------------------------
 double GPIIBackgroundAlpha::LogAPrioriProbability(const std::vector<double> &parameters)
 {
@@ -687,107 +699,125 @@ double GPIIBackgroundAlpha::LogAPrioriProbability(const std::vector<double> &par
    // parameters p(parameters).
 
   double logprob = 0.;
-  int nMC = f_MC.size();
 
-  for( int iMC = 0; iMC < nMC; iMC++ )
+  for( int p = 0; p < f_npars; p++ )
   {
-      double range = GetParameter(iMC)->GetRangeWidth();
+      // skip parameter if requested
+      bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
+      if( !useparameter ) continue;
+
+
+      double range = GetParameter(p-nParametersSkipped)->GetRangeWidth();
       // flat prior for all contributions
       logprob += log( 1. / range );
   }
 
   return logprob;
 }
+*/
 
 //FIX ME
 // ---------------------------------------------------------
 double GPIIBackgroundAlpha::EstimatePValue()
 {
-  //Allen's routine for the evaluation of p-value
-  //This is derived from PRD 83 (2011) 012004, appendix
-  //taken from Luciano
-  double logp0 = LogLikelihood( GetBestFitParameters() ); //likelihood at the mode
+    //Allen's routine for the evaluation of p-value
+    //This is derived from PRD 83 (2011) 012004, appendix
+    //taken from Luciano
+    double logp0 = LogLikelihood( GetBestFitParameters() ); //likelihood at the mode
 
-  /*
-    Now we initialize the Markov Chain by setting the number of entries in a bin to
-    the integer
-    part of the mean in that bin.  This will give the maximum possible likelihood.
-  */
-  double sumlog = 0;
+    /*
+      Now we initialize the Markov Chain by setting the number of entries in a bin to
+      the integer
+      part of the mean in that bin.  This will give the maximum possible likelihood.
+    */
+    double sumlog = 0;
 
 
-  /* mean is the array where you have the expected mean in each bin (calculated
-     from the parameter values at the mode. Nom is the nominal value of entries in
-     each bin (integer part)
-  */
+    /* mean is the array where you have the expected mean in each bin (calculated
+       from the parameter values at the mode. Nom is the nominal value of entries in
+       each bin (integer part)
+    */
 
-  vector<double> mean( f_hnumbins, 0 );
-  vector<int> nom( f_hnumbins, 0 );
+    vector<double> mean( f_hnumbins, 0 );
+    vector<int> nom( f_hnumbins, 0 );
 
-  vector<double> parameters = GetBestFitParameters();
+    vector<double> parameters = GetBestFitParameters();
 
-  for( int ibin = 0; ibin < f_hnumbins; ibin++ )
-  {
-      double lambda = 0.;
-	  int nMC = f_MC.size();
+    for( int ibin = 0; ibin < f_hnumbins; ibin++ )
+    {
+        double lambda = 0.;
+        int nHistosRead = 0;
+        int nParametersSkipped = 0;
 
-      for( int iMC = 0; iMC < nMC; iMC++ )
-      {
-    	  lambda += parameters[iMC]*f_vMC[iMC*f_hnumbins+ibin];
-      }
+        for( int p = 0; p < f_npars; p++)
+        {
+            // skip parameter if requested
+            bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
+            if( !useparameter ) { nParametersSkipped++; continue; }
 
-      int counter = ibin;
+            int ncorrelations = f_j_parconf["parameters"][p]["mc"].size();
 
-      mean[counter] = std::max( lambda, 1e-8 );
-      nom[counter] = int( mean[counter] );
-      sumlog += BCMath::LogPoisson( nom[counter], mean[counter] );
-  }
+            for( int c = 0; c < ncorrelations; c++ )
+            {
+                double weight = f_j_parconf["parameters"][p]["mc"].get("weight",1.).asDouble();
+                lambda += parameters[p-nParametersSkipped] * weight * f_vMC[ (nHistosRead + c)* f_hnumbins + ibin ];
+            }
 
-  cout << "Logprob for best: " << sumlog << endl;
+            nHistosRead += ncorrelations;
+        }
 
-  /*
-  Now we run the Markov chain to generate new configurations.  One iteration means
-  a loop over all the bins, with an attempt to vary each bin up or down by one unit.  We
-  accept/reject at each step  and compare the data logprob to the simulated at the end of each iteration.
-  */
-  const int nloops = 100000;
-  int Pgood = 0;
+        int counter = ibin;
 
-  for( int iloop = 0; iloop < nloops; iloop++ )
-  {
-      for( int ibin = 0; ibin < f_hnumbins; ibin++)
-      {
-    	  int counter = ibin;
+        mean[counter] = std::max( lambda, 1e-8 );
+        nom[counter] = int( mean[counter] );
+        sumlog += BCMath::LogPoisson( nom[counter], mean[counter] );
+    }
 
-    	  if ( rand() > RAND_MAX/2 ) // Try to increase the bin content by 1
-    	  {
-    		  double r = mean[counter]/(nom[counter]+1);
-    		  double rtest = double(rand())/RAND_MAX;
-    		  if( rtest < r ) //Accept
-    		  {
-    			  nom[counter] = nom[counter]+1;
-    			  sumlog += log(r);
-    		  }
-    	  }
-    	  else // Try to decrease the bin content by 1
-    	  {
-    		  double r = nom[counter]/mean[counter];
-    		  double rtest = double(rand())/RAND_MAX;
-    		  if ( rtest < r ) //Accept
-    		  {
-    			  nom[counter] = nom[counter]-1;
-    			  sumlog += log(r);
-    		  }
-    	  }
-      }
-      if ( sumlog < logp0 ) Pgood++;
-  }
+    cout << "Logprob for best: " << sumlog << endl;
 
-  double pvalue = double(Pgood)/double(nloops);
+    /*
+    Now we run the Markov chain to generate new configurations.  One iteration means
+    a loop over all the bins, with an attempt to vary each bin up or down by one unit.  We
+    accept/reject at each step  and compare the data logprob to the simulated at the end of each iteration.
+    */
+    const int nloops = 100000;
+    int Pgood = 0;
 
-  cout << "p-value is " << pvalue << endl;
+    for( int iloop = 0; iloop < nloops; iloop++ )
+    {
+        for( int ibin = 0; ibin < f_hnumbins; ibin++)
+        {
+            int counter = ibin;
 
-  return pvalue;
+            if ( rand() > RAND_MAX/2 ) // Try to increase the bin content by 1
+            {
+                double r = mean[counter]/(nom[counter]+1);
+                double rtest = double(rand())/RAND_MAX;
+                if( rtest < r ) //Accept
+                {
+                    nom[counter] = nom[counter]+1;
+                    sumlog += log(r);
+                }
+            }
+            else // Try to decrease the bin content by 1
+            {
+                double r = nom[counter]/mean[counter];
+                double rtest = double(rand())/RAND_MAX;
+                if ( rtest < r ) //Accept
+                {
+                    nom[counter] = nom[counter]-1;
+                    sumlog += log(r);
+                }
+            }
+        }
+        if ( sumlog < logp0 ) Pgood++;
+    }
+
+    double pvalue = double(Pgood)/double(nloops);
+
+    if( verbosity > 0) cout << "p-value is " << pvalue << endl;
+
+    return pvalue;
 }
 
 /*
