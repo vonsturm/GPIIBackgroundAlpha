@@ -98,19 +98,19 @@ class GPIIBackgroundAlpha : public BCModel
      void SetDetConf( std::string detconfname )
      {
          f_j_detconf = GetJsonValueFromFile( detconfname );
-         f_ndets = f_j_detconf.size();
+         f_ndets = f_j_detconf["detectors"].size();
          return;
      };
      void SetRunConf( std::string runconfname )
      {
          f_j_runconf = GetJsonValueFromFile( runconfname );
-         f_nruns = f_j_runconf.size();
+         f_nruns = f_j_runconf["runs"].size();
          return;
      };
      void SetParConf( std::string parconfname )
      {
          f_j_parconf = GetJsonValueFromFile( parconfname );
-         f_npars = f_j_parconf.size();
+         f_npars = f_j_parconf["parameters"].size();
          return;
      };
      void SetEnvConf( std::string envconfname ){ f_j_envconf = GetJsonValueFromFile( envconfname ); return; };
@@ -130,7 +130,7 @@ class GPIIBackgroundAlpha : public BCModel
      int f_ndets;
      int f_nruns;
      int f_npars;
-     
+
      int f_hnumbins;
      double f_hemin;
      double f_hemax;
