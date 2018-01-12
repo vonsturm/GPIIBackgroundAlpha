@@ -4,7 +4,6 @@
         {
             "name" : "par0_Po210_pPlus_0nm",
             "use" : false,
-            "fill-histograms" : true,
             "min" : 0.0,
             "max" : 100.0,
             "nbins" : 100,

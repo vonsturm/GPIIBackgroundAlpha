@@ -104,13 +104,15 @@ void GPIIBackgroundAlpha::SetMasterConf( string masterconfname )
 // ---------------------------------------------------------
 void GPIIBackgroundAlpha::UnwrapMasterConf()
 {
-    SetVerbosity( f_j_masterconf["verbosity"].asBool() );
+    SetVerbosity( f_j_masterconf["verbosity"].asInt() );
     SetPrecision( f_j_masterconf["precision"].asString() );
     SetHistogramParameters(
         f_j_masterconf["histo"]["binning"].asDouble(),
         f_j_masterconf["histo"]["min"].asDouble(),
         f_j_masterconf["histo"]["max"].asDouble()
     );
+
+    MCMCSetFlagFillHistograms( f_j_masterconf["MCMC-fill-histograms"].asBool() );
 
     return;
 }
@@ -163,10 +165,6 @@ void GPIIBackgroundAlpha::DefineParameters()
         // add parameter, set range and binning
 		AddParameter( name.c_str(), min, max );
 		GetParameter( name.c_str() )->SetNbins( nbins );
-
-        // set filling of nuisance parameter histograms for the respective parameter
-        bool fillhisto = f_j_parconf["parameters"][p].get("fill-histograms",true).asBool();
-        MCMCSetFlagFillHistograms( p, fillhisto );
 
 		if( f_verbosity > 0 )
 		{
