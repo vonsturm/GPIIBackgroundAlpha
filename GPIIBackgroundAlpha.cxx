@@ -178,7 +178,7 @@ int GPIIBackgroundAlpha::InitializeDataHistograms()
 {
 	string name = "hSum";
 	string name_fine = name; name_fine += "_fine";
-	string name_all = name; name_fine += "_all";
+	string name_all = name; name_all += "_all";
 	int bins = (int)f_hemax-f_hemin;
 
 	f_hdataSum = new TH1D( name.c_str(), name.c_str(), f_hnumbins, f_hemin, f_hemax);
