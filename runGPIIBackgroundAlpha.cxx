@@ -85,6 +85,9 @@ int main( int argc, char* argv[] )
     string OUTPUT_DIR = m->GetOutputDirectory();
     string OUT_FILE_BASE = OUTPUT_DIR; OUT_FILE_BASE += "/"; OUT_FILE_BASE += m->GetOutputFilenameBase();
 
+    cout << OUTPUT_DIR << endl;
+    cout << OUT_FILE_BASE << endl;
+
     // create directory if it does not exist
     string cmd = "mkdir -p "; cmd += OUTPUT_DIR;
     system( cmd.c_str() );
