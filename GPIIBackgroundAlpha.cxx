@@ -197,7 +197,7 @@ int GPIIBackgroundAlpha::InitializeDataHistograms()
 		f_DetectorLiveTime[det] = 0.;
 	}
 
-	if( f_verbosity > 0 ) cout << "Histograms initialized" << endl;
+	BCLog::OutSummary( "Data histograms initialized" );
 
 	return 0;
 }
@@ -514,6 +514,8 @@ int GPIIBackgroundAlpha::InitializeMCHistograms()
 			f_MC_all.push_back( hmc_all );
 		}
 	}
+
+    BCLog::OutSummary( "MC histograms initialized"  );
 
 	return 0;
 }
