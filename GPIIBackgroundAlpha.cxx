@@ -151,13 +151,23 @@ void GPIIBackgroundAlpha::DefineParameters()
 
 	for( int p = 0; p < f_npars; p++ )
 	{
+        // skip parameter if requested
+        bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
+        if( !useparameter ) continue;
+
 		string name = f_j_parconf["parameters"][p]["name"].asString();
 		double min = f_j_parconf["parameters"][p]["min"].asDouble();
 		double max = f_j_parconf["parameters"][p]["max"].asDouble();
 		int nbins = f_j_parconf["parameters"][p]["nbins"].asInt();
 
+        // add parameter, set range and binning
 		AddParameter( name.c_str(), min, max );
 		GetParameter( name.c_str() )->SetNbins( nbins );
+
+        // set filling of nuisance parameter histograms for the respective parameter
+        bool fillhisto = f_j_parconf["parameters"][p].get("fill-histograms",true).asBool();
+        MCMCSetFlagFillHistograms( p, fillhisto );
+
 		if( f_verbosity > 0 )
 		{
 			cout << "\t" << name << ": " << "[" << nbins << "|" << min << ":" << max << "]" << endl;
@@ -515,6 +525,8 @@ int GPIIBackgroundAlpha::InitializeMCHistograms()
 // ---------------------------------------------------------
 int GPIIBackgroundAlpha::ReadMC()
 {
+    InitializeMCHistograms();
+
 	string GERDA_MC_PDFS = f_j_envconf["GERDA_MC_PDFS"].asString();
 
 	if( GERDA_MC_PDFS.empty() )

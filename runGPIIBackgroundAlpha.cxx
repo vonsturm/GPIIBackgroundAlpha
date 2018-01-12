@@ -76,12 +76,11 @@ int main( int argc, char* argv[] )
 
     BCLog::OutSummary("Model created");
 
-    // read in the names of the files you want to use,
+    // initialize data histograms and read data
     m->ReadData();
-//    m->InitializeMCHistograms();
 
-    //m->ReadMCAlpha();
-
+    // initialize MC histograms and read MC pdfs
+    m->ReadMC();
 
 //disable histos for nuisance parameters
 //   size_t nPars = m->GetNParameters();

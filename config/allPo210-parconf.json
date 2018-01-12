@@ -3,6 +3,8 @@
     [
         {
             "name" : "par0_Po210_pPlus_0nm",
+            "use" : false,
+            "fill-histograms" : true,
             "min" : 0.0,
             "max" : 100.0,
             "nbins" : 100,
@@ -10,7 +12,8 @@
             [
                 {
                     "histoname" : "hist_dl0nm",
-                    "filename" : "histos_Po210_pPlus.root"
+                    "filename" : "histos_Po210_pPlus.root",
+                    "weight" : 1.0
                 }
             ]
         },
