@@ -87,7 +87,7 @@ int main( int argc, char* argv[] )
 
     // create directory if it does not exist
     string cmd = "mkdir -p "; cmd += OUTPUT_DIR;
-    system( cmd );
+    system( cmd.c_str() );
 
     string mout_filename = OUT_FILE_BASE; mout_filename += "_model.root";
     BCModelOutput* mout = new BCModelOutput( m, mout_filename.c_str() );
@@ -109,9 +109,6 @@ int main( int argc, char* argv[] )
     // write results
     // ----------------------------------
 
-    // output summary
-    BCSummaryTool * summary = new BCSummaryTool(m);
-
     string updatefilename = OUT_FILE_BASE; updatefilename += "_update.pdf";
 	summary -> PrintKnowledgeUpdatePlots( updatefilename.c_str() );
 
@@ -127,7 +124,7 @@ int main( int argc, char* argv[] )
 //    string marg_filename = OUT_FILE_BASE; marg_filename += "_plots.pdf";
 //    m->PrintAllMarginalized( marg_filename.c_str() );
 
-    string resu_filename = OUT_FILE_BASE; marg_filename += "_results.txt";
+    string resu_filename = OUT_FILE_BASE; resu_filename += "_results.txt";
     m->PrintResults( resu_filename.c_str() );
 
 //    m->DumpHistosAndInfo( m->GetBestFitParameters() );
