@@ -594,7 +594,7 @@ int GPIIBackgroundAlpha::ReadSingleMC( int par_index, int local_index, int globa
 	TFile * MCfile = new TFile( filename.c_str() );
 
     // get histogram [7500|0:7500]
-    TH1D * MChisto = MCfile->Get( histoname.c_str() );
+    TH1D * MChisto = (TH1D*) MCfile->Get( histoname.c_str() );
 
     int nbins = MChisto->GetNbinsX();
 
@@ -611,7 +611,7 @@ int GPIIBackgroundAlpha::ReadSingleMC( int par_index, int local_index, int globa
     MCfile->Close();
 
     // scale histograms with number of primaries
-	double primaries = f_j_parconf["parameters"][p]["mc"][c]["primaries"];
+	double primaries = f_j_parconf["parameters"][par_index]["mc"][local_index]["primaries"].asDouble();
 
     BCLog::OutSummary( Form( "Primaries: %.0f", primaries ) );
 
