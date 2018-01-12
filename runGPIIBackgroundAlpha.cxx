@@ -139,12 +139,11 @@ int main( int argc, char* argv[] )
     BCLog::OutSummary("Program ran successfully");
     BCLog::OutSummary("Exiting");
 
+    // close log file
+    BCLog::CloseLog();
     delete m;
     delete summary;
     delete mout;
-
-    // close log file
-//    BCLog::CloseLog();
 
     return 0;
 }
