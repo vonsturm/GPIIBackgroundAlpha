@@ -294,6 +294,8 @@ int GPIIBackgroundAlpha::WriteDataToFileForFastAccess( string outfilename )
 
     outfile->Close();
 
+    BCLog::OutSummary( Form( "Data histograms written to file: %s", outfilename.c_str() ) );
+
     // Write to run livetimes to json files
     Json::Value j_RunLiveTime;
 
@@ -314,6 +316,8 @@ int GPIIBackgroundAlpha::WriteDataToFileForFastAccess( string outfilename )
 
     runLTconf.close();
 
+    BCLog::OutSummary( Form( "Run Livetimes written to file: %s", runLTconfname.c_str() ) );
+
     // Write to detector livetimes to json files
     Json::Value j_DetectorLiveTime;
 
@@ -332,6 +336,8 @@ int GPIIBackgroundAlpha::WriteDataToFileForFastAccess( string outfilename )
     detLTconf << j_DetectorLiveTime;
 
     detLTconf.close();
+
+    BCLog::OutSummary( Form( "Detector Livetimes written to file: %s", detLTconfname.c_str() ) );
 
     return 0;
 }
