@@ -144,7 +144,7 @@ int main( int argc, char* argv[] )
     delete mout;
 
     // close log file
-    BCLog::CloseLog();
+//    BCLog::CloseLog();
 
     return 0;
 }
