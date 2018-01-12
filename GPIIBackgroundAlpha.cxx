@@ -1043,17 +1043,17 @@ string GPIIBackgroundAlpha::GetOutputDirectory()
 {
     string parconf = f_j_masterconf["parconf"].asString();
     int from = parconf.find_last_of('/')+1;
-    int length = parconf.find_last_of("-parconf.json") - from;
+    int length = parconf.find_last_of('-') - from;
     string dir_parconf = parconf.substr( from, length );
 
     string detconf = f_j_masterconf["detconf"].asString();
     from = detconf.find_last_of('/')+1;
-    length = detconf.find_last_of("-detconf.json") - from;
+    length = detconf.find_last_of('-') - from;
     string dir_detconf = detconf.substr( from, length );
 
     string runconf = f_j_masterconf["runconf"].asString();
     from = runconf.find_last_of('/')+1;
-    length = runconf.find_last_of("-runconf.json") - from;
+    length = runconf.find_last_of('-') - from;
     string dir_runconf = runconf.substr( from, length );
 
     string precision = f_j_masterconf["precision"].asString();
@@ -1076,17 +1076,17 @@ std::string GPIIBackgroundAlpha::GetOutputFilenameBase()
 {
     string parconf = f_j_masterconf["parconf"].asString();
     int from = parconf.find_last_of('/')+1;
-    int length = parconf.find_last_of("-parconf.json") - from;
+    int length = parconf.find_last_of('-') - from;
     string dir_parconf = parconf.substr( from, length );
 
     string detconf = f_j_masterconf["detconf"].asString();
     from = detconf.find_last_of('/')+1;
-    length = detconf.find_last_of("-detconf.json") - from;
+    length = detconf.find_last_of('-') - from;
     string dir_detconf = detconf.substr( from, length );
 
     string runconf = f_j_masterconf["runconf"].asString();
     from = runconf.find_last_of('/')+1;
-    length = runconf.find_last_of("-runconf.json") - from;
+    length = runconf.find_last_of('-') - from;
     string dir_runconf = runconf.substr( from, length );
 
     string precision = f_j_masterconf["precision"].asString();
