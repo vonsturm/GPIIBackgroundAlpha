@@ -130,8 +130,8 @@ int main( int argc, char* argv[] )
 //    m->DumpHistosAndInfo( m->GetBestFitParameters() );
 
     // Caluculate p-Value
-//    double pvalue = m->EstimatePValue();
-//    BCLog::OutSummary( Form(" --> p-value : %.6g", pvalue) );
+    double pvalue = m->EstimatePValue();
+    BCLog::OutSummary( Form(" --> p-value : %.6g", pvalue) );
 
     BCLog::OutSummary("Program ran successfully");
     BCLog::OutSummary("Exiting");
