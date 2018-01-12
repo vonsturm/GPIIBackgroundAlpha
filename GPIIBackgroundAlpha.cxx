@@ -156,7 +156,7 @@ void GPIIBackgroundAlpha::DefineParameters()
 	{
         // skip parameter if requested
         bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
-        if( !useparameter ) { nParametersSkipped++; continue; }
+        if( !useparameter ) { if( f_verbosity > 0 ) cout << "Parameter " << p << " skipped " << endl; nParametersSkipped++; continue; }
 
 		string name = f_j_parconf["parameters"][p]["name"].asString();
 		double min = f_j_parconf["parameters"][p]["min"].asDouble();
@@ -174,7 +174,7 @@ void GPIIBackgroundAlpha::DefineParameters()
 		}
 	}
 
-
+    return;
 }
 
 // ---------------------------------------------------------
@@ -551,9 +551,14 @@ int GPIIBackgroundAlpha::ReadMC()
 
 	// loop over parameters
 	int index = 0;
+    int nParametersSkipped = 0;
 
 	for( int p = 0; p < f_npars; p++ )
 	{
+        // skip parameter if requested
+        bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
+        if( !useparameter ) { nParametersSkipped++; continue; }
+
 		int ncorr = f_j_parconf["parameters"][p]["mc"].size();
 
 		for( int c = 0; c < ncorr; c++ )
