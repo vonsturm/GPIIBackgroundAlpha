@@ -587,7 +587,7 @@ int GPIIBackgroundAlpha::ReadSingleMC( int par_index, int local_index, int globa
     BCLog::OutSummary(  Form( "parameter: %d", par_index  ) );
     BCLog::OutSummary(  Form( "local index: %d", local_index ) );
     BCLog::OutSummary(  Form( "global index: %d", global_index ) );
-    BCLog::OutSummary(  Form( "File: %s", filename.c_str() ) ;
+    BCLog::OutSummary(  Form( "File: %s", filename.c_str() ) );
     BCLog::OutSummary(  Form( "Histogram: %s", histoname.c_str() ) );
 
     // open file
