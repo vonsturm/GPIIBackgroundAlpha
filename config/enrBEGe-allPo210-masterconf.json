@@ -10,7 +10,7 @@
     "ROI" : { "from" : 2014.0, "to" : 2064.0 },
 	"precision" : "kLow",
 	"parconf" : "./config/allPo210-parconf.json",
-	"runconf" : "./config/test-runlist.json",
+	"runconf" : "./config/all-runconf.json",
 	"detconf" : "./config/enrBEGe-detlist.json",
 	"envconf" : "./config/mpik-env.json"
 }

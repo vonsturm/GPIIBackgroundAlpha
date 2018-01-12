@@ -19,6 +19,7 @@
         },
         {
             "name" : "par1_Po210_pPlus_100nm",
+            "use" : false,
             "min" : 0.0,
             "max" : 100.0,
             "nbins" : 100,
@@ -33,6 +34,7 @@
         },
         {
             "name" : "par2_Po210_pPlus_200nm",
+            "use" : false,
             "min" : 0.0,
             "max" : 100.0,
             "nbins" : 100,
@@ -131,6 +133,7 @@
         },
         {
             "name" : "par9_Po210_pPlus_900nm",
+            "use" : false,
             "min" : 0.0,
             "max" : 100.0,
             "nbins" : 100,
@@ -145,6 +148,7 @@
         },
         {
             "name" : "par10_Po210_pPlus_1000nm",
+            "use" : false,
             "min" : 0.0,
             "max" : 100.0,
             "nbins" : 100,
