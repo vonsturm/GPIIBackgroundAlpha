@@ -531,6 +531,8 @@ int GPIIBackgroundAlpha::FillDataArray()
       f_upperlimits.push_back(upperlimit);
   }
 
+  BCLog::OutSummary( "Data arrays filled" );
+
   return 0;
 }
 
