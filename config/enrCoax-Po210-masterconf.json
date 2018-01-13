@@ -9,7 +9,7 @@
     "MCMC-write-chain" : true,
     "ROI" : { "from" : 2014.0, "to" : 2064.0 },
 	"precision" : "kMedium",
-    "update-parameters" : true,
+    "update-parameters" : false,
 	"parconf" : "./config/enrCoaxPo210-parconf.json",
 	"runconf" : "./config/all-runconf.json",
 	"detconf" : "./config/enrCoax-detlist.json",
