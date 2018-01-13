@@ -155,10 +155,14 @@ void GPIIBackgroundAlpha::DefineParameters()
 	for( unsigned int p = 0; p < f_npars; p++ )
 	{
         // skip parameter if requested
-        bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
-        if( !useparameter ) { if( f_verbosity > 0 ) cout << "Parameter " << p << " skipped " << endl; nParametersSkipped++; continue; }
+        if( SkipParameter(p) )
+        {
+            if( f_verbosity > 0 ) cout << "Parameter " << p << " skipped " << endl;
+            nParametersSkipped++;
+            continue;
+        }
 
-		string name = f_j_parconf["parameters"][p]["name"].asString();
+		string name = ParameterName(p);
 		double min = f_j_parconf["parameters"][p]["min"].asDouble();
 		double max = f_j_parconf["parameters"][p]["max"].asDouble();
 		int nbins = f_j_parconf["parameters"][p]["nbins"].asInt();
@@ -570,7 +574,7 @@ int GPIIBackgroundAlpha::InitializeMCHistograms()
 
 	for( unsigned int p = 0; p < f_npars; p++ )
 	{
-		string pname = f_j_parconf["parameters"][p]["name"].asString();
+		string pname = ParameterName(p);
 		int ncorrelations = f_j_parconf["parameters"][p]["mc"].size();
 		nMChistos += ncorrelations;
 
@@ -626,8 +630,7 @@ int GPIIBackgroundAlpha::ReadMC()
 	for( unsigned int p = 0; p < f_npars; p++ )
 	{
         // skip parameter if requested
-        bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
-        if( !useparameter ) { nParametersSkipped++; continue; }
+        if( SkipParameter(p) ) { nParametersSkipped++; continue; }
 
 		int ncorr = f_j_parconf["parameters"][p]["mc"].size();
 
@@ -750,8 +753,7 @@ double GPIIBackgroundAlpha::LogLikelihood(const vector <double> & parameters)
         for( unsigned int p = 0; p < f_npars; p++ )
         {
             // skip parameter if requested
-            bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
-            if( !useparameter ) { nParametersSkipped++; continue; }
+            if( SkipParameter(p) ) { nParametersSkipped++; continue; }
 
             int index = p-nParametersSkipped;
 
@@ -788,8 +790,7 @@ double GPIIBackgroundAlpha::LogAPrioriProbability(const vector<double> &paramete
   for( unsigned int p = 0; p < f_npars; p++ )
   {
       // skip parameter if requested
-      bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
-      if( !useparameter ) continue;
+      if( SkipParameter(p) ) continue;
 
 
       double range = GetParameter(p-nParametersSkipped)->GetRangeWidth();
@@ -836,8 +837,7 @@ double GPIIBackgroundAlpha::EstimatePValue()
         for( unsigned int p = 0; p < f_npars; p++)
         {
             // skip parameter if requested
-            bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
-            if( !useparameter ) { nParametersSkipped++; continue; }
+            if( SkipParameter(p) ) { nParametersSkipped++; continue; }
 
             int index = p-nParametersSkipped;
 
@@ -916,6 +916,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
     rootOut->cd();
 
     const vector<double> parameters = GetBestFitParameters();
+    const vector<double> parameters_error = GetBestFitParameterErrors();
     const vector<double> mparameters = GetBestFitParametersMarginalized();
 
     if( f_verbosity > 0 )
@@ -952,8 +953,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
     for( unsigned int p = 0; p < f_npars; p++ )
     {
         // skip parameter if requested
-        bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
-        if( !useparameter ) { nParametersSkipped++; continue; }
+        if( SkipParameter(p) ) { nParametersSkipped++; continue; }
 
         int index = p-nParametersSkipped;
 
@@ -1077,10 +1077,9 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
     for( unsigned int p = 0; p < f_npars; p++)
     {
         // skip parameter if requested
-        bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
-        if( !useparameter ) { nParametersSkipped++; continue; }
+        if( SkipParameter(p) ) { nParametersSkipped++; continue; }
 
-        name = f_j_parconf["parameters"][p]["name"].asString();
+        name = ParameterName(p);
 
         index = p - nParametersSkipped;
 
@@ -1115,11 +1114,26 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
     // events info
     cout << "---------------------------------------------" << endl;
     cout << "---------------------------------------------" << endl;
-    for( unsigned int j = 0; j < eventsMC.size(); j++ )
+    int nHistosRead = 0;
+    int nParametersSkipped = 0;
+
+    for( unsigned int p = 0; p < f_npars; p++ )
     {
-        cout << "MC " << j << ":" << endl;
-        cout << "\tevents (" << f_hemin << " - " << f_hemax << "): " << eventsMC[j] << endl;
-        cout << "\tevents (0 - 7500): " << eventsMC_all[j] << endl;
+        // skip parameter if requested
+        if( SkipParameter(p) ) { nParametersSkipped++; continue; }
+
+        int index = p-nParametersSkipped;
+
+        int ncorrelations = f_j_parconf["parameters"][p]["mc"].size();
+
+        cout << "Par: " << ParameterName(p) << endl;
+
+        for( int c = 0; c < ncorrelations; c++ )
+        {
+            cout "Hist: " << f_j_parconf["parameters"][p]["mc"][c]["histoname"].asString();
+            cout << "\tevents (" << f_hemin << " - " << f_hemax << "): " << eventsMC[nHistosRead] << endl;
+            cout << "\tevents (0 - 7500): " << eventsMC_all[nHistosRead++] << endl;
+        }
     }
     cout << "Total events in MC: " << hMC->Integral() << endl;
     cout << "Events in data: " << f_hdataSum->Integral() << endl;
@@ -1283,4 +1297,16 @@ string GPIIBackgroundAlpha::GetDetConfLTName()
     detLTconfname += "-DetLT.json";
 
     return detLTconfname;
+}
+
+bool GPIIBackgroundAlpha::SkipParameter( int p )
+{
+    bool use = f_j_parconf["parameters"][p].get("use",true).asBool();
+    return !use;
+}
+
+string GPIIBackgroundAlpha::ParameterName( int p )
+{
+    string name = f_j_parconf["parameters"][p]["name"].asString();
+    return name;
 }
