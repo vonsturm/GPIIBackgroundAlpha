@@ -1,6 +1,6 @@
 {
 	"verbosity" : 1,
-	"reprocess-data" : { "force" : false, "filename" : "./data/enrCoax-allruns-data.root" },
+	"reprocess-data" : { "force" : false, "filename" : "./data/natCoax-allruns-data.root" },
     "output-directory" : "./results",
 	"fitoverflow" : false,
 	"skipblinded" : { "do" : false, "from" : 2000.0, "to" : 2150.0 },
@@ -10,7 +10,7 @@
     "ROI" : { "from" : 2014.0, "to" : 2064.0 },
 	"precision" : "kLow",
     "update-parameters" : true,
-	"parconf" : "./config/enrCoaxPo210-parconf.json",
+	"parconf" : "./config/natCoaxPo210-parconf.json",
 	"runconf" : "./config/all-runconf.json",
 	"detconf" : "./config/enrCoax-detlist.json",
 	"envconf" : "./config/mpik-env.json"
