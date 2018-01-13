@@ -64,7 +64,7 @@
         },
         {
             "name" : "par4_Po210_pPlus_400nm",
-            "use" : false,
+            "use" : true,
             "min" : 0.0,
             "max" : 1000.0,
             "nbins" : 1000,
@@ -93,7 +93,7 @@
         },
         {
             "name" : "par6_Po210_pPlus_600nm",
-            "use" : false,
+            "use" : true,
             "min" : 0.0,
             "max" : 1000.0,
             "nbins" : 1000,
@@ -108,7 +108,7 @@
         },
         {
             "name" : "par7_Po210_pPlus_700nm",
-            "use" : false,
+            "use" : true,
             "min" : 0.0,
             "max" : 1000.0,
             "nbins" : 1000,

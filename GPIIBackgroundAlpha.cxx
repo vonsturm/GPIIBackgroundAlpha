@@ -703,8 +703,8 @@ int GPIIBackgroundAlpha::ReadSingleMC( int par_index, int local_index, int globa
     if( f_verbosity > 0 )
     {
         cout << "fMC scaled integral: " << f_MC[global_index] -> Integral() << endl;
-        cout << "fMC_fine scaled integral: " << f_MC[global_index] -> Integral() << endl;
-        cout << "fMC_all scaled integral: " << f_MC[global_index] -> Integral() << endl;
+        cout << "fMC_fine scaled integral: " << f_MC_fine[global_index] -> Integral() << endl;
+        cout << "fMC_all scaled integral: " << f_MC_all[global_index] -> Integral() << endl;
     }
 
     BCLog::OutSummary( "--------------------------------------------" );
