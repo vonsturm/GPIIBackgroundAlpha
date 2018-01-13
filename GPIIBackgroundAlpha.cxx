@@ -726,6 +726,8 @@ int GPIIBackgroundAlpha::FillMCArrays()
       	}
   	}
 
+    BCLog::OutSummary( "MC arrays filled" );
+
   	return 0;
 }
 
