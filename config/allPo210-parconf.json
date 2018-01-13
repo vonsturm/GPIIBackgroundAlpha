@@ -6,7 +6,7 @@
             "use" : false,
             "min" : 0.0,
             "max" : 1000.0,
-            "nbins" : 500,
+            "nbins" : 100,
             "mc" :
             [
                 {
@@ -22,7 +22,7 @@
             "use" : false,
             "min" : 0.0,
             "max" : 1000.0,
-            "nbins" : 500,
+            "nbins" : 100,
             "mc" :
             [
                 {
@@ -37,7 +37,7 @@
             "use" : false,
             "min" : 0.0,
             "max" : 1000.0,
-            "nbins" : 500,
+            "nbins" : 100,
             "mc" :
             [
                 {
@@ -49,10 +49,10 @@
         },
         {
             "name" : "par3_Po210_pPlus_300nm",
-            "use" : true,
+            "use" : false,
             "min" : 0.0,
             "max" : 1000.0,
-            "nbins" : 500,
+            "nbins" : 100,
             "mc" :
             [
                 {
@@ -67,7 +67,7 @@
             "use" : true,
             "min" : 0.0,
             "max" : 1000.0,
-            "nbins" : 500,
+            "nbins" : 100,
             "mc" :
             [
                 {
@@ -82,7 +82,7 @@
             "use" : true,
             "min" : 0.0,
             "max" : 1000.0,
-            "nbins" : 500,
+            "nbins" : 100,
             "mc" :
             [
                 {
@@ -97,7 +97,7 @@
             "use" : true,
             "min" : 0.0,
             "max" : 1000.0,
-            "nbins" : 500,
+            "nbins" : 100,
             "mc" :
             [
                 {
@@ -112,7 +112,7 @@
             "use" : true,
             "min" : 0.0,
             "max" : 1000.0,
-            "nbins" : 500,
+            "nbins" : 100,
             "mc" :
             [
                 {
@@ -127,7 +127,7 @@
             "use" : true,
             "min" : 0.0,
             "max" : 1000.0,
-            "nbins" : 500,
+            "nbins" : 100,
             "mc" :
             [
                 {
@@ -139,10 +139,10 @@
         },
         {
             "name" : "par9_Po210_pPlus_900nm",
-            "use" : true,
+            "use" : false,
             "min" : 0.0,
             "max" : 1000.0,
-            "nbins" : 500,
+            "nbins" : 100,
             "mc" :
             [
                 {
@@ -154,10 +154,10 @@
         },
         {
             "name" : "par10_Po210_pPlus_1000nm",
-            "use" : true,
+            "use" : false,
             "min" : 0.0,
             "max" : 1000.0,
-            "nbins" : 500,
+            "nbins" : 100,
             "mc" :
             [
                 {
