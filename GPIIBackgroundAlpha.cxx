@@ -923,15 +923,13 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
     {
         cout << "Best fit parameters: " << endl;
         if( f_verbosity > 0 )
+        {
             for( unsigned int i = 0; i < parameters.size(); i++ )
-                cout << "\tPar " << i << ": " << parameters[i] << "+-" << parameters_error[i] << "Bq" << endl;
-/*
-        const vector<double> mparameters = GetBestFitParametersMarginalized();
-        cout << "Marginalized fit parameters: " << endl;
-        if( f_verbosity > 0 )
-            for( unsigned int i = 0; i < mparameters.size(); i++ )
-                cout << "\tPar " << i << ": " << mparameters[i] << endl;
-*/
+            {
+                cout << setprecision(2) << "\tPar " << i << ": ";
+                cout << parameters[i] << "+-" << parameters_error[i] << endl;
+            }
+        }
     }
 
     int bins = int( f_hemax - f_hemin );
