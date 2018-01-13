@@ -1145,6 +1145,14 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
   rootOut->Close();
 }
 
+int GPIIBackgroundAlpha::UpdateParameters()
+{
+    const vector<double> parameters = GetBestFitParameters();
+    const vector<double> parameters_error = GetBestFitParameterErrors();
+
+    return 0;
+}
+
 
 // ---------------------------------------------------------
 Json::Value GPIIBackgroundAlpha::GetJsonValueFromFile( string filename )
