@@ -243,18 +243,27 @@ int GPIIBackgroundAlpha::ReadDataFromHistogram( string infilename )
 	return stat;
     }
 
-    f_hdataSum      = (TH1D*) file->Get("hSum");
-    f_hdataSum_fine = (TH1D*) file->Get("hSum_fine");
-    f_hdataSum_all  = (TH1D*) file->Get("hSum_all");
-
     for( unsigned int d = 0; d < f_ndets; d++ )
     {
         string det = f_j_detconf["detectors"][d].asString();
 
-        f_hdata[det] = (TH1D*) file->Get( Form("hSingle_%s", det.c_str()) );
+        f_hdata[det] -> Add( (TH1D*) file->Get( Form("hSingle_%s", det.c_str()) ) );
     }
 
+    f_hdataSum_all->Add( (TH1D*)file->Get("hSum_all") );
+
     file->Close();
+
+    int nbins = f_hdataSum_all->GetNbinsX();
+
+	for( int b = 1; b <= nbins; b++ )
+	{
+		double bincontent = f_hdataSum_all->GetBinContent( b );
+		double bincenter = f_hdataSum_all->GetBinCenter( b );
+
+        f_hdataSum -> Fill( f_hdataSum -> FindBin( bincenter ), bincontent );
+        f_hdataSum_fine -> Fill( f_hdataSum_fine -> FindBin( bincenter ), bincontent );
+    }
 
     BCLog::OutSummary( Form( "Data histograms read from file: %s", infilename.c_str() ) );
 
