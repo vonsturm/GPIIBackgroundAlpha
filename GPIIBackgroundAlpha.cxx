@@ -247,12 +247,18 @@ int GPIIBackgroundAlpha::ReadDataFromHistogram( string infilename )
     {
         string det = f_j_detconf["detectors"][d].asString();
 
-        f_hdata[det] -> Add( (TH1D*) file->Get( Form("hSingle_%s", det.c_str()) ) );
+        TH1D * hh = (TH1D*) file->Get( Form("hSingle_%s", det.c_str()) );
+
+        cout << "In file " << det << ": " << hh->Integral() << endl;
+
+        f_hdata[det] -> Add( hh );
     }
 
-    f_hdataSum_all->Add( (TH1D*)file->Get("hSum_all") );
+    TH1D * hsum = (TH1D*)file->Get("hSum_all");
 
-    file->Close();
+    cout << "In file sum: " <<  hsum -> Integral() << endl;
+
+    f_hdataSum_all->Add( hsum );
 
     int nbins = f_hdataSum_all->GetNbinsX();
 
@@ -265,8 +271,14 @@ int GPIIBackgroundAlpha::ReadDataFromHistogram( string infilename )
         f_hdataSum_fine -> Fill( bincenter, bincontent );
     }
 
+    file->Close();
+
     if( f_verbosity > 0 )
+    {
         cout << "Data histo integral: " << f_hdataSum -> Integral() << endl;
+        cout << "Data fine histo integral: " << f_hdataSum_fine -> Integral() << endl;
+        cout << "Data all histo integral: " << f_hdataSum_all -> Integral() << endl;
+    }
 
     BCLog::OutSummary( Form( "Data histograms read from file: %s", infilename.c_str() ) );
 
