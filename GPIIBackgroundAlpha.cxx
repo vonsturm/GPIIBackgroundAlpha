@@ -1374,7 +1374,7 @@ double GPIIBackgroundAlpha::GeneratedPrimaries( int p, int c )
 
 bool GPIIBackgroundAlpha::FitOverflowBin()
 {
-    bool f = f_j_master["fitoverflow"].asBool();
+    bool f = f_j_masterconf["fitoverflow"].asBool();
 
     return f;
 }
