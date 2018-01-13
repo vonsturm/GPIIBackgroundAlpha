@@ -905,7 +905,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string ro
     int binning = (int)f_j_masterconf["histo"]["binning"].asDouble();
 
     // write the single detector data spectra
-    for(int d = 0; d < f_ndets; d++)
+    for( unsigned int d = 0; d < f_ndets; d++ )
     {
         string det = f_j_detconf["detectors"][d].asString();
 
