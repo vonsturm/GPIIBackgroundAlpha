@@ -1,6 +1,6 @@
 {
 	"verbosity" : 1,
-	"reprocess-data" : { "force" : false, "filename" : "./data/enrBEGe-data.root" },
+	"reprocess-data" : { "force" : false, "filename" : "./data/enrCoax-allruns-data.root" },
     "output-directory" : "./results",
 	"fitoverflow" : false,
 	"skipblinded" : { "do" : false, "from" : 2000.0, "to" : 2150.0 },
@@ -8,10 +8,10 @@
     "MCMC-fill-histograms" : true,
     "MCMC-write-chain" : true,
     "ROI" : { "from" : 2014.0, "to" : 2064.0 },
-	"precision" : "kMedium",
+	"precision" : "kLow",
     "update-parameters" : true,
 	"parconf" : "./config/allPo210-parconf.json",
 	"runconf" : "./config/all-runconf.json",
-	"detconf" : "./config/enrBEGe-detlist.json",
+	"detconf" : "./config/enrCoax-detlist.json",
 	"envconf" : "./config/mpik-env.json"
 }
