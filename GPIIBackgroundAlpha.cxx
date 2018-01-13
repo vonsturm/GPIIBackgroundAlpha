@@ -232,13 +232,13 @@ int GPIIBackgroundAlpha::ReadDataFromHistogram( string infilename )
     //      * histogram from file (from root file) with binning possibly changed
     int stat = 0;
 
-    TFile * file = new TFile( infile.c_str(), "READ" );
+    TFile * file = new TFile( infilename.c_str(), "READ" );
 
-    if( !file.IsOpen() )
+    if( !file->IsOpen() )
     {
         BCLog::OutSummary( Form( "File not found: %s", infilename.c_str()) );
         BCLog::OutSummary( "Reading data from events" );
-        stat = ReadDataFromEvents( filename );
+        stat = ReadDataFromEvents( infilename );
     }
 
     f_hdataSum      = (TH1D*) file->Get("hSum");
