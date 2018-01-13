@@ -915,18 +915,19 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
 
     rootOut->cd();
 
+    const vector<double> parameters = GetBestFitParameters();
+    const vector<double> mparameters = GetBestFitParametersMarginalized();
+
     if( f_verbosity > 0 )
     {
         cout << "Best fit parameters: " << endl;
-        const vector<double> parameters = GetBestFitParameters();
         if( f_verbosity > 0 )
-            for( int i = 0; i < parameters.size(); i++ )
+            for( unsigned int i = 0; i < parameters.size(); i++ )
                 cout << "\tPar " << i << ": " << parameters[i] << endl;
 
         cout << "Marginalized fit parameters: " << endl;
-        const vector<double> mparameters = GetBestFitParametersMarginalized();
         if( f_verbosity > 0 )
-            for( int i = 0; i < mparameters.size(); i++ )
+            for( unsigned int i = 0; i < mparameters.size(); i++ )
                 cout << "\tPar " << i << ": " << mparameters[i] << endl;
     }
 
@@ -1114,7 +1115,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
     // events info
     cout << "---------------------------------------------" << endl;
     cout << "---------------------------------------------" << endl;
-    for( int j = 0; j < eventsMC.size(); j++ )
+    for( unsigned int j = 0; j < eventsMC.size(); j++ )
     {
         cout << "MC " << j << ":" << endl;
         cout << "\tevents (" << f_hemin << " - " << f_hemax << "): " << eventsMC[j] << endl;
