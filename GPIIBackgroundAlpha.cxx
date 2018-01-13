@@ -231,10 +231,20 @@ int GPIIBackgroundAlpha::ReadDataFromHistogram( string infilename )
     //      * run livetimes (from json file),
     //      * histogram from file (from root file) with binning possibly changed
 
-    cout << "IMPLEMENT ME" << endl;
-    exit(EXIT_SUCCESS);
+    int stat = 0;
 
-    return 0;
+    TFile * file = new TFile( infile.c_str(), "READ" );
+
+    if( !file.IsOpen() )
+    {
+        BCLog::OutSummary( Form( "File not found: %s", infilename.c_str()) );
+        BCLog::OutSummary( "Reading data from events" );
+        stat = ReadDataFromEvents( filename );
+    }
+
+    file->Get();
+
+    return stat;
 }
 
 // ---------------------------------------------------------
@@ -896,7 +906,11 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string ro
         nHistosRead += ncorrelations;
     }
 
-    if( f_npars != p_MC.size() )
+    cout << "Parameters: " << f_npars << endl;
+    cout << "Of which skipped: " << nParametersSkipped << endl;
+    cout << "Combined MC pdfs" << p_MC.size() << endl;
+
+    if( (f_npars-nParametersSkipped) != p_MC.size() )
     {
         cout << "Something went wrong in preparing the MC histograms" << endl;
         exit(EXIT_FAILURE);
