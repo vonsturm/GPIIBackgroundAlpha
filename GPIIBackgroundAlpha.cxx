@@ -1130,7 +1130,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
 
         for( int c = 0; c < ncorrelations; c++ )
         {
-            cout "Hist: " << f_j_parconf["parameters"][p]["mc"][c]["histoname"].asString();
+            cout << "Hist: " << f_j_parconf["parameters"][p]["mc"][c]["histoname"].asString() << endl;
             cout << "\tevents (" << f_hemin << " - " << f_hemax << "): " << eventsMC[nHistosRead] << endl;
             cout << "\tevents (0 - 7500): " << eventsMC_all[nHistosRead++] << endl;
         }
