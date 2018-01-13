@@ -1168,13 +1168,16 @@ int GPIIBackgroundAlpha::UpdateParameters()
         updatedpars["parameters"][p]["max"] = newmax;
     }
 
-    ofstream file( "testupdate.json" );
+    string filename = "testupdate.json"
 
+    if( f_j_masterconf["update-parameters"].asBool() )
+        filename = f_j_masterconf["parconf"];
+
+    ofstream file( filename.c_str() );
     file << updatedpars;
-
     file.close();
 
-    cout << "Updated Parameters written to file: testupdate.json" << endl;
+    cout << "Updated Parameters written to file: " << filename << endl;
 
     return 0;
 }
