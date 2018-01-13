@@ -874,7 +874,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(std::vector<double> parameters, char
 
             hMC         ->Add( f_MC.at(iMC) );
             hMC_fine    ->Add( f_MC_fine.at(iMC) );
-            hMC_all     ->Add( f_MCall.at(iMC) );
+            hMC_all     ->Add( f_MC_all.at(iMC) );
 
             eventsMC.push_back( f_MC.at(iMC)->Integral() );
             eventsMC_all.push_back( f_MC_all.at(iMC)->Integral() );
@@ -887,9 +887,9 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(std::vector<double> parameters, char
             }
             else
             {
-                p_MC.back()->Add( f_MC.at( iMC );
-                p_MC_fine.back()->Add( f_MC_fine.at( iMC );
-                p_MC_all.back()->Add( f_MC_all.at( iMC );
+                p_MC.back()->Add( f_MC.at( iMC ) );
+                p_MC_fine.back()->Add( f_MC_fine.at( iMC ) );
+                p_MC_all.back()->Add( f_MC_all.at( iMC ) );
             }
         }
 
