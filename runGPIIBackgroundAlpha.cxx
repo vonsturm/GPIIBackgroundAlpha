@@ -129,8 +129,7 @@ int main( int argc, char* argv[] )
     string resu_filename = OUT_FILE_BASE; resu_filename += "_results.txt";
     m->PrintResults( resu_filename.c_str() );
 
-
-    // UpdateParameters();
+    UpdateParameters();
 
     string hist_filename = OUT_FILE_BASE; hist_filename += "_plots.root";
     m->DumpHistosAndInfo( hist_filename );

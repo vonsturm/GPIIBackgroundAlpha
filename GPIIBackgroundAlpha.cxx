@@ -10,6 +10,7 @@
 #include <fstream>
 #include <cmath>
 #include <string>
+#include <algorithm>
 
 // jsoncpp
 #include "json/value.h"
@@ -1149,6 +1150,31 @@ int GPIIBackgroundAlpha::UpdateParameters()
 {
     const vector<double> parameters = GetBestFitParameters();
     const vector<double> parameters_error = GetBestFitParameterErrors();
+
+    Json::Value updatedpars = f_j_parconf;
+
+    int nSkipped = 0;
+
+    for( int p = 0; p < f_npars; p++ )
+    {
+        if(SkipParameter(p)) { nSkipped++; continue; }
+
+        int index = p - nSkipped;
+
+        double newmin = max( 0., parameters[index] - 4 * parameters_error[index] );
+        double newmax = parameters[index] - 4 * parameters_error[index];
+
+        updatedpars["parameters"][p]["min"] = newmin;
+        updatedpars["parameters"][p]["min"] = newmax;
+    }
+
+    ofstream file( "testupdate.json" );
+
+    file << updatedpars;
+
+    file.close();
+
+    cout << "Updated Parameters written to file: testupdate.json" << endl;
 
     return 0;
 }
