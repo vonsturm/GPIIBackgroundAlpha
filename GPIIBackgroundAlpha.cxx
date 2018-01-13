@@ -221,6 +221,8 @@ int GPIIBackgroundAlpha::ReadData()
     else
         stat = ReadDataFromHistogram( filename );
 
+    FillDataArray();
+
     return stat;
 }
 
@@ -327,8 +329,6 @@ int GPIIBackgroundAlpha::ReadDataFromEvents( string outfilename )
 	}
 
     WriteDataToFileForFastAccess( outfilename );
-
-	FillDataArray();
 
 	return 0;
 }
