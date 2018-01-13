@@ -94,8 +94,12 @@ class GPIIBackgroundAlpha : public BCModel
       std::string GetRunConfLTName();
       std::string GetDetConfLTName();
 
+      // json config file manip
       bool SkipParameter( int p );
       std::string ParameterName( int p );
+      int NumberOfCorrelatedHistos( int p );
+      double WeightOfHistogram( int p, int c );
+      double GeneratedPrimaries( int p, int c );
 
       bool GetWriteMCMCChain(){ return f_j_masterconf["MCMC-write-chain"].asBool(); };
 
