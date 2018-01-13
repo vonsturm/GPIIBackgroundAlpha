@@ -105,6 +105,7 @@ int main( int argc, char* argv[] )
     // Marginalize all
     m->MarginalizeAll(BCIntegrate::kMargMetropolis);
 
+/*
     // find mode using Minuit using MCMC mode as starting point
     m->FindMode( m->GetBestFitParameters() );
 
@@ -129,7 +130,7 @@ int main( int argc, char* argv[] )
 
     string resu_filename = OUT_FILE_BASE; resu_filename += "_results.txt";
     m->PrintResults( resu_filename.c_str() );
-
+*/
     string hist_filename = OUT_FILE_BASE; hist_filename += "_plots.root";
     m->DumpHistosAndInfo( m->GetBestFitParameters(), hist_filename );
 
