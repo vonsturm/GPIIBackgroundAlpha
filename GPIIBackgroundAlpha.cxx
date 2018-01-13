@@ -918,7 +918,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string ro
     rootOut->cd();
 
     if( f_verbosity > 0 )
-        for( for i = 0; i < parameters.size(); i++ )
+        for( i = 0; i < parameters.size(); i++ )
             cout << "Par " << i << ": " << parameters[i] << endl;
 
     int bins = int( f_hemax - f_hemin );
