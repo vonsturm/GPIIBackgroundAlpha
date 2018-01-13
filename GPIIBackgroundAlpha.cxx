@@ -909,17 +909,21 @@ double GPIIBackgroundAlpha::EstimatePValue()
 // FIX ME update plots and output info
 void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
 {
-    const vector<double> parameters = GetBestFitParametersMarginalized();
-
     TFile* rootOut = new TFile( rootfilename.c_str(), "RECREATE" );
 
     if(!rootOut->IsOpen()) cout<<"No rootfile opened!"<<endl;
 
     rootOut->cd();
 
+    const vector<double> parameters = GetBestFitParameters();
     if( f_verbosity > 0 )
         for( int i = 0; i < parameters.size(); i++ )
             cout << "Par " << i << ": " << parameters[i] << endl;
+
+    const vector<double> mparameters = GetBestFitParametersMarginalized();
+    if( f_verbosity > 0 )
+        for( int i = 0; i < mparameters.size(); i++ )
+            cout << "Par " << i << ": " << mparameters[i] << endl;
 
     int bins = int( f_hemax - f_hemin );
     TH1D* hMC = new TH1D("hMC", "hMC", f_hnumbins, f_hemin, f_hemax);
