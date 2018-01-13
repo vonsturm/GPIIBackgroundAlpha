@@ -126,7 +126,7 @@ int main( int argc, char* argv[] )
     string corrmatrixfilename = OUT_FILE_BASE; corrmatrixfilename += "_corrmatrix.pdf";
 	summary -> PrintCorrelationMatrix( corrmatrixfilename.c_str() );
 
-/   string resu_filename = OUT_FILE_BASE; resu_filename += "_results.txt";
+    string resu_filename = OUT_FILE_BASE; resu_filename += "_results.txt";
     m->PrintResults( resu_filename.c_str() );
 
     string hist_filename = OUT_FILE_BASE; hist_filename += "_plots.root";
