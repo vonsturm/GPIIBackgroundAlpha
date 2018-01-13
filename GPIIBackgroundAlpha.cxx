@@ -753,15 +753,16 @@ double GPIIBackgroundAlpha::LogLikelihood(const std::vector <double> & parameter
             bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
             if( !useparameter ) { nParametersSkipped++; continue; }
 
+            int index = p-nParametersSkipped;
+
             int ncorrelations = f_j_parconf["parameters"][p]["mc"].size();
 
             for( int c = 0; c < ncorrelations; c++ )
             {
                 double weight = f_j_parconf["parameters"][p]["mc"][c].get("weight",1.0).asDouble();
-		        lambda += parameters[p-nParametersSkipped] * weight * f_vMC[ (nHistosRead + c)* f_hnumbins + ibin ];
+		        lambda += parameters[index] * weight * f_vMC[ nHistosRead * f_hnumbins + ibin ];
+                nHistosRead++;
             }
-
-		  nHistosRead += ncorrelations;
 	  }
 
       int bincontent = (int)f_vdata[ibin];
@@ -838,15 +839,16 @@ double GPIIBackgroundAlpha::EstimatePValue()
             bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
             if( !useparameter ) { nParametersSkipped++; continue; }
 
+            int index = p-nParametersSkipped;
+
             int ncorrelations = f_j_parconf["parameters"][p]["mc"].size();
 
             for( int c = 0; c < ncorrelations; c++ )
             {
                 double weight = f_j_parconf["parameters"][p]["mc"][c].get("weight",1.0).asDouble();
-                lambda += parameters[p-nParametersSkipped] * weight * f_vMC[ (nHistosRead + c)* f_hnumbins + ibin ];
+                lambda += parameters[index] * weight * f_vMC[ nHistosRead * f_hnumbins + ibin ];
+                nHistosRead++;
             }
-
-            nHistosRead += ncorrelations;
         }
 
         int counter = ibin;
@@ -937,7 +939,9 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string ro
         bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
         if( !useparameter ) { nParametersSkipped++; continue; }
 
-        double scale = parameters[p-nParametersSkipped];
+        int index = p-nParametersSkipped;
+
+        double scale = parameters[index];
 
         int ncorrelations = f_j_parconf["parameters"][p]["mc"].size();
 
