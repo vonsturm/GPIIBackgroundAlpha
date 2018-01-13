@@ -10,6 +10,7 @@ This is a BAT fit of the Alpha Background.
 Create shared library for ProgressBar
 
 ```
+cd $PROGRESS_BAR_DIR
 gcc -c -Wall -Werror -fpic ProgressBar.cc
 gcc -shared -o libProgressBar.so ProgressBar.cc
 ```
