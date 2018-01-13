@@ -681,18 +681,19 @@ int GPIIBackgroundAlpha::ReadSingleMC( int par_index, int local_index, int globa
 
     BCLog::OutSummary( Form( "Primaries: %.0f", primaries ) );
 
+    f_MC[global_index]      -> Scale(1./primaries);
+    f_MC_fine[global_index] -> Scale(1./primaries);
+    f_MC_all[global_index]  -> Scale(1./primaries);
+
     if( f_verbosity > 0 )
     {
-        cout << "fMC integral: " << f_MC[global_index] -> Integral() << endl;
-        cout << "fMC_fine integral: " << f_MC[global_index] -> Integral() << endl;
-        cout << "fMC_all integral: " << f_MC[global_index] -> Integral() << endl;
+        cout << "fMC scaled integral: " << f_MC[global_index] -> Integral() << endl;
+        cout << "fMC_fine scaled integral: " << f_MC[global_index] -> Integral() << endl;
+        cout << "fMC_all scaled integral: " << f_MC[global_index] -> Integral() << endl;
     }
 
     exit(EXIT_SUCCESS);
 
-    f_MC[global_index]      -> Scale(1./primaries);
-    f_MC_fine[global_index] -> Scale(1./primaries);
-    f_MC_all[global_index]  -> Scale(1./primaries);
     BCLog::OutSummary( "--------------------------------------------" );
 
 	return 0;
