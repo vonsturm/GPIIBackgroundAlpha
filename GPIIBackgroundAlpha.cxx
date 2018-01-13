@@ -655,9 +655,9 @@ int GPIIBackgroundAlpha::ReadSingleMC( int par_index, int local_index, int globa
 		double bincontent = MChisto->GetBinContent( b );
 		double bincenter = MChisto->GetBinCenter( b );
 
-        f_MC[global_index]      ->Fill( f_MC[global_index]      ->FindBin( bincenter ), bincontent );
-        f_MC_fine[global_index] ->Fill( f_MC_fine[global_index] ->FindBin( bincenter ), bincontent );
-        f_MC_all[global_index]  ->Fill( f_MC_all[global_index]  ->FindBin( bincenter ), bincontent );
+        f_MC[global_index]      -> Fill( f_MC[global_index]      ->FindBin( bincenter ), bincontent );
+        f_MC_fine[global_index] -> Fill( f_MC_fine[global_index] ->FindBin( bincenter ), bincontent );
+        f_MC_all[global_index]  -> Fill( f_MC_all[global_index]  ->FindBin( bincenter ), bincontent );
     }
 
     MCfile->Close();
@@ -667,10 +667,11 @@ int GPIIBackgroundAlpha::ReadSingleMC( int par_index, int local_index, int globa
 
     BCLog::OutSummary( Form( "Primaries: %.0f", primaries ) );
 
+    /*
     f_MC[global_index]      ->Scale(1./primaries);
     f_MC_fine[global_index] ->Scale(1./primaries);
     f_MC_all[global_index]  ->Scale(1./primaries);
-
+    */
     BCLog::OutSummary( "--------------------------------------------" );
 
 	return 0;
