@@ -1376,5 +1376,7 @@ bool GPIIBackgroundAlpha::FitOverflowBin()
 {
     bool f = f_j_masterconf["fitoverflow"].asBool();
 
+    if(f) BCLog::OutSummary( "Fitting WITH OVERFLOW bin" );
+
     return f;
 }
