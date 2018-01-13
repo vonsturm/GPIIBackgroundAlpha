@@ -939,7 +939,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string ro
 
     cout << "Parameters: " << f_npars << endl;
     cout << "Of which skipped: " << nParametersSkipped << endl;
-    cout << "Combined MC pdfs" << p_MC.size() << endl;
+    cout << "Combined MC pdfs: " << p_MC.size() << endl;
 
     if( (f_npars-nParametersSkipped) != p_MC.size() )
     {
@@ -948,6 +948,8 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string ro
     }
 
     int binning = (int)f_j_masterconf["histo"]["binning"].asDouble();
+
+    cout << "control1" << endl;
 
     // write the single detector data spectra
     for( unsigned int d = 0; d < f_ndets; d++ )
@@ -959,6 +961,8 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string ro
         f_hdata.at(det)->GetYaxis()->SetTitle(Form("cts/(%d keV)",binning));
         f_hdata.at(det)->Write();
     }
+
+    cout << "control2" << endl;
 
     // write the finer binning data histogram
     f_hdataSum_fine->SetLineWidth(2);
@@ -1013,26 +1017,38 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string ro
 
     //the single contributions
     string name;
+    int index = 0;
+    nParametersSkipped = 0;
+
+    cout << "control3" << endl;
 
     for( unsigned int p = 0; p < f_npars; p++)
     {
+        // skip parameter if requested
+        bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
+        if( !useparameter ) { nParametersSkipped++; continue; }
+
         name = f_j_parconf["parameters"][p]["name"].asString();
 
-        p_MC.at(p)->SetLineWidth(2);
+        index = p - nParametersSkipped;
 
-        int pp = p/8;
-        p_MC.at(p)->SetLineColor( p%8 + 2 );
-        p_MC.at(p)->SetLineStyle( pp + 1 );
+        p_MC.at(index)->SetLineWidth(2);
 
-        p_MC.at(p)->Draw("same");
-        p_MC.at(p)->GetXaxis()->SetTitle("energy (keV)");
-        p_MC.at(p)->GetYaxis()->SetTitle( Form("cts/(%d keV)",binning) );
-        legend->AddEntry(p_MC.at(p),Form("%s",name.c_str()),"l");
+        int pp = index/8;
+        p_MC.at(index)->SetLineColor( index%8 + 2 );
+        p_MC.at(index)->SetLineStyle( pp + 1 );
 
-        p_MC.at(p)->Write();
+        p_MC.at(index)->Draw("same");
+        p_MC.at(index)->GetXaxis()->SetTitle("energy (keV)");
+        p_MC.at(index)->GetYaxis()->SetTitle( Form("cts/(%d keV)",binning) );
+        legend->AddEntry(p_MC.at(index),Form("%s",name.c_str()),"l");
+
+        p_MC.at(index)->Write();
     }
 
     legend->Draw();
+
+    cout << "control4" << endl;
 
     canvas->cd(2);
     hresiduals->Add(f_hdataSum);
