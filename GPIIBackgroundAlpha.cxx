@@ -915,15 +915,20 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
 
     rootOut->cd();
 
-    const vector<double> parameters = GetBestFitParameters();
     if( f_verbosity > 0 )
-        for( int i = 0; i < parameters.size(); i++ )
-            cout << "Par " << i << ": " << parameters[i] << endl;
+    {
+        cout << "Best fit parameters: " << endl;
+        const vector<double> parameters = GetBestFitParameters();
+        if( f_verbosity > 0 )
+            for( int i = 0; i < parameters.size(); i++ )
+                cout << "\tPar " << i << ": " << parameters[i] << endl;
 
-    const vector<double> mparameters = GetBestFitParametersMarginalized();
-    if( f_verbosity > 0 )
-        for( int i = 0; i < mparameters.size(); i++ )
-            cout << "Par " << i << ": " << mparameters[i] << endl;
+        cout << "Marginalized fit parameters: " << endl;
+        const vector<double> mparameters = GetBestFitParametersMarginalized();
+        if( f_verbosity > 0 )
+            for( int i = 0; i < mparameters.size(); i++ )
+                cout << "\tPar " << i << ": " << mparameters[i] << endl;
+    }
 
     int bins = int( f_hemax - f_hemin );
     TH1D* hMC = new TH1D("hMC", "hMC", f_hnumbins, f_hemin, f_hemax);
