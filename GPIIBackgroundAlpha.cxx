@@ -696,7 +696,7 @@ int GPIIBackgroundAlpha::ReadSingleMC( int par_index, int local_index, int globa
     MCfile->Close();
 
     // scale histograms with number of primaries
-	double primaries = f_j_parconf["parameters"][par_index]["mc"][local_index]["primaries"].asDouble();
+	double primaries = GeneratedPrimaries(par_index,local_index);
 
     BCLog::OutSummary( Form( "Primaries: %.0f", primaries ) );
 
@@ -1357,4 +1357,11 @@ double GPIIBackgroundAlpha::WeightOfHistogram( int p, int c )
     double weight = f_j_parconf["parameters"][p]["mc"][c].get("weight",1.0).asDouble();
 
     return weight;
+}
+
+double GPIIBackgroundAlpha::GeneratedPrimaries( int p, int c )
+{
+    double primaries = f_j_parconf["parameters"][p]["mc"][c]["primaries"].asDouble();
+
+    return primaries;
 }
