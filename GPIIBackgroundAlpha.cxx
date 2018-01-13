@@ -917,6 +917,10 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string ro
 
     rootOut->cd();
 
+    if( f_verbosity > 0 )
+        for( for i = 0; i < parameters.size(); i++ )
+            cout << "Par " << i << ": " << parameters[i] << endl;
+
     int bins = int( f_hemax - f_hemin );
     TH1D* hMC = new TH1D("hMC", "hMC", f_hnumbins, f_hemin, f_hemax);
     TH1D* hMC_fine = new TH1D("hMC_fine", "hMC_fine", bins, f_hemin, f_hemax);
