@@ -576,7 +576,7 @@ int GPIIBackgroundAlpha::InitializeMCHistograms()
 	for( unsigned int p = 0; p < f_npars; p++ )
 	{
 		string pname = ParameterName(p);
-		int ncorrelations = f_j_parconf["parameters"][p]["mc"].size();
+		int ncorrelations = NumberOfCorrelatedHistos(p);
 		nMChistos += ncorrelations;
 
 		for( int c = 0; c < ncorrelations; c++ )
@@ -633,7 +633,7 @@ int GPIIBackgroundAlpha::ReadMC()
         // skip parameter if requested
         if( SkipParameter(p) ) { nParametersSkipped++; continue; }
 
-		int ncorr = f_j_parconf["parameters"][p]["mc"].size();
+		int ncorr = NumberOfCorrelatedHistos(p);
 
 		for( int c = 0; c < ncorr; c++ )
 		{
@@ -758,11 +758,11 @@ double GPIIBackgroundAlpha::LogLikelihood(const vector <double> & parameters)
 
             int index = p-nParametersSkipped;
 
-            int ncorrelations = f_j_parconf["parameters"][p]["mc"].size();
+            int ncorrelations = NumberOfCorrelatedHistos(p);
 
             for( int c = 0; c < ncorrelations; c++ )
             {
-                double weight = f_j_parconf["parameters"][p]["mc"][c].get("weight",1.0).asDouble();
+                double weight = WeightOfHistogram(p,c);
 		        lambda += parameters[index] * weight * f_vMC[ nHistosRead * f_hnumbins + ibin ];
                 nHistosRead++;
             }
@@ -842,11 +842,11 @@ double GPIIBackgroundAlpha::EstimatePValue()
 
             int index = p-nParametersSkipped;
 
-            int ncorrelations = f_j_parconf["parameters"][p]["mc"].size();
+            int ncorrelations = NumberOfCorrelatedHistos(p);
 
             for( int c = 0; c < ncorrelations; c++ )
             {
-                double weight = f_j_parconf["parameters"][p]["mc"][c].get("weight",1.0).asDouble();
+                double weight = WeightOfHistogram(p,c);
                 lambda += parameters[index] * weight * f_vMC[ nHistosRead * f_hnumbins + ibin ];
                 nHistosRead++;
             }
@@ -959,11 +959,11 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
 
         double scale = parameters[index];
 
-        int ncorrelations = f_j_parconf["parameters"][p]["mc"].size();
+        int ncorrelations = NumberOfCorrelatedHistos(p);
 
         for( int c = 0; c < ncorrelations; c++ )
         {
-            double weight = f_j_parconf["parameters"][p]["mc"][c].get("weight",1.0).asDouble();
+            double weight = WeightOfHistogram(p,c);
 
             int iMC = nHistosRead+c;
 
@@ -1122,7 +1122,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
         // skip parameter if requested
         if( SkipParameter(p) ) { nParametersSkipped++; continue; }
 
-        int ncorrelations = f_j_parconf["parameters"][p]["mc"].size();
+        int ncorrelations = NumberOfCorrelatedHistos(printf("%s\n", ););
 
         cout << "Par: " << ParameterName(p) << endl;
 
@@ -1343,4 +1343,18 @@ string GPIIBackgroundAlpha::ParameterName( int p )
 {
     string name = f_j_parconf["parameters"][p]["name"].asString();
     return name;
+}
+
+int GPIIBackgroundAlpha::NumberOfCorrelatedHistos( int p )
+{
+    int n = f_j_parconf["parameters"][p]["mc"].size();
+
+    return n;
+}
+
+double GPIIBackgroundAlpha::WeightOfHistogram( int p, int c )
+{
+    double weight = f_j_parconf["parameters"][p]["mc"][c].get("weight",1.0).asDouble();
+
+    return weight;
 }
