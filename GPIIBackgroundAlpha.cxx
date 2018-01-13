@@ -57,17 +57,21 @@ using namespace gada;
 GPIIBackgroundAlpha::GPIIBackgroundAlpha() : BCModel()
 {
     f_verbosity = 0;
+    f_obin = 0;
 };
 
 // ---------------------------------------------------------
 GPIIBackgroundAlpha::GPIIBackgroundAlpha(const char * name) : BCModel(name)
 {
     f_verbosity = 0;
+    f_obin = 0;
 };
 
 // ---------------------------------------------------------
 GPIIBackgroundAlpha::GPIIBackgroundAlpha(string masterconfname) : BCModel()
 {
+    f_verbosity = 0;
+    f_obin = 0;
 	SetMasterConf( masterconfname );
     UnwrapMasterConf();
     DefineParameters();
@@ -114,6 +118,8 @@ void GPIIBackgroundAlpha::UnwrapMasterConf()
     );
 
     MCMCSetFlagFillHistograms( f_j_masterconf["MCMC-fill-histograms"].asBool() );
+
+    if( FitOverflowBin() ) f_obin = 1;
 
     return;
 }
@@ -544,31 +550,27 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist )
 
 int GPIIBackgroundAlpha::FillDataArray()
 {
-    int obin = 0;
-
-    if( FitOverflowBin() ) obin = 1;
-
-    for(int ibin = 1; ibin <= (f_hnumbins + obin); ibin++)
+    for(int ibin = 1; ibin <= f_hnumbins; ibin++)
     {
         double value = f_hdataSum->GetBinContent( ibin );
         f_vdata.push_back(value);
     }
 
-  // fill also the arrays with upper and lower limits
-  // of the bins in the data histograms
-  // dont't know what they should be good for...
-  for(int ibin = 1; ibin <= f_hnumbins; ibin++)
-  {
-      double lowerlimit = f_hdataSum->GetBinLowEdge( ibin );
-      double upperlimit = lowerlimit + f_hdataSum->GetBinWidth( ibin );
+    // fill also the arrays with upper and lower limits
+    // of the bins in the data histograms
+    // dont't know what they should be good for...
+    for(int ibin = 1; ibin <= f_hnumbins; ibin++)
+    {
+        double lowerlimit = f_hdataSum->GetBinLowEdge( ibin );
+        double upperlimit = lowerlimit + f_hdataSum->GetBinWidth( ibin );
 
-      f_lowerlimits.push_back(lowerlimit);
-      f_upperlimits.push_back(upperlimit);
-  }
+        f_lowerlimits.push_back(lowerlimit);
+        f_upperlimits.push_back(upperlimit);
+    }
 
-  BCLog::OutSummary( "Data arrays filled" );
+    BCLog::OutSummary( "Data arrays filled" );
 
-  return 0;
+    return 0;
 }
 
 

@@ -146,6 +146,8 @@ class GPIIBackgroundAlpha : public BCModel
      Json::Value f_j_parconf;
      Json::Value f_j_envconf;
 
+     int f_obin;
+
      unsigned int f_ndets;
      unsigned int f_nruns;
      unsigned int f_npars;
