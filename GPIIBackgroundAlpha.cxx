@@ -111,15 +111,16 @@ void GPIIBackgroundAlpha::UnwrapMasterConf()
 {
     SetVerbosity( f_j_masterconf["verbosity"].asInt() );
     SetPrecision( f_j_masterconf["precision"].asString() );
+    if( FitOverflowBin() ) f_obin = 1;
     SetHistogramParameters(
         f_j_masterconf["histo"]["binning"].asDouble(),
         f_j_masterconf["histo"]["min"].asDouble(),
         f_j_masterconf["histo"]["max"].asDouble()
     );
 
-    MCMCSetFlagFillHistograms( f_j_masterconf["MCMC-fill-histograms"].asBool() );
+    f_fitbins = f_hnumbins + f_obin;
 
-    if( FitOverflowBin() ) f_obin = 1;
+    MCMCSetFlagFillHistograms( f_j_masterconf["MCMC-fill-histograms"].asBool() );
 
     return;
 }
@@ -550,7 +551,7 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist )
 
 int GPIIBackgroundAlpha::FillDataArray()
 {
-    for(int ibin = 1; ibin <= f_hnumbins; ibin++)
+    for(int ibin = 1; ibin <= f_fitbins; ibin++)
     {
         double value = f_hdataSum->GetBinContent( ibin );
         f_vdata.push_back(value);
@@ -559,7 +560,7 @@ int GPIIBackgroundAlpha::FillDataArray()
     // fill also the arrays with upper and lower limits
     // of the bins in the data histograms
     // dont't know what they should be good for...
-    for(int ibin = 1; ibin <= f_hnumbins; ibin++)
+    for(int ibin = 1; ibin <= f_fitbins; ibin++)
     {
         double lowerlimit = f_hdataSum->GetBinLowEdge( ibin );
         double upperlimit = lowerlimit + f_hdataSum->GetBinWidth( ibin );
@@ -728,7 +729,7 @@ int GPIIBackgroundAlpha::FillMCArrays()
 
   	for( int iMC = 0; iMC < nMC; iMC++ )
   	{
-    	for( int ibin = 1; ibin <= f_hnumbins; ibin++ )
+    	for( int ibin = 1; ibin <= f_fitbins; ibin++ )
       	{
     	  	double value = f_MC[iMC]->GetBinContent( ibin );
     	  	f_vMC.push_back(value);
@@ -750,7 +751,7 @@ double GPIIBackgroundAlpha::LogLikelihood(const vector <double> & parameters)
 
     double logprob = 0.;
 
-    for( int ibin = 0; ibin < f_hnumbins; ibin++)
+    for( int ibin = 0; ibin < f_fitbins; ibin++)
     {
         double lambda = 0.;
         int nHistosRead = 0;
@@ -768,7 +769,7 @@ double GPIIBackgroundAlpha::LogLikelihood(const vector <double> & parameters)
             for( int c = 0; c < ncorrelations; c++ )
             {
                 double weight = WeightOfHistogram(p,c);
-		        lambda += parameters[index] * weight * f_vMC[ nHistosRead * f_hnumbins + ibin ];
+		        lambda += parameters[index] * weight * f_vMC[ nHistosRead * f_fitbins + ibin ];
                 nHistosRead++;
             }
 	  }
@@ -829,12 +830,12 @@ double GPIIBackgroundAlpha::EstimatePValue()
        each bin (integer part)
     */
 
-    vector<double> mean( f_hnumbins, 0 );
-    vector<int> nom( f_hnumbins, 0 );
+    vector<double> mean( f_fitbins, 0 );
+    vector<int> nom( f_fitbins, 0 );
 
     vector<double> parameters = GetBestFitParameters();
 
-    for( int ibin = 0; ibin < f_hnumbins; ibin++ )
+    for( int ibin = 0; ibin < f_fitbins; ibin++ )
     {
         double lambda = 0.;
         int nHistosRead = 0;
@@ -852,7 +853,7 @@ double GPIIBackgroundAlpha::EstimatePValue()
             for( int c = 0; c < ncorrelations; c++ )
             {
                 double weight = WeightOfHistogram(p,c);
-                lambda += parameters[index] * weight * f_vMC[ nHistosRead * f_hnumbins + ibin ];
+                lambda += parameters[index] * weight * f_vMC[ nHistosRead * f_fitbins + ibin ];
                 nHistosRead++;
             }
         }
@@ -876,7 +877,7 @@ double GPIIBackgroundAlpha::EstimatePValue()
 
     for( int iloop = 0; iloop < nloops; iloop++ )
     {
-        for( int ibin = 0; ibin < f_hnumbins; ibin++)
+        for( int ibin = 0; ibin < f_fitbins; ibin++)
         {
             int counter = ibin;
 
@@ -912,7 +913,7 @@ double GPIIBackgroundAlpha::EstimatePValue()
 }
 
 // ---------------------------------------------------------
-// FIX ME update plots and output info
+// FIX ME overflowbin plot
 void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
 {
     TFile* rootOut = new TFile( rootfilename.c_str(), "RECREATE" );
