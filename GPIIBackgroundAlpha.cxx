@@ -667,6 +667,12 @@ int GPIIBackgroundAlpha::ReadSingleMC( int par_index, int local_index, int globa
 
     BCLog::OutSummary( Form( "Primaries: %.0f", primaries ) );
 
+    cout << "fMC integral: " << f_MC[global_index] -> Integral() << endl;
+    cout << "fMC_fine integral: " << f_MC[global_index] -> Integral() << endl;
+    cout << "fMC_all integral: " << f_MC[global_index] -> Integral() << endl;
+
+    exit(EXIT_SUCCESS);
+
     /*
     f_MC[global_index]      ->Scale(1./primaries);
     f_MC_fine[global_index] ->Scale(1./primaries);
