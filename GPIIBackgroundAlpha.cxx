@@ -707,8 +707,6 @@ int GPIIBackgroundAlpha::ReadSingleMC( int par_index, int local_index, int globa
         cout << "fMC_all scaled integral: " << f_MC[global_index] -> Integral() << endl;
     }
 
-    exit(EXIT_SUCCESS);
-
     BCLog::OutSummary( "--------------------------------------------" );
 
 	return 0;
