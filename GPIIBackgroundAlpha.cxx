@@ -180,7 +180,21 @@ void GPIIBackgroundAlpha::DefineParameters()
 // ---------------------------------------------------------
 int GPIIBackgroundAlpha::InitializeDataHistograms()
 {
-f
+    string name = "hSum";
+	string name_fine = name; name_fine += "_fine";
+	string name_all = name; name_all += "_all";
+	int bins = (int)f_hemax-f_hemin;
+
+	f_hdataSum = new TH1D( name.c_str(), name.c_str(), f_hnumbins, f_hemin, f_hemax);
+	f_hdataSum_fine = new TH1D( name_fine.c_str(), name_fine.c_str(), bins, f_hemin, f_hemax);
+	f_hdataSum_all = new TH1D( name_all.c_str(), name_all.c_str(), 7500, 0., 7500.);
+
+	for( unsigned int d = 0; d < f_ndets; d++ )
+	{
+        string det = f_j_detconf["detectors"][d].asString();
+
+		string name_single = Form( "hSingle_%s", det.c_str() );
+
 		TH1D * henergy = new TH1D( name_single.c_str(), name_single.c_str(), 7500, 0., 7500.);
 
 		f_hdata[det] = henergy;
