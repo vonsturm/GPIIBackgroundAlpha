@@ -94,7 +94,7 @@ class GPIIBackgroundAlpha : public BCModel
 
       bool GetWriteMCMCChain(){ return f_j_masterconf["MCMC-write-chain"].asBool(); };
 
-      void DumpHistosAndInfo(std::vector<double> parameters, char* rootfilename);
+      void DumpHistosAndInfo(std::vector<double> parameters, std::string rootfilename);
 
  private:
 

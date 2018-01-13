@@ -826,9 +826,9 @@ double GPIIBackgroundAlpha::EstimatePValue()
 
 // ---------------------------------------------------------
 // FIX ME update plots and output info
-void GPIIBackgroundAlpha::DumpHistosAndInfo(std::vector<double> parameters, char* rootfilename)
+void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string rootfilename);
 {
-    TFile* rootOut = new TFile( rootfilename, "RECREATE" );
+    TFile* rootOut = new TFile( rootfilename.c_str(), "RECREATE" );
 
     if(!rootOut->IsOpen()) cout<<"No rootfile opened!"<<endl;
 
