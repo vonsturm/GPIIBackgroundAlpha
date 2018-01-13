@@ -1109,8 +1109,12 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
     // events info
     cout << "---------------------------------------------" << endl;
     cout << "---------------------------------------------" << endl;
-    for( auto n : eventsMC )        cout << "Events (" << f_hemin << " - " << f_hemax << "): " << n << endl;
-    for( auto n : eventsMC_all )    cout << "Events (0 - 7500): " << n << endl;
+    for( int j = 0; j < eventsMC.size(); j++ )
+    {
+        cout << "MC " << j << ":" << endl;
+        cout << "\tevents (" << f_hemin << " - " << f_hemax << "): " << eventsMC[j] << endl;
+        cout << "\tevents (0 - 7500): " << eventsMC_all[j] << endl;
+    }
     cout << "Total events in MC: " << hMC->Integral() << endl;
     cout << "Events in data: " << f_hdataSum->Integral() << endl;
 //    cout << "Estimate of BI: " << hMC_all->GetBinLowEdge( 1401 ) << "keV-" << hMC_all->GetBinLowEdge( 1501 ) << "keV" << endl;
