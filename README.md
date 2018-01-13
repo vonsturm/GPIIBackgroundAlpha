@@ -1,29 +1,21 @@
 # README #
 
-This is a BAT fit of the BEGe Alpha background. It contains various components with a p+ contact thickness of 600nm. Po210, Ra226 and Rn222 on the contact and inside the LAr close to the contact surface. Other components cannot be seen as they are absorbed by the n+ contact or the material in between.
+This is a BAT fit of the Alpha Background.
 
-### What is this repository for? ###
+### Dependencies ###
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+* jsoncpp : https://github.com/open-source-parsers/jsoncpp
+* progressbar : https://github.com/gipert/progressbar
 
-### How do I get set up? ###
+Create shared library for ProgressBar
+gcc -c -Wall -Werror -fpic ProgressBar.cc
+gcc -shared -o libProgressBar.so ProgressBar.cc
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+### ENVIRONMENT ###
 
-### Contribution guidelines ###
+set JSONCPP_BASE_DIR
+set PROGRESS_BAR_DIR
 
-* Writing tests
-* Code review
-* Other guidelines
+### Contact ###
 
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+vonsturm@pd.infn.it
