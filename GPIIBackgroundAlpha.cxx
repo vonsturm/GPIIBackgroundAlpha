@@ -907,10 +907,12 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(std::vector<double> parameters, char
     // write the single detector data spectra
     for(int d = 0; d < f_ndets; d++)
     {
-        f_hdata.at(d)->SetLineWidth(2);
-        f_hdata.at(d)->GetXaxis()->SetTitle("energy (keV)");
-        f_hdata.at(d)->GetYaxis()->SetTitle(Form("cts/(%d keV)",binning));
-        f_hdata.at(d)->Write();
+        string det = f_j_detconf["detectors"][d].asString();
+
+        f_hdata.at(det)->SetLineWidth(2);
+        f_hdata.at(det)->GetXaxis()->SetTitle("energy (keV)");
+        f_hdata.at(det)->GetYaxis()->SetTitle(Form("cts/(%d keV)",binning));
+        f_hdata.at(det)->Write();
     }
 
     // write the finer binning data histogram
