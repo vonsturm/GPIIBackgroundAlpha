@@ -1162,10 +1162,10 @@ int GPIIBackgroundAlpha::UpdateParameters()
         int index = p - nSkipped;
 
         double newmin = max( 0., parameters[index] - 4 * parameters_error[index] );
-        double newmax = parameters[index] - 4 * parameters_error[index];
+        double newmax = parameters[index] + 4 * parameters_error[index];
 
         updatedpars["parameters"][p]["min"] = newmin;
-        updatedpars["parameters"][p]["min"] = newmax;
+        updatedpars["parameters"][p]["max"] = newmax;
     }
 
     ofstream file( "testupdate.json" );
