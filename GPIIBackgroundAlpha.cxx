@@ -760,8 +760,6 @@ double GPIIBackgroundAlpha::LogLikelihood(const std::vector <double> & parameter
             for( int c = 0; c < ncorrelations; c++ )
             {
                 double weight = f_j_parconf["parameters"][p]["mc"][c].get("weight",1.0).asDouble();
-
-                cout << "weight " << weight << endl;
 		        lambda += parameters[index] * weight * f_vMC[ nHistosRead * f_hnumbins + ibin ];
                 nHistosRead++;
             }
