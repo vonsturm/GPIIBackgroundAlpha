@@ -1053,7 +1053,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
 
     hMC->SetLineWidth(2);
     hMC->SetLineColor(1);
-    hMC->Draw("same");
+    hMC->Draw("samehisto");
     hMC->GetXaxis()->SetTitle("Energy (keV)");
     hMC->GetYaxis()->SetTitle(Form("Events/(%d keV)",binning));
     hMC->Write();
@@ -1063,8 +1063,6 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
     string name;
     int index = 0;
     nParametersSkipped = 0;
-
-    cout << "control3" << endl;
 
     for( unsigned int p = 0; p < f_npars; p++)
     {
@@ -1082,7 +1080,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
         p_MC.at(index)->SetLineColor( index%8 + 2 );
         p_MC.at(index)->SetLineStyle( pp + 1 );
 
-        p_MC.at(index)->Draw("same");
+        p_MC.at(index)->Draw("samehisto");
         p_MC.at(index)->GetXaxis()->SetTitle("energy (keV)");
         p_MC.at(index)->GetYaxis()->SetTitle( Form("cts/(%d keV)",binning) );
         legend->AddEntry(p_MC.at(index),Form("%s",name.c_str()),"l");
@@ -1099,7 +1097,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
     hresiduals->SetMarkerStyle(20);
     hresiduals->GetXaxis()->SetTitle("energy (keV)");
     hresiduals->GetYaxis()->SetTitle(Form("residual counts/(%d keV)",binning));
-    hresiduals->Draw();
+    hresiduals->Draw("histo");
     hresiduals->Write();
 
     canvas->Write();
