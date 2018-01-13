@@ -1122,8 +1122,6 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
         // skip parameter if requested
         if( SkipParameter(p) ) { nParametersSkipped++; continue; }
 
-        int index = p-nParametersSkipped;
-
         int ncorrelations = f_j_parconf["parameters"][p]["mc"].size();
 
         cout << "Par: " << ParameterName(p) << endl;
