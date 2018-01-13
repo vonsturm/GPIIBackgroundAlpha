@@ -544,12 +544,15 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist )
 
 int GPIIBackgroundAlpha::FillDataArray()
 {
+    int obin = 0;
 
-  for(int ibin = 1; ibin <= f_hnumbins; ibin++)
-  {
-	  double value = f_hdataSum->GetBinContent( ibin );
-	  f_vdata.push_back(value);
-  }
+    if( FitOverflowBin() ) obin = 1;
+
+    for(int ibin = 1; ibin <= (f_hnumbins + obin); ibin++)
+    {
+        double value = f_hdataSum->GetBinContent( ibin );
+        f_vdata.push_back(value);
+    }
 
   // fill also the arrays with upper and lower limits
   // of the bins in the data histograms
@@ -1364,4 +1367,11 @@ double GPIIBackgroundAlpha::GeneratedPrimaries( int p, int c )
     double primaries = f_j_parconf["parameters"][p]["mc"][c]["primaries"].asDouble();
 
     return primaries;
+}
+
+bool GPIIBackgroundAlpha::FitOverflowBin()
+{
+    bool f = f_j_master["fitoverflow"].asBool();
+
+    return f;
 }
