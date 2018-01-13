@@ -230,15 +230,15 @@ int GPIIBackgroundAlpha::ReadDataFromHistogram( string infilename )
     // read * detector live times (from json file)
     //      * run livetimes (from json file),
     //      * histogram from file (from root file) with binning possibly changed
-    int stat = 0;
-
     TFile * file = new TFile( infilename.c_str(), "READ" );
 
     if( !file->IsOpen() )
     {
         BCLog::OutSummary( Form( "File not found: %s", infilename.c_str()) );
         BCLog::OutSummary( "Reading data from events" );
-        stat = ReadDataFromEvents( infilename );
+        int stat = ReadDataFromEvents( infilename );
+
+	return stat;
     }
 
     f_hdataSum      = (TH1D*) file->Get("hSum");
@@ -286,7 +286,7 @@ int GPIIBackgroundAlpha::ReadDataFromHistogram( string infilename )
 
     BCLog::OutSummary( Form( "Detector Livetimes read from file: %s", GetDetConfLTName().c_str() ) );
 
-    return stat;
+    return 0;
 }
 
 // ---------------------------------------------------------
