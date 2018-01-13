@@ -66,7 +66,7 @@
             "name" : "par4_Po210_pPlus_400nm",
             "use" : true,
             "min" : 0.0,
-            "max" : 1000.0,
+            "max" : 400.0,
             "nbins" : 100,
             "mc" :
             [
