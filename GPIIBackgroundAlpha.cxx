@@ -760,6 +760,8 @@ double GPIIBackgroundAlpha::LogLikelihood(const std::vector <double> & parameter
             for( int c = 0; c < ncorrelations; c++ )
             {
                 double weight = f_j_parconf["parameters"][p]["mc"][c].get("weight",1.0).asDouble();
+
+                cout << "weight " << weight << endl;
 		        lambda += parameters[index] * weight * f_vMC[ nHistosRead * f_hnumbins + ibin ];
                 nHistosRead++;
             }
@@ -991,8 +993,6 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string ro
 
     int binning = (int)f_j_masterconf["histo"]["binning"].asDouble();
 
-    cout << "control1" << endl;
-
     // write the single detector data spectra
     for( unsigned int d = 0; d < f_ndets; d++ )
     {
@@ -1003,8 +1003,6 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string ro
         f_hdata.at(det)->GetYaxis()->SetTitle(Form("cts/(%d keV)",binning));
         f_hdata.at(det)->Write();
     }
-
-    cout << "control2" << endl;
 
     // write the finer binning data histogram
     f_hdataSum_fine->SetLineWidth(2);
@@ -1089,8 +1087,6 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string ro
     }
 
     legend->Draw();
-
-    cout << "control4" << endl;
 
     canvas->cd(2);
     hresiduals->Add(f_hdataSum);
