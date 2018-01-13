@@ -261,8 +261,8 @@ int GPIIBackgroundAlpha::ReadDataFromHistogram( string infilename )
 		double bincontent = f_hdataSum_all->GetBinContent( b );
 		double bincenter = f_hdataSum_all->GetBinCenter( b );
 
-        f_hdataSum -> Fill( f_hdataSum -> FindBin( bincenter ), bincontent );
-        f_hdataSum_fine -> Fill( f_hdataSum_fine -> FindBin( bincenter ), bincontent );
+        f_hdataSum -> Fill( bincenter, bincontent );
+        f_hdataSum_fine -> Fill( bincenter, bincontent );
     }
 
     BCLog::OutSummary( Form( "Data histograms read from file: %s", infilename.c_str() ) );
@@ -666,9 +666,9 @@ int GPIIBackgroundAlpha::ReadSingleMC( int par_index, int local_index, int globa
 		double bincontent = MChisto->GetBinContent( b );
 		double bincenter = MChisto->GetBinCenter( b );
 
-        f_MC[global_index]      -> Fill( f_MC[global_index]      ->FindBin( bincenter ), bincontent );
-        f_MC_fine[global_index] -> Fill( f_MC_fine[global_index] ->FindBin( bincenter ), bincontent );
-        f_MC_all[global_index]  -> Fill( f_MC_all[global_index]  ->FindBin( bincenter ), bincontent );
+        f_MC[global_index]      -> Fill( bincenter, bincontent );
+        f_MC_fine[global_index] -> Fill( bincenter, bincontent );
+        f_MC_all[global_index]  -> Fill( bincenter, bincontent );
     }
 
     MCfile->Close();
