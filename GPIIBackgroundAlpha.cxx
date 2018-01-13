@@ -249,14 +249,16 @@ int GPIIBackgroundAlpha::ReadDataFromHistogram( string infilename )
 
         TH1D * hh = (TH1D*) file->Get( Form("hSingle_%s", det.c_str()) );
 
-        cout << "In file " << det << ": " << hh->Integral() << endl;
+        if( f_verbosity > 0 )
+            cout << "In file " << det << ": " << hh->Integral() << endl;
 
         f_hdata[det] -> Add( hh );
     }
 
     TH1D * hsum = (TH1D*)file->Get("hSum_all");
 
-    cout << "In file sum: " <<  hsum -> Integral() << endl;
+    if( f_verbosity > 0 )
+        cout << "In file sum: " <<  hsum -> Integral() << endl;
 
     f_hdataSum_all->Add( hsum );
 
@@ -518,6 +520,7 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist )
 				f_hdata[det] -> Fill( en );
 				f_hdataSum -> Fill( en );
 				f_hdataSum_fine -> Fill( en );
+                f_hdataSum_all -> Fill( en );
 			}
 		}
 	}
