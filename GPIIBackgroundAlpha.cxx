@@ -732,7 +732,7 @@ int GPIIBackgroundAlpha::FillMCArrays()
 }
 
 // ---------------------------------------------------------
-double GPIIBackgroundAlpha::LogLikelihood(const std::vector <double> & parameters)
+double GPIIBackgroundAlpha::LogLikelihood(const vector <double> & parameters)
 {
     // This methods returns the logarithm of the conditional probability
     // p(data|parameters). This is where you have to define your model.
@@ -778,7 +778,7 @@ double GPIIBackgroundAlpha::LogLikelihood(const std::vector <double> & parameter
 /*
 // ONLY NEEDED IF THE PRIOR PROBABILITY IS MORE COMPLICATED
 // ---------------------------------------------------------
-double GPIIBackgroundAlpha::LogAPrioriProbability(const std::vector<double> &parameters)
+double GPIIBackgroundAlpha::LogAPrioriProbability(const vector<double> &parameters)
 {
    // This method returns the logarithm of the prior probability for the
    // parameters p(parameters).
@@ -853,7 +853,7 @@ double GPIIBackgroundAlpha::EstimatePValue()
 
         int counter = ibin;
 
-        mean[counter] = std::max( lambda, 1e-8 );
+        mean[counter] = max( lambda, 1e-8 );
         nom[counter] = int( mean[counter] );
         sumlog += BCMath::LogPoisson( nom[counter], mean[counter] );
     }
@@ -907,8 +907,10 @@ double GPIIBackgroundAlpha::EstimatePValue()
 
 // ---------------------------------------------------------
 // FIX ME update plots and output info
-void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string rootfilename)
+void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
 {
+    const vector<double> parameters = GetBestFitParametersMarginalized();
+
     TFile* rootOut = new TFile( rootfilename.c_str(), "RECREATE" );
 
     if(!rootOut->IsOpen()) cout<<"No rootfile opened!"<<endl;

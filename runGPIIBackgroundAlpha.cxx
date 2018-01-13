@@ -104,10 +104,11 @@ int main( int argc, char* argv[] )
 
     // Marginalize all
     m->MarginalizeAll(BCIntegrate::kMargMetropolis);
+    string margfilename = OUT_FILE_BASE; margfilename += "_marg.pdf";
+    m->PrintAllMarginalized( margfilename.c_str() );
 
-/*
     // find mode using Minuit using MCMC mode as starting point
-    m->FindMode( m->GetBestFitParameters() );
+    m->FindMode(); // m->GetBestFitParametersMarginalized() );
 
     // ----------------------------------
     // write results
@@ -125,14 +126,11 @@ int main( int argc, char* argv[] )
     string corrmatrixfilename = OUT_FILE_BASE; corrmatrixfilename += "_corrmatrix.pdf";
 	summary -> PrintCorrelationMatrix( corrmatrixfilename.c_str() );
 
-//    string marg_filename = OUT_FILE_BASE; marg_filename += "_plots.pdf";
-//    m->PrintAllMarginalized( marg_filename.c_str() );
-
-    string resu_filename = OUT_FILE_BASE; resu_filename += "_results.txt";
+/   string resu_filename = OUT_FILE_BASE; resu_filename += "_results.txt";
     m->PrintResults( resu_filename.c_str() );
-*/
+
     string hist_filename = OUT_FILE_BASE; hist_filename += "_plots.root";
-    m->DumpHistosAndInfo( m->GetBestFitParameters(), hist_filename );
+    m->DumpHistosAndInfo( hist_filename );
 
     // Caluculate p-Value
     double pvalue = m->EstimatePValue();
