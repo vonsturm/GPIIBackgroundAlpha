@@ -1160,7 +1160,7 @@ int GPIIBackgroundAlpha::UpdateParameters( string filename )
 
     int nSkipped = 0;
 
-    for( int p = 0; p < f_npars; p++ )
+    for( unsigned int p = 0; p < f_npars; p++ )
     {
         if(SkipParameter(p)) { nSkipped++; continue; }
 
