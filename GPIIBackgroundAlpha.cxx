@@ -1143,10 +1143,15 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
     cout << "---------------------------------------------" << endl;
     cout << "---------------------------------------------" << endl;
 
-  rootOut->Close();
+    rootOut->Close();
+
+    if( f_j_masterconf["update-parameters"].asBool() )
+        UpdateParameters( "updated-parameters.json" );
+
+    return;
 }
 
-int GPIIBackgroundAlpha::UpdateParameters()
+int GPIIBackgroundAlpha::UpdateParameters( string filename )
 {
     const vector<double> parameters = GetBestFitParameters();
     const vector<double> parameters_error = GetBestFitParameterErrors();
@@ -1167,11 +1172,6 @@ int GPIIBackgroundAlpha::UpdateParameters()
         updatedpars["parameters"][p]["min"] = newmin;
         updatedpars["parameters"][p]["max"] = newmax;
     }
-
-    string filename = "testupdate.json"
-
-    if( f_j_masterconf["update-parameters"].asBool() )
-        filename = f_j_masterconf["parconf"];
 
     ofstream file( filename.c_str() );
     file << updatedpars;
