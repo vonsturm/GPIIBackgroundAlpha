@@ -252,7 +252,7 @@ int GPIIBackgroundAlpha::ReadDataFromHistogram( string infilename )
         if( f_verbosity > 0 )
             cout << "In file " << det << ": " << hh->Integral() << endl;
 
-        f_hdata[det] -> Add( hh );
+        f_hdata.at(det) -> Add( hh );
     }
 
     TH1D * hsum = (TH1D*)file->Get("hSum_all");
@@ -966,9 +966,9 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string ro
             }
             else
             {
-                p_MC.back()->Add( f_MC.at( iMC ) );
-                p_MC_fine.back()->Add( f_MC_fine.at( iMC ) );
-                p_MC_all.back()->Add( f_MC_all.at( iMC ) );
+                p_MC.back()->Add( f_MC[iMC] );
+                p_MC_fine.back()->Add( f_MC_fine[iMC] );
+                p_MC_all.back()->Add( f_MC_all[iMC] );
             }
         }
 
