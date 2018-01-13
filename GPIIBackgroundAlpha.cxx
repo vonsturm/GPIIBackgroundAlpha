@@ -180,21 +180,7 @@ void GPIIBackgroundAlpha::DefineParameters()
 // ---------------------------------------------------------
 int GPIIBackgroundAlpha::InitializeDataHistograms()
 {
-	string name = "hSum";
-	string name_fine = name; name_fine += "_fine";
-	string name_all = name; name_all += "_all";
-	int bins = (int)f_hemax-f_hemin;
-
-	f_hdataSum = new TH1D( name.c_str(), name.c_str(), f_hnumbins, f_hemin, f_hemax);
-	f_hdataSum_fine = new TH1D( name_fine.c_str(), name_fine.c_str(), bins, f_hemin, f_hemax);
-	f_hdataSum_all = new TH1D( name_all.c_str(), name_all.c_str(), 7500, 0., 7500.);
-
-	for( unsigned int d = 0; d < f_ndets; d++ )
-	{
-        string det = f_j_detconf["detectors"][d].asString();
-
-		string name_single = Form( "hSingle_%s", det.c_str() );
-
+f
 		TH1D * henergy = new TH1D( name_single.c_str(), name_single.c_str(), 7500, 0., 7500.);
 
 		f_hdata[det] = henergy;
@@ -230,11 +216,63 @@ int GPIIBackgroundAlpha::ReadDataFromHistogram( string infilename )
     // read * detector live times (from json file)
     //      * run livetimes (from json file),
     //      * histogram from file (from root file) with binning possibly changed
+    int stat = 0;
 
-    cout << "IMPLEMENT ME" << endl;
-    exit(EXIT_SUCCESS);
+    TFile * file = new TFile( infile.c_str(), "READ" );
 
-    return 0;
+    if( !file.IsOpen() )
+    {
+        BCLog::OutSummary( Form( "File not found: %s", infilename.c_str()) );
+        BCLog::OutSummary( "Reading data from events" );
+        stat = ReadDataFromEvents( filename );
+    }
+
+    f_hdataSum      = (TH1D*) file->Get("hSum");
+    f_hdataSum_fine = (TH1D*) file->Get("hSum_fine");
+    f_hdataSum_all  = (TH1D*) file->Get("hSum_all");
+
+    for( unsigned int d = 0; d < f_ndets; d++ )
+    {
+        string det = f_j_detconf["detectors"][d].asString();
+
+        f_hdata[det] = (TH1D*) file->Get( Form("hSingle_%s", det.c_str()) );
+    }
+
+    file->Close();
+
+    BCLog::OutSummary( Form( "Data histograms read from file: %s", infilename.c_str() ) );
+
+    ifstream runLTconf( GetRunConfLTName() );
+    Json::Value j_RunLiveTime;
+    runLTconf >> j_RunLiveTime;
+    runLTconf.close();
+
+    for( unsigned int r = 0; r < f_nruns; r++ )
+    {
+        string run = to_string( f_j_runconf["runs"][r].asInt() );
+        double rLT = j_RunLiveTime[run].asDouble();
+
+        f_RunLiveTime.push_back(rLT);
+    }
+
+    BCLog::OutSummary( Form( "Run Livetimes read from file: %s", GetRunConfLTName().c_str() ) );
+
+    ifstream detLTconf( GetDetConfLTName() );
+    Json::Value j_DetectorLiveTime;
+    detLTconf >> j_DetectorLiveTime;
+    detLTconf.close();
+
+    for( unsigned int d = 0; d < f_ndets; d++ )
+    {
+        string det = f_j_detconf["detectors"][d].asString();
+        double dLT = j_DetectorLiveTime[det].asDouble();
+
+        f_DetectorLiveTime[det] = dLT;
+    }
+
+    BCLog::OutSummary( Form( "Detector Livetimes read from file: %s", GetDetConfLTName().c_str() ) );
+
+    return stat;
 }
 
 // ---------------------------------------------------------
@@ -310,17 +348,11 @@ int GPIIBackgroundAlpha::WriteDataToFileForFastAccess( string outfilename )
         j_RunLiveTime[ to_string(run) ] = f_RunLiveTime[r];
     }
 
-    string runconfname = f_j_masterconf["runconf"].asString();
-    string runLTconfname = runconfname.substr( 0, runconfname.find_last_of('.') );
-    runLTconfname += "-RunLT.json";
-
-    ofstream runLTconf( runLTconfname );
-
+    ofstream runLTconf( GetRunConfLTName() );
     runLTconf << j_RunLiveTime;
-
     runLTconf.close();
 
-    BCLog::OutSummary( Form( "Run Livetimes written to file: %s", runLTconfname.c_str() ) );
+    BCLog::OutSummary( Form( "Run Livetimes written to file: %s", GetRunConfLTName().c_str() ) );
 
     // Write to detector livetimes to json files
     Json::Value j_DetectorLiveTime;
@@ -332,16 +364,11 @@ int GPIIBackgroundAlpha::WriteDataToFileForFastAccess( string outfilename )
         j_DetectorLiveTime[ det ] = f_DetectorLiveTime[det];
     }
 
-    string detLTconfname = runconfname.substr( 0, runconfname.find_last_of('.') );
-    detLTconfname += "-DetLT.json";
-
-    ofstream detLTconf( detLTconfname );
-
+    ofstream detLTconf( GetDetConfLTName() );
     detLTconf << j_DetectorLiveTime;
-
     detLTconf.close();
 
-    BCLog::OutSummary( Form( "Detector Livetimes written to file: %s", detLTconfname.c_str() ) );
+    BCLog::OutSummary( Form( "Detector Livetimes written to file: %s", GetDetConfLTName().c_str() ) );
 
     return 0;
 }
@@ -896,7 +923,11 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string ro
         nHistosRead += ncorrelations;
     }
 
-    if( f_npars != p_MC.size() )
+    cout << "Parameters: " << f_npars << endl;
+    cout << "Of which skipped: " << nParametersSkipped << endl;
+    cout << "Combined MC pdfs" << p_MC.size() << endl;
+
+    if( (f_npars-nParametersSkipped) != p_MC.size() )
     {
         cout << "Something went wrong in preparing the MC histograms" << endl;
         exit(EXIT_FAILURE);
@@ -1099,7 +1130,7 @@ string GPIIBackgroundAlpha::GetOutputDirectory()
 }
 
 // ---------------------------------------------------------
-std::string GPIIBackgroundAlpha::GetOutputFilenameBase()
+string GPIIBackgroundAlpha::GetOutputFilenameBase()
 {
     string parconf = f_j_masterconf["parconf"].asString();
     int from = parconf.find_last_of('/')+1;
@@ -1144,4 +1175,28 @@ std::string GPIIBackgroundAlpha::GetOutputFilenameBase()
     filename_base += s_fitoverflow;
 
     return filename_base;
+}
+
+string GPIIBackgroundAlpha::GetRunConfLTName()
+{
+    string runconfname = f_j_masterconf["runconf"].asString();
+    string runLTconfname = "./data/";
+    int from = runconfname.find_last_of('/') + 1;
+    int to = runconfname.find_last_of('.');
+    runLTconfname += runconfname.substr( from, to-from );
+    runLTconfname += "-RunLT.json";
+
+    return runLTconfname;
+}
+
+string GPIIBackgroundAlpha::GetDetConfLTName()
+{
+    string runconfname = f_j_masterconf["runconf"].asString();
+    string detLTconfname = "./data/";
+    int from = runconfname.find_last_of('/') + 1;
+    int to = runconfname.find_last_of('.');
+    detLTconfname += runconfname.substr( from, to-from );
+    detLTconfname += "-DetLT.json";
+
+    return detLTconfname;
 }
