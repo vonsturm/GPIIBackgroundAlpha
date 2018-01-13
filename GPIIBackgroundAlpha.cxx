@@ -937,7 +937,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string ro
         bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
         if( !useparameter ) { nParametersSkipped++; continue; }
 
-        double scale = parameters.at(p-nParametersSkipped);
+        double scale = parameters[p-nParametersSkipped];
 
         int ncorrelations = f_j_parconf["parameters"][p]["mc"].size();
 
@@ -947,22 +947,22 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string ro
 
             int iMC = nHistosRead+c;
 
-            f_MC.at( iMC )        -> Scale( scale*weight );
-            f_MC_fine.at( iMC )   -> Scale( scale*weight );
-            f_MC_all.at( iMC )    -> Scale( scale*weight );
+            f_MC[iMC]       -> Scale( scale*weight );
+            f_MC_fine[iMC]   -> Scale( scale*weight );
+            f_MC_all[iMC]    -> Scale( scale*weight );
 
-            hMC         ->Add( f_MC.at(iMC) );
-            hMC_fine    ->Add( f_MC_fine.at(iMC) );
-            hMC_all     ->Add( f_MC_all.at(iMC) );
+            hMC         -> Add( f_MC[iMC] );
+            hMC_fine    -> Add( f_MC_fine[iMC] );
+            hMC_all     -> Add( f_MC_all[iMC] );
 
-            eventsMC.push_back( f_MC.at(iMC)->Integral() );
-            eventsMC_all.push_back( f_MC_all.at(iMC)->Integral() );
+            eventsMC.push_back( f_MC[iMC]->Integral() );
+            eventsMC_all.push_back( f_MC_all[iMC]->Integral() );
 
             if( c == 0 )
             {
-                p_MC.push_back( f_MC.at( iMC ) );
-                p_MC_fine.push_back( f_MC_fine.at( iMC ) );
-                p_MC_all.push_back( f_MC_all.at( iMC ) );
+                p_MC.push_back( f_MC[iMC] );
+                p_MC_fine.push_back( f_MC_fine[iMC] );
+                p_MC_all.push_back( f_MC_all[iMC] );
             }
             else
             {
