@@ -101,7 +101,7 @@ class GPIIBackgroundAlpha : public BCModel
 
       void DumpHistosAndInfo( std::string rootfilename );
 
-      int UpdateParameters();
+      int UpdateParameters( std::string filename );
 
  private:
 

@@ -6,7 +6,7 @@
             "use" : true,
             "min" : 0.0,
             "max" : 2000.0,
-            "nbins" : 500,
+            "nbins" : 2000,
             "mc" :
             [
                 {
@@ -22,7 +22,7 @@
             "use" : true,
             "min" : 0.0,
             "max" : 2000.0,
-            "nbins" : 500,
+            "nbins" : 2000,
             "mc" :
             [
                 {
@@ -37,7 +37,7 @@
             "use" : true,
             "min" : 0.0,
             "max" : 2000.0,
-            "nbins" : 500,
+            "nbins" : 2000,
             "mc" :
             [
                 {
@@ -52,7 +52,7 @@
             "use" : true,
             "min" : 0.0,
             "max" : 2000.0,
-            "nbins" : 500,
+            "nbins" : 2000,
             "mc" :
             [
                 {
@@ -67,7 +67,7 @@
             "use" : true,
             "min" : 0.0,
             "max" : 2000.0,
-            "nbins" : 500,
+            "nbins" : 2000,
             "mc" :
             [
                 {
@@ -82,7 +82,7 @@
             "use" : true,
             "min" : 0.0,
             "max" : 2000.0,
-            "nbins" : 500,
+            "nbins" : 2000,
             "mc" :
             [
                 {
@@ -97,7 +97,7 @@
             "use" : true,
             "min" : 0.0,
             "max" : 2000.0,
-            "nbins" : 500,
+            "nbins" : 2000,
             "mc" :
             [
                 {
@@ -112,7 +112,7 @@
             "use" : true,
             "min" : 0.0,
             "max" : 2000.0,
-            "nbins" : 500,
+            "nbins" : 2000,
             "mc" :
             [
                 {
@@ -127,7 +127,7 @@
             "use" : true,
             "min" : 0.0,
             "max" : 2000.0,
-            "nbins" : 500,
+            "nbins" : 2000,
             "mc" :
             [
                 {
@@ -142,7 +142,7 @@
             "use" : true,
             "min" : 0.0,
             "max" : 2000.0,
-            "nbins" : 500,
+            "nbins" : 2000,
             "mc" :
             [
                 {
@@ -157,7 +157,7 @@
             "use" : true,
             "min" : 0.0,
             "max" : 2000.0,
-            "nbins" : 500,
+            "nbins" : 2000,
             "mc" :
             [
                 {

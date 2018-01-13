@@ -3,7 +3,7 @@
     [
         {
             "name" : "par0_0nm",
-            "use" : false,
+            "use" : true,
             "min" : 0.0,
             "max" : 2000.0,
             "nbins" : 2000,
@@ -38,7 +38,7 @@
         },
         {
             "name" : "par1_100nm",
-            "use" : false,
+            "use" : true,
             "min" : 0.0,
             "max" : 2000.0,
             "nbins" : 2000,
@@ -73,7 +73,7 @@
         },
         {
             "name" : "par2_200nm",
-            "use" : false,
+            "use" : true,
             "min" : 0.0,
             "max" : 2000.0,
             "nbins" : 2000,
@@ -282,7 +282,7 @@
         },
         {
             "name" : "par8_800nm",
-            "use" : false,
+            "use" : true,
             "min" : 0.0,
             "max" : 2000.0,
             "nbins" : 2000,
@@ -317,7 +317,7 @@
         },
         {
             "name" : "par9_900nm",
-            "use" : false,
+            "use" : true,
             "min" : 0.0,
             "max" : 2000.0,
             "nbins" : 2000,
@@ -352,7 +352,7 @@
         },
         {
             "name" : "par10_1000nm",
-            "use" : false,
+            "use" : true,
             "min" : 0.0,
             "max" : 2000.0,
             "nbins" : 2000,
