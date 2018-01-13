@@ -152,7 +152,7 @@ void GPIIBackgroundAlpha::DefineParameters()
 
     int nParametersSkipped = 0;
 
-	for( int p = 0; p < f_npars; p++ )
+	for( unsigned int p = 0; p < f_npars; p++ )
 	{
         // skip parameter if requested
         bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
@@ -189,7 +189,7 @@ int GPIIBackgroundAlpha::InitializeDataHistograms()
 	f_hdataSum_fine = new TH1D( name_fine.c_str(), name_fine.c_str(), bins, f_hemin, f_hemax);
 	f_hdataSum_all = new TH1D( name_all.c_str(), name_all.c_str(), 7500, 0., 7500.);
 
-	for( int d = 0; d < f_ndets; d++ )
+	for( unsigned int d = 0; d < f_ndets; d++ )
 	{
         string det = f_j_detconf["detectors"][d].asString();
 
@@ -250,7 +250,7 @@ int GPIIBackgroundAlpha::ReadDataFromEvents( string outfilename )
 
 	if( f_verbosity > 0 ) cout << "Reading run data: " << endl;
 
-	for( int r = 0; r < f_nruns; r++ )
+	for( unsigned int r = 0; r < f_nruns; r++ )
 	{
 		int run = f_j_runconf["runs"][r].asInt();
 
@@ -267,7 +267,7 @@ int GPIIBackgroundAlpha::ReadDataFromEvents( string outfilename )
 	{
 		cout << "Detector LiveTimes: " << endl;
 
-		for( int d = 0; d < f_ndets; d++ )
+		for( unsigned int d = 0; d < f_ndets; d++ )
 		{
 			string det = f_j_detconf["detectors"][d].asString();
 			cout << "\t" << det << ": " << f_DetectorLiveTime[det] << endl;
@@ -286,7 +286,7 @@ int GPIIBackgroundAlpha::WriteDataToFileForFastAccess( string outfilename )
 {
     TFile * outfile = new TFile( outfilename.c_str(), "RECREATE" );
 
-    for( int d = 0; d < f_ndets; d++ )
+    for( unsigned int d = 0; d < f_ndets; d++ )
     {
         string det = f_j_detconf["detectors"][d].asString();
         f_hdata[det]->Write();
@@ -303,7 +303,7 @@ int GPIIBackgroundAlpha::WriteDataToFileForFastAccess( string outfilename )
     // Write to run livetimes to json files
     Json::Value j_RunLiveTime;
 
-    for( int r = 0; r < f_nruns; r++ )
+    for( unsigned int r = 0; r < f_nruns; r++ )
     {
         int run = f_j_runconf["runs"][r].asInt();
 
@@ -325,7 +325,7 @@ int GPIIBackgroundAlpha::WriteDataToFileForFastAccess( string outfilename )
     // Write to detector livetimes to json files
     Json::Value j_DetectorLiveTime;
 
-    for( int d = 0; d < f_ndets; d++ )
+    for( unsigned int d = 0; d < f_ndets; d++ )
     {
         string det = f_j_detconf["detectors"][d].asString();
 
@@ -425,7 +425,7 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist )
 		if ( isTP )
 		{
 			nTP++;
-			for( int d = 0; d < f_ndets; d++ )
+			for( unsigned int d = 0; d < f_ndets; d++ )
             {
                 string det = f_j_detconf["detectors"][d].asString();
                 if( IsOn( RunConf, det ) ) f_DetectorLiveTime[det] += 1./(frequencyTP*60.*60.*24.);
@@ -435,7 +435,7 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist )
 		if ( multiplicity > 1 ) continue;
 		if ( isVetoedInTime ) 	continue;
 
-		for( int d = 0; d < f_ndets; d++  )
+		for( unsigned int d = 0; d < f_ndets; d++  )
 		{
             string det = f_j_detconf["detectors"][d].asString();
             if( !IsOn( RunConf, det ) ) continue;
@@ -498,7 +498,7 @@ int GPIIBackgroundAlpha::InitializeMCHistograms()
 {
 	int nMChistos = 0;
 
-	for( int p = 0; p < f_npars; p++ )
+	for( unsigned int p = 0; p < f_npars; p++ )
 	{
 		string pname = f_j_parconf["parameters"][p]["name"].asString();
 		int ncorrelations = f_j_parconf["parameters"][p]["mc"].size();
@@ -553,7 +553,7 @@ int GPIIBackgroundAlpha::ReadMC()
 	int index = 0;
     int nParametersSkipped = 0;
 
-	for( int p = 0; p < f_npars; p++ )
+	for( unsigned int p = 0; p < f_npars; p++ )
 	{
         // skip parameter if requested
         bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
@@ -668,7 +668,7 @@ double GPIIBackgroundAlpha::LogLikelihood(const std::vector <double> & parameter
         int nHistosRead = 0;
         int nParametersSkipped = 0;
 
-        for( int p = 0; p < f_npars; p++ )
+        for( unsigned int p = 0; p < f_npars; p++ )
         {
             // skip parameter if requested
             bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
@@ -705,7 +705,7 @@ double GPIIBackgroundAlpha::LogAPrioriProbability(const std::vector<double> &par
 
   double logprob = 0.;
 
-  for( int p = 0; p < f_npars; p++ )
+  for( unsigned int p = 0; p < f_npars; p++ )
   {
       // skip parameter if requested
       bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
@@ -753,7 +753,7 @@ double GPIIBackgroundAlpha::EstimatePValue()
         int nHistosRead = 0;
         int nParametersSkipped = 0;
 
-        for( int p = 0; p < f_npars; p++)
+        for( unsigned int p = 0; p < f_npars; p++)
         {
             // skip parameter if requested
             bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
@@ -852,7 +852,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string ro
     int nParametersSkipped = 0;
 
     // prepare singel MC pdfs
-    for( int p = 0; p < f_npars; p++ )
+    for( unsigned int p = 0; p < f_npars; p++ )
     {
         // skip parameter if requested
         bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
@@ -969,7 +969,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo(vector<double> parameters, string ro
     //the single contributions
     string name;
 
-    for( int p = 0; p < f_npars; p++)
+    for( unsigned int p = 0; p < f_npars; p++)
     {
         name = f_j_parconf["parameters"][p]["name"].asString();
 
