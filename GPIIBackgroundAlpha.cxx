@@ -1114,8 +1114,8 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
     // events info
     cout << "---------------------------------------------" << endl;
     cout << "---------------------------------------------" << endl;
-    int nHistosRead = 0;
-    int nParametersSkipped = 0;
+    nHistosRead = 0;
+    nParametersSkipped = 0;
 
     for( unsigned int p = 0; p < f_npars; p++ )
     {

@@ -95,7 +95,7 @@ class GPIIBackgroundAlpha : public BCModel
       std::string GetDetConfLTName();
 
       bool SkipParameter( int p );
-      string ParameterName( int p );
+      std::string ParameterName( int p );
 
       bool GetWriteMCMCChain(){ return f_j_masterconf["MCMC-write-chain"].asBool(); };
 
