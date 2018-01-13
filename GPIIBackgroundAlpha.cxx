@@ -265,6 +265,9 @@ int GPIIBackgroundAlpha::ReadDataFromHistogram( string infilename )
         f_hdataSum_fine -> Fill( bincenter, bincontent );
     }
 
+    if( f_verbosity > 0 )
+        cout << "Data histo integral: " << f_hdataSum -> Integral() << endl;
+
     BCLog::OutSummary( Form( "Data histograms read from file: %s", infilename.c_str() ) );
 
     ifstream runLTconf( GetRunConfLTName() );
@@ -678,17 +681,18 @@ int GPIIBackgroundAlpha::ReadSingleMC( int par_index, int local_index, int globa
 
     BCLog::OutSummary( Form( "Primaries: %.0f", primaries ) );
 
-    cout << "fMC integral: " << f_MC[global_index] -> Integral() << endl;
-    cout << "fMC_fine integral: " << f_MC[global_index] -> Integral() << endl;
-    cout << "fMC_all integral: " << f_MC[global_index] -> Integral() << endl;
+    if( f_verbosity > 0 )
+    {
+        cout << "fMC integral: " << f_MC[global_index] -> Integral() << endl;
+        cout << "fMC_fine integral: " << f_MC[global_index] -> Integral() << endl;
+        cout << "fMC_all integral: " << f_MC[global_index] -> Integral() << endl;
+    }
 
     exit(EXIT_SUCCESS);
 
-    /*
-    f_MC[global_index]      ->Scale(1./primaries);
-    f_MC_fine[global_index] ->Scale(1./primaries);
-    f_MC_all[global_index]  ->Scale(1./primaries);
-    */
+    f_MC[global_index]      -> Scale(1./primaries);
+    f_MC_fine[global_index] -> Scale(1./primaries);
+    f_MC_all[global_index]  -> Scale(1./primaries);
     BCLog::OutSummary( "--------------------------------------------" );
 
 	return 0;
