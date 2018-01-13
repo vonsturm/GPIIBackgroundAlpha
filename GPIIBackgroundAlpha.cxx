@@ -721,7 +721,6 @@ double GPIIBackgroundAlpha::LogAPrioriProbability(const std::vector<double> &par
 }
 */
 
-//FIX ME
 // ---------------------------------------------------------
 double GPIIBackgroundAlpha::EstimatePValue()
 {
@@ -825,171 +824,198 @@ double GPIIBackgroundAlpha::EstimatePValue()
     return pvalue;
 }
 
-/*
 // ---------------------------------------------------------
 // FIX ME update plots and output info
 void GPIIBackgroundAlpha::DumpHistosAndInfo(std::vector<double> parameters, char* rootfilename)
 {
-  TFile* rootOut = new TFile( rootfilename, "recreate" );
+    TFile* rootOut = new TFile( rootfilename, "RECREATE" );
 
-  if(!rootOut->IsOpen()) cout<<"No rootfile opened!"<<endl;
+    if(!rootOut->IsOpen()) cout<<"No rootfile opened!"<<endl;
 
-  rootOut->cd();
+    rootOut->cd();
 
-  TH1D* hMC = new TH1D("hMC", "model", f_hnumbins, f_hemin, f_hemax);
+    int bins = int( f_hemax - f_hemin );
+    TH1D* hMC = new TH1D("hMC", "hMC", f_hnumbins, f_hemin, f_hemax);
+    TH1D* hMC_fine = new TH1D("hMC_fine", "hMC_fine", bins, f_hemin, f_hemax);
+    TH1D* hMC_all = new TH1D("hMC_all", "model", 7500, 0, 7500.);
 
-  int bins = int( f_hemax - f_hemin );
-  TH1D* hMC_fine = new TH1D("hMC_fine", "model", bins, f_hemin, f_hemax);
+    TH1D* hresiduals = new TH1D("hresiduals", "residuals", f_hnumbins, f_hemin, f_hemax);
 
-  int binsall = 7500;
-  TH1D* hMC_all = new TH1D("hMC_all", "model", binsall, 0, 7500.);
+    vector<TH1D*> p_MC;
+    vector<TH1D*> p_MC_fine;
+    vector<TH1D*> p_MC_all;
 
-  TH1D* hresiduals = new TH1D("hresiduals", "residuals", f_hnumbins, f_hemin, f_hemax);
+    vector<double> eventsMC;
+    vector<double> eventsMC_all;
 
-  vector<double> eventsMC;
-  vector<double> eventsMC_fine;
-  vector<double> eventsMC_all;
+    int nHistosRead = 0;
+    int nParametersSkipped = 0;
 
-  for( int iMC = 0; iMC < (int)f_MC.size(); iMC++ )
-  {
-	  // prepare the histograms
-      f_MC.at(iMC)->Scale( parameters.at(iMC) );
-      f_MC_fine.at(iMC)->Scale( parameters.at(iMC) );
-      f_MCall.at(iMC)->Scale( parameters.at(iMC) );
+    // prepare singel MC pdfs
+    for( int p = 0; p < f_npars; p++ )
+    {
+        // skip parameter if requested
+        bool useparameter = f_j_parconf["parameters"][p].get("use",true).asBool();
+        if( !useparameter ) { nParametersSkipped++; continue; }
 
-      f_MC.at(iMC)->Write();
-      f_MC_fine.at(iMC)->Write();
-      f_MCall.at(iMC)->Write();
+        double scale = parameters.at(p-nParametersSkipped);
 
-      hMC->Add( f_MC.at(iMC) );
-      hMC_fine->Add( f_MC_fine.at(iMC) );
-      hMC_all->Add( f_MCall.at(iMC) );
+        int ncorrelations = f_j_parconf["parameters"][p]["mc"].size();
 
-      // count the events
-      eventsMC.push_back( f_MC.at(iMC)->Integral() );
-      eventsMC_all.push_back( f_MCall.at(iMC)->Integral() );
-  }
+        for( int c = 0; c < ncorrelations; c++ )
+        {
+            double weight = f_j_parconf["parameters"][p]["mc"][c].get("weight",1.0).asDouble();
 
-  // write the single detector data spectra
-  for(int idet=0; idet<f_ndets; idet++)
-  {
-	  if( f_hdata.at(idet) != NULL )
-	  {
-		  double binwidth = f_hdata.at(idet)->GetBinWidth(1);
+            int iMC = nHistosRead+c;
 
-		  f_hdata.at(idet)->SetLineWidth(2);
-		  f_hdata.at(idet)->GetXaxis()->SetTitle("Energy (keV)");
-		  f_hdata.at(idet)->GetYaxis()->SetTitle(Form("Events/(%d keV)",(int)binwidth));
-		  f_hdata.at(idet)->Write();
-	  }
-  }
-  // write the finer binning data histogram
-  f_hdataSum_fine->SetLineWidth(2);
-  f_hdataSum_fine->GetXaxis()->SetTitle("Energy (keV)");
-  f_hdataSum_fine->GetYaxis()->SetTitle("Events/keV");
-  f_hdataSum_fine->Write();
+            f_MC.at( iMC )        -> Scale( scale*weight );
+            f_MC_fine.at( iMC )   -> Scale( scale*weight );
+            f_MC_all.at( iMC )    -> Scale( scale*weight );
 
-  // write the finer binning MC histogram
-  hMC_fine->SetLineWidth(2);
-  hMC_fine->GetXaxis()->SetTitle("Energy (keV)");
-  hMC_fine->GetYaxis()->SetTitle("Events/keV");
-  hMC_fine->Write();
+            hMC         ->Add( f_MC.at(iMC) );
+            hMC_fine    ->Add( f_MC_fine.at(iMC) );
+            hMC_all     ->Add( f_MCall.at(iMC) );
 
-  // write the complete spectrum MC histogram
-  hMC_all->SetLineWidth(2);
-  hMC_all->GetXaxis()->SetTitle("Energy (keV)");
-  hMC_all->GetYaxis()->SetTitle("Events/keV");
-  hMC_all->Write();
+            eventsMC.push_back( f_MC.at(iMC)->Integral() );
+            eventsMC_all.push_back( f_MC_all.at(iMC)->Integral() );
 
-  // write the fit results
+            if( c == 0 )
+            {
+                p_MC.push_back( f_MC.at( iMC ) );
+                p_MC_fine.push_back( f_MC_fine.at( iMC ) );
+                p_MC_all.push_back( f_MC_all.at( iMC ) );
+            }
+            else
+            {
+                p_MC.back()->Add( f_MC.at( iMC );
+                p_MC_fine.back()->Add( f_MC_fine.at( iMC );
+                p_MC_all.back()->Add( f_MC_all.at( iMC );
+            }
+        }
 
-  TCanvas* canvas=new TCanvas("canvas", "");
-  canvas->cd();
+        nHistosRead += ncorrelations;
+    }
 
-  TLegend* legend = new TLegend(0.73, 0.62, 0.98, 0.87);
-  legend->SetTextFont(62);
-  legend->SetFillColor(0);
-  legend->SetFillStyle(0);
-  legend->SetBorderSize(0);
+    if( f_npars != p_MC.size() )
+    {
+        cout << "Something went wrong in preparing the MC histograms" << endl;
+        exit(EXIT_FAILURE);
+    }
 
-  double binwidth_hsum = f_hdataSum->GetBinWidth(1);
+    int binning = (int)f_j_masterconf["histo"]["binning"].asDouble();
 
-  f_hdataSum->SetLineWidth(2);
-  f_hdataSum->SetMarkerStyle(20);
-  f_hdataSum->GetXaxis()->SetTitle("Energy (keV)");
-  f_hdataSum->GetYaxis()->SetTitle(Form("Events/(%d keV)",(int)binwidth_hsum));
-  f_hdataSum->Draw("P");
-  f_hdataSum->Write();
-  legend->AddEntry(f_hdataSum,"data","p");
+    // write the single detector data spectra
+    for(int d = 0; d < f_ndets; d++)
+    {
+        f_hdata.at(d)->SetLineWidth(2);
+        f_hdata.at(d)->GetXaxis()->SetTitle("energy (keV)");
+        f_hdata.at(d)->GetYaxis()->SetTitle(Form("cts/(%d keV)",binning));
+        f_hdata.at(d)->Write();
+    }
 
-  double binwidth_hMC = hMC->GetBinWidth(1);
+    // write the finer binning data histogram
+    f_hdataSum_fine->SetLineWidth(2);
+    f_hdataSum_fine->GetXaxis()->SetTitle("energy (keV)");
+    f_hdataSum_fine->GetYaxis()->SetTitle("cts/keV");
+    f_hdataSum_fine->Write();
 
-  hMC->SetLineWidth(2);
-  hMC->SetLineColor(1);
-  hMC->Draw("same");
-  hMC->GetXaxis()->SetTitle("Energy (keV)");
-  hMC->GetYaxis()->SetTitle(Form("Events/(%d keV)",(int)binwidth_hMC));
-  hMC->Write();
-  legend->AddEntry(hMC,"model","l");
+    // write the finer binning data histogram
+    f_hdataSum_all->SetLineWidth(2);
+    f_hdataSum_all->GetXaxis()->SetTitle("energy (keV)");
+    f_hdataSum_all->GetYaxis()->SetTitle("cts/keV");
+    f_hdataSum_all->Write();
 
-  //the single contributions
+    // write the finer binning MC histogram
+    hMC_fine->SetLineWidth(2);
+    hMC_fine->GetXaxis()->SetTitle("energy (keV)");
+    hMC_fine->GetYaxis()->SetTitle("cts/keV");
+    hMC_fine->Write();
 
-  string name;
+    // write the complete spectrum MC histogram
+    hMC_all->SetLineWidth(2);
+    hMC_all->GetXaxis()->SetTitle("energy (keV)");
+    hMC_all->GetYaxis()->SetTitle("cts/keV");
+    hMC_all->Write();
 
-  for(int iMC=0; iMC<(int)f_MC.size(); iMC++)
-  {
-      f_MC.at(iMC)->SetLineWidth(2);
+    // write the fit results to a canvas
+    TCanvas* canvas = new TCanvas("fitresult", "");
+    canvas->Divide(1,2);
+    canvas->cd(1);
 
-      if(iMC < 10) f_MC.at(iMC)->SetLineColor(iMC+2);
+    TLegend* legend = new TLegend(0.73, 0.62, 0.98, 0.87);
+    legend->SetTextFont(62);
+    legend->SetFillColor(0);
+    legend->SetFillStyle(0);
+    legend->SetBorderSize(0);
 
-      if(iMC >= 8)
-      {
-    	  f_MC.at(iMC)->SetLineColor(iMC-8+2);
-    	  f_MC.at(iMC)->SetLineStyle(2);
-      }
+    f_hdataSum->SetLineWidth(2);
+    f_hdataSum->SetMarkerStyle(20);
+    f_hdataSum->GetXaxis()->SetTitle("energy (keV)");
+    f_hdataSum->GetYaxis()->SetTitle(Form("cts/(%d keV)",binning));
+    f_hdataSum->Draw("P");
+    f_hdataSum->Write();
+    legend->AddEntry(f_hdataSum,"data","p");
 
-      f_MC.at(iMC)->Draw("same");
-      f_MC.at(iMC)->GetXaxis()->SetTitle("Energy (keV)");
-      f_MC.at(iMC)->GetYaxis()->SetTitle(Form("Events/(%d keV)",(int)binwidth_hMC));
-      legend->AddEntry(f_MC.at(iMC),Form("%s",name.c_str()),"l");
+    hMC->SetLineWidth(2);
+    hMC->SetLineColor(1);
+    hMC->Draw("same");
+    hMC->GetXaxis()->SetTitle("Energy (keV)");
+    hMC->GetYaxis()->SetTitle(Form("Events/(%d keV)",binning));
+    hMC->Write();
+    legend->AddEntry(hMC,"model","l");
 
-      f_MC.at(iMC)->Write();
-  }
+    //the single contributions
+    string name;
 
-  legend->Draw();
-  canvas->Write();
+    for( int p = 0; p < f_npars; p++)
+    {
+        name = f_j_parconf["parameters"][p]["name"].asString();
 
-  hresiduals->Add(f_hdataSum);
-  hresiduals->Divide(hMC); //ratio
-  hresiduals->SetLineWidth(2);
-  hresiduals->SetMarkerStyle(20);
-  hresiduals->GetXaxis()->SetTitle("Energy (keV)");
-  hresiduals->GetYaxis()->SetTitle(Form("residual counts/(%d keV)",(int)binwidth_hMC));
-  hresiduals->Write();
+        p_MC.at(p)->SetLineWidth(2);
 
-  // events info
-  cout << "---------------------------------------------" << endl;
-  cout << "---------------------------------------------" << endl << endl;
-  for( int iMC = 0; iMC < (int)eventsMC.size(); iMC++ )
-  {
-      cout << "Events: " << endl;
-      cout << "In total spectrum from (0 - 7500) keV" << endl;
-  }
-  cout << "Total events in MC: " << hMC->Integral() << endl;
-  cout << endl;
-  cout << "Events in data: " << f_hdataSum->Integral() << endl;
-  cout << endl;
-  cout << "Estimate of BI: " << hMC_all->GetBinLowEdge( 1401 ) << "keV-" << hMC_all->GetBinLowEdge( 1501 ) << "keV" << endl;
-  cout << hMC_all->Integral( 1401, 1500 ) << "cts -> " << hMC_all->Integral( 1401, 1500 )/100./5.988 << "cts/(keV kg yr)" << endl;
-  cout << "Estimate of BI: " << hMC_all->GetBinLowEdge( 1415 ) << "keV-" << hMC_all->GetBinLowEdge( 1465 ) << "keV" << endl;
-  cout << hMC_all->Integral( 1415, 1464 ) << "cts -> " << hMC_all->Integral( 1415, 1464 )/50./5.988 << "cts/(keV kg yr)" << endl;
-  cout << "---------------------------------------------" << endl;
-  cout << "---------------------------------------------" << endl << endl;
+        int pp = p/8;
+        p_MC.at(p)->SetLineColor( p%8 + 2 );
+        p_MC.at(p)->SetLineStyle( pp + 1 );
+
+        p_MC.at(p)->Draw("same");
+        p_MC.at(p)->GetXaxis()->SetTitle("energy (keV)");
+        p_MC.at(p)->GetYaxis()->SetTitle( Form("cts/(%d keV)",binning) );
+        legend->AddEntry(p_MC.at(p),Form("%s",name.c_str()),"l");
+
+        p_MC.at(p)->Write();
+    }
+
+    legend->Draw();
+
+    canvas->cd(2);
+    hresiduals->Add(f_hdataSum);
+    hresiduals->Divide(hMC); //ratio
+    hresiduals->SetLineWidth(2);
+    hresiduals->SetMarkerStyle(20);
+    hresiduals->GetXaxis()->SetTitle("energy (keV)");
+    hresiduals->GetYaxis()->SetTitle(Form("residual counts/(%d keV)",binning));
+    hresiduals->Draw();
+    hresiduals->Write();
+
+    canvas->Write();
+
+    // events info
+    cout << "---------------------------------------------" << endl;
+    cout << "---------------------------------------------" << endl;
+    for( auto n : eventsMC )        cout << "Events (" << f_hemin << " - " << f_hemax << "): " << n << endl;
+    for( auto n : eventsMC_all )    cout << "Events (0 - 7500): " << n << endl;
+    cout << "Total events in MC: " << hMC->Integral() << endl;
+    cout << "Events in data: " << f_hdataSum->Integral() << endl;
+//    cout << "Estimate of BI: " << hMC_all->GetBinLowEdge( 1401 ) << "keV-" << hMC_all->GetBinLowEdge( 1501 ) << "keV" << endl;
+//    cout << hMC_all->Integral( 1401, 1500 ) << "cts -> " << hMC_all->Integral( 1401, 1500 )/100./5.988 << "cts/(keV kg yr)" << endl;
+//    cout << "Estimate of BI: " << hMC_all->GetBinLowEdge( 1415 ) << "keV-" << hMC_all->GetBinLowEdge( 1465 ) << "keV" << endl;
+//    cout << hMC_all->Integral( 1415, 1464 ) << "cts -> " << hMC_all->Integral( 1415, 1464 )/50./5.988 << "cts/(keV kg yr)" << endl;
+    cout << "---------------------------------------------" << endl;
+    cout << "---------------------------------------------" << endl;
 
   rootOut->Close();
 }
-// ---------------------------------------------------------
-*/
+
 
 // ---------------------------------------------------------
 Json::Value GPIIBackgroundAlpha::GetJsonValueFromFile( string filename )

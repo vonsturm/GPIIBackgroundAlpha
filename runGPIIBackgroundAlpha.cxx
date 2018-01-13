@@ -130,7 +130,8 @@ int main( int argc, char* argv[] )
     string resu_filename = OUT_FILE_BASE; resu_filename += "_results.txt";
     m->PrintResults( resu_filename.c_str() );
 
-//    m->DumpHistosAndInfo( m->GetBestFitParameters() );
+    string hist_filename = OUT_FILE_BASE; hist_filename += "_plots.root";
+    m->DumpHistosAndInfo( m->GetBestFitParameters(), hist_filename );
 
     // Caluculate p-Value
     double pvalue = m->EstimatePValue();
@@ -143,7 +144,6 @@ int main( int argc, char* argv[] )
     BCLog::CloseLog();
     delete m;
     delete summary;
-    delete mout;
 
     return 0;
 }
