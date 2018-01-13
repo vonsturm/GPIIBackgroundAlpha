@@ -1122,7 +1122,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
         // skip parameter if requested
         if( SkipParameter(p) ) { nParametersSkipped++; continue; }
 
-        int ncorrelations = NumberOfCorrelatedHistos(printf("%s\n", ););
+        int ncorrelations = NumberOfCorrelatedHistos(p);
 
         cout << "Par: " << ParameterName(p) << endl;
 
