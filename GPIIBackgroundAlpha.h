@@ -105,7 +105,7 @@ class GPIIBackgroundAlpha : public BCModel
 
       void DumpHistosAndInfo( std::string rootfilename );
 
-      int UpdateParameters( std::string filename );
+      int UpdateParameters( std::string filename, double nerror = 5. );
 
  private:
 
