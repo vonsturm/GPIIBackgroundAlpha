@@ -3,8 +3,8 @@
 	"fitoverflow" : false,
 	"skipblinded" : { "do" : false, "from" : 2000.0, "to" : 2150.0 },
 	"histo" : { "min" : 3500.0, "max" : 5300.0, "binning" : 30.0 },
-	"parconf" : "allPo210-parconf.json",
-	"runconf" : "test-runlist.json",
-	"detconf" : "enrBEGe-detlist.json",
-	"envconf" : "mpik-env.json"
+	"parconf" : "./config/allPo210-parconf.json",
+	"runconf" : "./config/test-runlist.json",
+	"detconf" : "./config/enrBEGe-detlist.json",
+	"envconf" : "./config/mpik-env.json"
 }
