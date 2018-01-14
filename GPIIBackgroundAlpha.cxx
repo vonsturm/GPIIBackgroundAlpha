@@ -117,7 +117,7 @@ void GPIIBackgroundAlpha::OpenSummaryLogfile()
     logfilename += filebase;
     logfilename += "-log.txt";
 
-    BCLog::OpenLog(logfilename);
+    BCLog::OpenLog(logfilename.c_str());
     BCLog::SetLogLevel(BCLog::detail);
 
     return;
