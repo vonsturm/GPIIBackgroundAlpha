@@ -71,6 +71,7 @@ GPIIBackgroundAlpha::GPIIBackgroundAlpha(const char * name) : BCModel(name)
 // ---------------------------------------------------------
 GPIIBackgroundAlpha::GPIIBackgroundAlpha(string masterconfname) : BCModel()
 {
+    f_obin = 0;
 	SetMasterConf( masterconfname );
     UnwrapMasterConf();
     DefineParameters();
