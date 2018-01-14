@@ -32,6 +32,7 @@
 #include "TObject.h"
 #include "TNtuple.h"
 #include "TMath.h"
+#include "TLine.h"
 
 // BAT includes
 #include <BAT/BCMath.h>
@@ -1114,7 +1115,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
     hresiduals->Write();
 
     TLine * l = new TLine( f_hemin, 1., f_hemax, 1. );
-    l->SetLineWith(1);
+    l->SetLineWidth(1);
     l->SetLineStyle(2);
     l->Draw();
 
