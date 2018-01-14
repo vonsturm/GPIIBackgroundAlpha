@@ -110,7 +110,7 @@ void GPIIBackgroundAlpha::SetMasterConf( string masterconfname )
 void GPIIBackgroundAlpha::OpenSummaryLogfile()
 {
     string dir = GetOutputDirectory();
-    string filebase = GetOutputFilenameBase
+    string filebase = GetOutputFilenameBase();
 
     string logfilename = dir;
     logfilename += "/";
