@@ -64,6 +64,9 @@ int main( int argc, char* argv[] )
     BCAux::SetStyle();
     gStyle->SetOptStat(0);
 
+    BCLog::OpenLog("log.txt");
+    BCLog::SetLogLevel(BCLog::detail);
+
     // create new GPIIBackgroundAlpha object and open logfile
     GPIIBackgroundAlpha * m = new GPIIBackgroundAlpha( masterfileJSON );
 
@@ -137,6 +140,15 @@ int main( int argc, char* argv[] )
 
     // close log file
     BCLog::CloseLog();
+
+    string logfilename = m->GetOutputDirectory();
+    logfilename += "/";
+    logfilename += m->GetOutputFilenameBase();
+    logfilename += "-log.txt";
+
+    cmd = "cp log.txt "; cmd += logfilename;
+    system( cmd.c_str() );
+
     delete m;
     delete summary;
 
