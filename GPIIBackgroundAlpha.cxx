@@ -73,6 +73,7 @@ GPIIBackgroundAlpha::GPIIBackgroundAlpha(string masterconfname) : BCModel()
     f_verbosity = 0;
     f_obin = 0;
 	SetMasterConf( masterconfname );
+    OpenSummaryLogfile();
     UnwrapMasterConf();
     DefineParameters();
 };
@@ -104,6 +105,22 @@ void GPIIBackgroundAlpha::SetMasterConf( string masterconfname )
 	SetEnvConf( f_j_masterconf["envconf"].asString() );
 
 	return;
+}
+
+void GPIIBackgroundAlpha::OpenSummaryLogfile()
+{
+    string dir = GetOutputDirectory();
+    string filebase = GetOutputFilenameBase
+
+    string logfilename = dir;
+    logfilename += "/";
+    logfilename += filebase;
+    logfilename += "-log.txt";
+
+    BCLog::OpenLog(logfilename);
+    BCLog::SetLogLevel(BCLog::detail);
+
+    return;
 }
 
 // ---------------------------------------------------------

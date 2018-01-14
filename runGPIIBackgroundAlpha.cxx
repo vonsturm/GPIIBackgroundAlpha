@@ -64,11 +64,7 @@ int main( int argc, char* argv[] )
     BCAux::SetStyle();
     gStyle->SetOptStat(0);
 
-    // open log file
-    BCLog::OpenLog("log.txt");
-    BCLog::SetLogLevel(BCLog::detail);
-
-    // create new GPIIBackgroundAlpha object
+    // create new GPIIBackgroundAlpha object and open logfile
     GPIIBackgroundAlpha * m = new GPIIBackgroundAlpha( masterfileJSON );
 
     // create a new summary tool object

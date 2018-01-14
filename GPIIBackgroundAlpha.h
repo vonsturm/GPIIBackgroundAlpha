@@ -102,6 +102,8 @@ class GPIIBackgroundAlpha : public BCModel
       double GeneratedPrimaries( int p, int c );
       bool FitOverflowBin();
 
+      void OpenSummaryLogfile();
+
       bool GetWriteMCMCChain(){ return f_j_masterconf["MCMC-write-chain"].asBool(); };
 
       void DumpHistosAndInfo( std::string rootfilename );
