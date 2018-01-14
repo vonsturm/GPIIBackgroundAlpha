@@ -12,21 +12,191 @@
                 {
                     "histoname" : "hist_dl400nm",
                     "filename" : "histos_Po210_pPlus.root",
+                    "weight" : ,
                     "primaries" : 1.0E9
-                }
+                },
                 {
                     "histoname" : "hist_dl500nm",
                     "filename" : "histos_Po210_pPlus.root",
+                    "weight" : ,
                     "primaries" : 1.0E9
-                }
+                },
                 {
                     "histoname" : "hist_dl600nm",
                     "filename" : "histos_Po210_pPlus.root",
+                    "weight" : ,
                     "primaries" : 1.0E9
-                }
+                },
                 {
                     "histoname" : "hist_dl700nm",
                     "filename" : "histos_Po210_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl800nm",
+                    "filename" : "histos_Po210_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                }
+            ]
+        },
+        {
+            "name" : "par1_rn222_pplus",
+            "use" : true,
+            "min" : 0.0,
+            "max" : 1500.0,
+            "nbins" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl400nm",
+                    "filename" : "histos_Rn222_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl500nm",
+                    "filename" : "histos_Rn222_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl600nm",
+                    "filename" : "histos_Rn222_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl700nm",
+                    "filename" : "histos_Rn222_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl800nm",
+                    "filename" : "histos_Rn222_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                }
+            ]
+        },
+        {
+            "name" : "par2_ra226_pplus",
+            "use" : true,
+            "min" : 0.0,
+            "max" : 1500.0,
+            "nbins" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl400nm",
+                    "filename" : "histos_Ra226_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl500nm",
+                    "filename" : "histos_Ra226_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl600nm",
+                    "filename" : "histos_Ra226_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl700nm",
+                    "filename" : "histos_Ra226_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl800nm",
+                    "filename" : "histos_Ra226_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                }
+            ]
+        },
+        {
+            "name" : "par3_rn222_larpplus",
+            "use" : true,
+            "min" : 0.0,
+            "max" : 1500.0,
+            "nbins" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl400nm",
+                    "filename" : "histos_Rn222_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl500nm",
+                    "filename" : "histos_Rn222_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl600nm",
+                    "filename" : "histos_Rn222_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl700nm",
+                    "filename" : "histos_Rn222_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl800nm",
+                    "filename" : "histos_Rn222_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                }
+            ]
+        },
+        {
+            "name" : "par4_ra226_larpplus",
+            "use" : true,
+            "min" : 0.0,
+            "max" : 1500.0,
+            "nbins" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl400nm",
+                    "filename" : "histos_Ra226_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl500nm",
+                    "filename" : "histos_Ra226_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl600nm",
+                    "filename" : "histos_Ra226_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl700nm",
+                    "filename" : "histos_Ra226_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl800nm",
+                    "filename" : "histos_Ra226_LArpPlus.root",
+                    "weight" : ,
                     "primaries" : 1.0E9
                 }
             ]

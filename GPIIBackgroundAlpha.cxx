@@ -120,6 +120,8 @@ void GPIIBackgroundAlpha::OpenSummaryLogfile()
     BCLog::OpenLog(logfilename.c_str());
     BCLog::SetLogLevel(BCLog::detail);
 
+    BCLog::OutSummary( Form( "Logfile: %s",logfilename.c_str() ) );
+
     return;
 }
 
