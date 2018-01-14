@@ -144,7 +144,7 @@ int main( int argc, char* argv[] )
     string logfilename = m->GetOutputDirectory();
     logfilename += "/";
     logfilename += m->GetOutputFilenameBase();
-    logfilename += "-log.txt";
+    logfilename += "_log.txt";
 
     cmd = "cp log.txt "; cmd += logfilename;
     system( cmd.c_str() );

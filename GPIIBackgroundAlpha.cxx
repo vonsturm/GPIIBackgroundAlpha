@@ -925,17 +925,18 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
     const vector<double> parameters = GetBestFitParameters();
     const vector<double> parameters_error = GetBestFitParameterErrors();
 
-    if( f_verbosity > 0 )
+    int nParametersSkipped = 0;
+
+    BCLog::OutSummary( "Best fit parameters:" );
+    for( unsigned int p = 0; p < f_npars; i++ )
     {
-        cout << "Best fit parameters: " << endl;
-        if( f_verbosity > 0 )
-        {
-            for( unsigned int i = 0; i < parameters.size(); i++ )
-            {
-                cout << setprecision(2) << "\tPar " << i << ": ";
-                cout << parameters[i] << "+-" << parameters_error[i] << endl;
-            }
-        }
+        if( SkipParameter(p) ){ nParametersSkipped++; continue; }
+
+        string pname = ParameterName(p);
+        int i = p-nParametersSkipped;
+
+        BCLog::OutSummary( Form("Par%d: %.2f+-%.2f (%s)",
+            i, parameters[i], parameters_error[i], pname.c_str()) );
     }
 
     int bins = int( f_hemax - f_hemin );
@@ -953,7 +954,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
     vector<double> eventsMC_all;
 
     int nHistosRead = 0;
-    int nParametersSkipped = 0;
+    nParametersSkipped = 0;
 
     // prepare singel MC pdfs
     for( unsigned int p = 0; p < f_npars; p++ )
