@@ -1110,8 +1110,13 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
     hresiduals->SetMarkerStyle(20);
     hresiduals->GetXaxis()->SetTitle("energy (keV)");
     hresiduals->GetYaxis()->SetTitle(Form("residual counts/(%d keV)",binning));
-    hresiduals->Draw("histo");
+    hresiduals->Draw();
     hresiduals->Write();
+
+    TLine * l = new TLine( f_hemin, 1., f_hemax, 1. );
+    l->SetLineWith(1);
+    l->SetLineStyle(2);
+    l->Draw();
 
     canvas->Write();
 
