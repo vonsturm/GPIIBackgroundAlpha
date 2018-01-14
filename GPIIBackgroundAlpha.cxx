@@ -70,8 +70,6 @@ GPIIBackgroundAlpha::GPIIBackgroundAlpha(const char * name) : BCModel(name)
 // ---------------------------------------------------------
 GPIIBackgroundAlpha::GPIIBackgroundAlpha(string masterconfname) : BCModel()
 {
-    f_verbosity = 0;
-    f_obin = 0;
 	SetMasterConf( masterconfname );
     UnwrapMasterConf();
     DefineParameters();
@@ -1199,7 +1197,7 @@ Json::Value GPIIBackgroundAlpha::GetJsonValueFromFile( string filename )
 		exit(EXIT_FAILURE);
 	}
 
-	cout << "Reading JSON file:" << filename << endl;
+	if( f_verbosity > 0 ) cout << "Reading JSON file:" << filename << endl;
 
 	Json::Value val;
 
