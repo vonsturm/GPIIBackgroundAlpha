@@ -577,13 +577,14 @@ int GPIIBackgroundAlpha::FillDataArray()
 
 int GPIIBackgroundAlpha::InitializeMCHistograms()
 {
-	int nMChistos = 0;
+//	int nParametersSkipped = 0;
 
 	for( unsigned int p = 0; p < f_npars; p++ )
 	{
+//		if( SkipParameter(p) ) nParametersSkipped++; continue;
+
 		string pname = ParameterName(p);
 		int ncorrelations = NumberOfCorrelatedHistos(p);
-		nMChistos += ncorrelations;
 
 		for( int c = 0; c < ncorrelations; c++ )
 		{
@@ -928,7 +929,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
     int nParametersSkipped = 0;
 
     BCLog::OutSummary( "Best fit parameters:" );
-    for( unsigned int p = 0; p < f_npars; i++ )
+    for( unsigned int p = 0; p < f_npars; p++ )
     {
         if( SkipParameter(p) ){ nParametersSkipped++; continue; }
 
@@ -1101,7 +1102,8 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
         p_MC.at(index)->GetYaxis()->SetTitle( Form("cts/(%d keV)",binning) );
         legend->AddEntry(p_MC.at(index),Form("%s",name.c_str()),"l");
 
-        p_MC.at(index)->Write();
+	// fix me
+        p_MC.at(index)->Write(Form("%s",name.c_str()));
     }
 
     legend->Draw();
@@ -1324,10 +1326,18 @@ string GPIIBackgroundAlpha::GetOutputFilenameBase()
 string GPIIBackgroundAlpha::GetRunConfLTName()
 {
     string runconfname = f_j_masterconf["runconf"].asString();
+    string detconfname = f_j_masterconf["detconf"].asString();
+
     string runLTconfname = "./data/";
+
     int from = runconfname.find_last_of('/') + 1;
-    int to = runconfname.find_last_of('.');
+    int to = runconfname.find_last_of('-');
     runLTconfname += runconfname.substr( from, to-from );
+    runLTconfname += "-";
+    from = detconfname.find_last_of('/') + 1;
+    to = detconfname.find_last_of('-');
+    runLTconfname += detconfname.substr( from, to-from );
+
     runLTconfname += "-RunLT.json";
 
     return runLTconfname;
@@ -1336,10 +1346,18 @@ string GPIIBackgroundAlpha::GetRunConfLTName()
 string GPIIBackgroundAlpha::GetDetConfLTName()
 {
     string runconfname = f_j_masterconf["runconf"].asString();
+    string detconfname = f_j_masterconf["detconf"].asString();
+
     string detLTconfname = "./data/";
+
     int from = runconfname.find_last_of('/') + 1;
-    int to = runconfname.find_last_of('.');
+    int to = runconfname.find_last_of('-');
     detLTconfname += runconfname.substr( from, to-from );
+    detLTconfname += "-";
+    from = detconfname.find_last_of('/') + 1;
+    to = detconfname.find_last_of('-');
+    detLTconfname += detconfname.substr( from, to-from );
+
     detLTconfname += "-DetLT.json";
 
     return detLTconfname;

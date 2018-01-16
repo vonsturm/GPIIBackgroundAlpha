@@ -34,7 +34,7 @@
         },
         {
             "name" : "par2_Po210_pPlus_200nm",
-            "use" : false,
+            "use" : true,
             "min" : 0.0,
             "max" : 1500.0,
             "nbins" : 100,
@@ -139,7 +139,7 @@
         },
         {
             "name" : "par9_Po210_pPlus_900nm",
-            "use" : false,
+            "use" : true,
             "min" : 0.0,
             "max" : 1500.0,
             "nbins" : 100,

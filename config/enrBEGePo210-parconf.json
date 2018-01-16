@@ -124,7 +124,7 @@
         },
         {
             "name" : "par8_Po210_pPlus_800nm",
-            "use" : true,
+            "use" : false,
             "min" : 0.0,
             "max" : 1000.0,
             "nbins" : 100,

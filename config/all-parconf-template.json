@@ -1,0 +1,265 @@
+{
+    "parameters" :
+    [
+        {
+            "name" : "par0_Po210_pPlus",
+            "use" : true,
+            "min" : 0.0,
+            "max" : 1500.0,
+            "nbins" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl400nm",
+                    "filename" : "histos_Po210_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl500nm",
+                    "filename" : "histos_Po210_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl600nm",
+                    "filename" : "histos_Po210_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl700nm",
+                    "filename" : "histos_Po210_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl800nm",
+                    "filename" : "histos_Po210_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                }
+            ]
+        },
+        {
+            "name" : "par1_Rn222_pPlus",
+            "use" : true,
+            "min" : 0.0,
+            "max" : 1500.0,
+            "nbins" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl400nm",
+                    "filename" : "histos_Rn222_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl500nm",
+                    "filename" : "histos_Rn222_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl600nm",
+                    "filename" : "histos_Rn222_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl700nm",
+                    "filename" : "histos_Rn222_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl800nm",
+                    "filename" : "histos_Rn222_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                }
+            ]
+        },
+        {
+            "name" : "par2_Ra226_pPlus",
+            "use" : true,
+            "min" : 0.0,
+            "max" : 1500.0,
+            "nbins" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl400nm",
+                    "filename" : "histos_Ra226_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl500nm",
+                    "filename" : "histos_Ra226_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl600nm",
+                    "filename" : "histos_Ra226_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl700nm",
+                    "filename" : "histos_Ra226_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl800nm",
+                    "filename" : "histos_Ra226_pPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                }
+            ]
+        },
+        {
+            "name" : "par3_Rn222_LArpPlus",
+            "use" : true,
+            "min" : 0.0,
+            "max" : 1500.0,
+            "nbins" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl400nm",
+                    "filename" : "histos_Rn222_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl500nm",
+                    "filename" : "histos_Rn222_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl600nm",
+                    "filename" : "histos_Rn222_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl700nm",
+                    "filename" : "histos_Rn222_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl800nm",
+                    "filename" : "histos_Rn222_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                }
+            ]
+        },
+        {
+            "name" : "par4_Ra226_LArpPlus",
+            "use" : true,
+            "min" : 0.0,
+            "max" : 1500.0,
+            "nbins" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_dl400nm",
+                    "filename" : "histos_Ra226_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl500nm",
+                    "filename" : "histos_Ra226_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl600nm",
+                    "filename" : "histos_Ra226_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl700nm",
+                    "filename" : "histos_Ra226_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                },
+                {
+                    "histoname" : "hist_dl800nm",
+                    "filename" : "histos_Ra226_LArpPlus.root",
+                    "weight" : ,
+                    "primaries" : 1.0E9
+                }
+            ]
+        },
+        {
+            "name" : "par5_Po214_pPlus",
+            "use" : true,
+            "min" : 0.0,
+            "max" : 1500.0,
+            "nbins" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_Po214_pPlus",
+                    "filename" : "PhaseI/Po214_pPlus.root",
+                    "primaries" : 1.0E7
+                }
+            ]
+        },
+        {
+            "name" : "par6_Po214_LArpPlus",
+            "use" : true,
+            "min" : 0.0,
+            "max" : 1500.0,
+            "nbins" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_Po214_LAr",
+                    "filename" : "PhaseI/Po214_LAr.root",
+                    "primaries" : 1.0E7
+                }
+            ]
+        },
+        {
+            "name" : "par7_Po218_pPlus",
+            "use" : true,
+            "min" : 0.0,
+            "max" : 1500.0,
+            "nbins" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_Po218_pPlus",
+                    "filename" : "PhaseI/Po218_pPlus.root",
+                    "primaries" : 1.0E7
+                }
+            ]
+        },
+        {
+            "name" : "par8_Po218_LArpPlus",
+            "use" : true,
+            "min" : 0.0,
+            "max" : 1500.0,
+            "nbins" : 100,
+            "mc" :
+            [
+                {
+                    "histoname" : "hist_Po218_LAr",
+                    "filename" : "PhaseI/Po214_LAr.root",
+                    "primaries" : 1.0E7
+                }
+            ]
+        }
+    ]
+}
