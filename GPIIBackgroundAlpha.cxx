@@ -49,7 +49,6 @@
 #include "ProgressBar.h"
 
 // own includes
-#include "RunPhaseII.h"
 #include "GPIIBackgroundAlpha.h"
 
 using namespace std;
