@@ -63,14 +63,14 @@ LIBS += -L$(JSONCPP_BASE_DIR)/lib -ljsoncpp
 # Add classes to the end. Backslash indicates continuation
 # on the next line
 CXXSRCS      = \
-	GPIIBackgroundAlpha.cxx RunPhaseII.cxx DetectorPhaseII.cxx
+    GPIIBackgroundAlpha.cxx
 
 # ----------------------------------------------------------------------
 # don't change lines below unless you know what you're doing
 #
 
 CXXOBJS      = $(patsubst %.cxx,%.o,$(CXXSRCS))
-MYPROGS      = runGPIIBackgroundAlpha test_classes
+MYPROGS      = runGPIIBackgroundAlpha
 
 GARBAGE      = $(CXXOBJS) *.o *~ link.d $(MYPROGS)
 
@@ -79,23 +79,19 @@ GARBAGE      = $(CXXOBJS) *.o *~ link.d $(MYPROGS)
 all : runGPIIBackgroundAlpha
 
 link.d : $(patsubst %.cxx,%.h,$(CXXSRCS))
-	$(CXX) -MM $(CXXFLAGS) $(CXXSRCS) > link.d;
+    $(CXX) -MM $(CXXFLAGS) $(CXXSRCS) > link.d;
 
 -include link.d
 
 %.o : %.cxx
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+    $(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean :
-	$(RM) $(GARBAGE)
+    $(RM) $(GARBAGE)
 
 runGPIIBackgroundAlpha : runGPIIBackgroundAlpha.cxx $(CXXOBJS)
-	$(CXX) $(CXXFLAGS) -c $<
-	$(CXX) $(LDFLAGS) $(LIBS) runGPIIBackgroundAlpha.o $(CXXOBJS) -o runGPIIBackgroundAlpha
-
-test : test_classes.cxx $(CXXOBJS)
-	$(CXX) $(CXXFLAGS) -c $<
-	$(CXX) $(LDFLAGS) $(LIBS) test_classes.o $(CXXOBJS) -o test_classes
+    $(CXX) $(CXXFLAGS) -c $<
+    $(CXX) $(LDFLAGS) $(LIBS) runGPIIBackgroundAlpha.o $(CXXOBJS) -o runGPIIBackgroundAlpha
 
 print :
    echo compiler  : $(CXX)
