@@ -31,10 +31,6 @@ CINT         = rootcint
 CXXFLAGS += $(shell bat-config --cflags) -lBATmvc
 LIBS := $(shell bat-config --libs)
 
-# CUBA
-#CXXFLAGS += -I$(CUBA_BASE_DIR)/include
-#LIBS += -L$(CUBA_BASE_DIR)/lib -lcuba
-
 # ROOT
 CXXFLAGS += $(shell root-config --cflags)
 LIBS += $(shell root-config --libs) -lMinuit
@@ -63,7 +59,7 @@ LIBS += -L$(JSONCPP_BASE_DIR)/lib -ljsoncpp
 # Add classes to the end. Backslash indicates continuation
 # on the next line
 CXXSRCS      = \
-    GPIIBackgroundAlpha.cxx
+	GPIIBackgroundAlpha.cxx
 
 # ----------------------------------------------------------------------
 # don't change lines below unless you know what you're doing
@@ -79,19 +75,19 @@ GARBAGE      = $(CXXOBJS) *.o *~ link.d $(MYPROGS)
 all : runGPIIBackgroundAlpha
 
 link.d : $(patsubst %.cxx,%.h,$(CXXSRCS))
-    $(CXX) -MM $(CXXFLAGS) $(CXXSRCS) > link.d;
+	$(CXX) -MM $(CXXFLAGS) $(CXXSRCS) > link.d;
 
 -include link.d
 
 %.o : %.cxx
-    $(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean :
-    $(RM) $(GARBAGE)
+	$(RM) $(GARBAGE)
 
 runGPIIBackgroundAlpha : runGPIIBackgroundAlpha.cxx $(CXXOBJS)
-    $(CXX) $(CXXFLAGS) -c $<
-    $(CXX) $(LDFLAGS) $(LIBS) runGPIIBackgroundAlpha.o $(CXXOBJS) -o runGPIIBackgroundAlpha
+	$(CXX) $(CXXFLAGS) -c $<
+	$(CXX) $(LDFLAGS) $(LIBS) runGPIIBackgroundAlpha.o $(CXXOBJS) -o runGPIIBackgroundAlpha
 
 print :
    echo compiler  : $(CXX)
