@@ -28,7 +28,7 @@ ECHO         = echo
 CINT         = rootcint
 
 # BAT
-CXXFLAGS += $(shell bat-config --cflags)
+CXXFLAGS += $(shell bat-config --cflags) -lBATmvc
 LIBS := $(shell bat-config --libs)
 
 # CUBA

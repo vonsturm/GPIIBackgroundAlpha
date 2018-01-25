@@ -44,6 +44,7 @@
 
 #include "GETRunConfiguration.hh"
 #include "GERunConfigurationManager.hh"
+#include "GADatasetManager.h"
 
 #include "ProgressBar.h"
 
@@ -72,7 +73,7 @@ GPIIBackgroundAlpha::GPIIBackgroundAlpha(const char * name) : BCModel(name)
 GPIIBackgroundAlpha::GPIIBackgroundAlpha(string masterconfname) : BCModel()
 {
     f_obin = 0;
-	SetMasterConf( masterconfname );
+    SetMasterConf( masterconfname );
     UnwrapMasterConf();
     DefineParameters();
 };
@@ -80,30 +81,30 @@ GPIIBackgroundAlpha::GPIIBackgroundAlpha(string masterconfname) : BCModel()
 // ---------------------------------------------------------
 GPIIBackgroundAlpha::~GPIIBackgroundAlpha()
 {
-	for( auto i : f_hdata ) delete i.second;
-	f_hdata.clear();
+    for( auto i : f_hdata ) delete i.second;
+    f_hdata.clear();
 
-	for( auto i : f_MC ) delete i;
-	f_MC.clear();
+    for( auto i : f_MC ) delete i;
+    f_MC.clear();
 
-	f_vdata.clear();
-	f_lowerlimits.clear();
-	f_upperlimits.clear();
-	f_vMC.clear();
+    f_vdata.clear();
+    f_lowerlimits.clear();
+    f_upperlimits.clear();
+    f_vMC.clear();
 };
 
 // ---------------------------------------------------------
 void GPIIBackgroundAlpha::SetMasterConf( string masterconfname )
 {
-	f_masterconfname = masterconfname;
+    f_masterconfname = masterconfname;
 
-	f_j_masterconf  = GetJsonValueFromFile( f_masterconfname );
-	SetParConf( f_j_masterconf["parconf"].asString() );
-	SetDetConf( f_j_masterconf["detconf"].asString() );
-	SetRunConf( f_j_masterconf["runconf"].asString() );
-	SetEnvConf( f_j_masterconf["envconf"].asString() );
+    f_j_masterconf  = GetJsonValueFromFile( f_masterconfname );
+    SetParConf( f_j_masterconf["parconf"].asString() );
+    SetDetConf( f_j_masterconf["detconf"].asString() );
+    SetRunConf( f_j_masterconf["runconf"].asString() );
+    SetEnvConf( f_j_masterconf["envconf"].asString() );
 
-	return;
+    return;
 }
 
 // ---------------------------------------------------------
@@ -156,12 +157,12 @@ void GPIIBackgroundAlpha::SetHistogramParameters(double hBinning, double hMin, d
 // ---------------------------------------------------------
 void GPIIBackgroundAlpha::DefineParameters()
 {
-	if( f_verbosity > 0 ) cout << "Defining parameters" << endl;
+    if( f_verbosity > 0 ) cout << "Defining parameters" << endl;
 
     int nParametersSkipped = 0;
 
-	for( unsigned int p = 0; p < f_npars; p++ )
-	{
+    for( unsigned int p = 0; p < f_npars; p++ )
+    {
         // skip parameter if requested
         if( SkipParameter(p) )
         {
@@ -170,21 +171,21 @@ void GPIIBackgroundAlpha::DefineParameters()
             continue;
         }
 
-		string name = ParameterName(p);
-		double min = f_j_parconf["parameters"][p]["min"].asDouble();
-		double max = f_j_parconf["parameters"][p]["max"].asDouble();
-		int nbins = f_j_parconf["parameters"][p]["nbins"].asInt();
+        string name = ParameterName(p);
+        double min = f_j_parconf["parameters"][p]["min"].asDouble();
+        double max = f_j_parconf["parameters"][p]["max"].asDouble();
+        int nbins = f_j_parconf["parameters"][p]["nbins"].asInt();
 
         // add parameter, set range and binning
-		AddParameter( name.c_str(), min, max );
-		GetParameter( name.c_str() )->SetNbins( nbins );
+        AddParameter( name.c_str(), min, max );
+        GetParameter( name.c_str() )->SetNbins( nbins );
         SetPriorConstant( p-nParametersSkipped );
 
-		if( f_verbosity > 0 )
-		{
-			cout << "\t" << name << ": " << "[" << nbins << "|" << min << ":" << max << "]" << endl;
-		}
-	}
+        if( f_verbosity > 0 )
+        {
+            cout << "\t" << name << ": " << "[" << nbins << "|" << min << ":" << max << "]" << endl;
+        }
+    }
 
     return;
 }
@@ -193,29 +194,29 @@ void GPIIBackgroundAlpha::DefineParameters()
 int GPIIBackgroundAlpha::InitializeDataHistograms()
 {
     string name = "hSum";
-	string name_fine = name; name_fine += "_fine";
-	string name_all = name; name_all += "_all";
-	int bins = (int)f_hemax-f_hemin;
+    string name_fine = name; name_fine += "_fine";
+    string name_all = name; name_all += "_all";
+    int bins = (int)f_hemax-f_hemin;
 
-	f_hdataSum = new TH1D( name.c_str(), name.c_str(), f_hnumbins, f_hemin, f_hemax);
-	f_hdataSum_fine = new TH1D( name_fine.c_str(), name_fine.c_str(), bins, f_hemin, f_hemax);
-	f_hdataSum_all = new TH1D( name_all.c_str(), name_all.c_str(), 7500, 0., 7500.);
+    f_hdataSum = new TH1D( name.c_str(), name.c_str(), f_hnumbins, f_hemin, f_hemax);
+    f_hdataSum_fine = new TH1D( name_fine.c_str(), name_fine.c_str(), bins, f_hemin, f_hemax);
+    f_hdataSum_all = new TH1D( name_all.c_str(), name_all.c_str(), 7500, 0., 7500.);
 
-	for( unsigned int d = 0; d < f_ndets; d++ )
-	{
+    for( unsigned int d = 0; d < f_ndets; d++ )
+    {
         string det = f_j_detconf["detectors"][d].asString();
 
-		string name_single = Form( "hSingle_%s", det.c_str() );
+        string name_single = Form( "hSingle_%s", det.c_str() );
 
-		TH1D * henergy = new TH1D( name_single.c_str(), name_single.c_str(), 7500, 0., 7500.);
+        TH1D * henergy = new TH1D( name_single.c_str(), name_single.c_str(), 7500, 0., 7500.);
 
-		f_hdata[det] = henergy;
-		f_DetectorLiveTime[det] = 0.;
-	}
+        f_hdata[det] = henergy;
+        f_DetectorLiveTime[det] = 0.;
+    }
 
-	BCLog::OutSummary( "Data histograms initialized" );
+    BCLog::OutSummary( "Data histograms initialized" );
 
-	return 0;
+    return 0;
 }
 
 // WRAPPER
@@ -252,7 +253,7 @@ int GPIIBackgroundAlpha::ReadDataFromHistogram( string infilename )
         BCLog::OutSummary( "Reading data from events" );
         int stat = ReadDataFromEvents( infilename );
 
-	return stat;
+    return stat;
     }
 
     for( unsigned int d = 0; d < f_ndets; d++ )
@@ -276,10 +277,10 @@ int GPIIBackgroundAlpha::ReadDataFromHistogram( string infilename )
 
     int nbins = f_hdataSum_all->GetNbinsX();
 
-	for( int b = 1; b <= nbins; b++ )
-	{
-		double bincontent = f_hdataSum_all->GetBinContent( b );
-		double bincenter = f_hdataSum_all->GetBinCenter( b );
+    for( int b = 1; b <= nbins; b++ )
+    {
+        double bincontent = f_hdataSum_all->GetBinContent( b );
+        double bincenter = f_hdataSum_all->GetBinCenter( b );
 
         f_hdataSum -> Fill( bincenter, bincontent );
         f_hdataSum_fine -> Fill( bincenter, bincontent );
@@ -336,39 +337,39 @@ int GPIIBackgroundAlpha::ReadDataFromEvents( string outfilename )
     //       * run livetimes (to json file),
     //       * histograms from file (to root file)
 
-	// read analysis key lists of each run
-	string GERDA_DATA_SETS = f_j_envconf["GERDA_DATA_SETS"].asString();
-	vector<string> keylist;
+    // read analysis key lists of each run
+    string GERDA_DATA_SETS = f_j_envconf["GERDA_DATA_SETS"].asString();
+    vector<string> keylist;
 
-	if( f_verbosity > 0 ) cout << "Reading run data: " << endl;
+    if( f_verbosity > 0 ) cout << "Reading run data: " << endl;
 
-	for( unsigned int r = 0; r < f_nruns; r++ )
-	{
-		int run = f_j_runconf["runs"][r].asInt();
+    for( unsigned int r = 0; r < f_nruns; r++ )
+    {
+        int run = f_j_runconf["runs"][r].asInt();
 
-		string keylist = GERDA_DATA_SETS;
-		keylist += "/run"; keylist += Form( "%04d", run );
-		keylist += "-phy-analysis.txt";
+        string keylist = GERDA_DATA_SETS;
+        keylist += "/run"; keylist += Form( "%04d", run );
+        keylist += "-phy-analysis.txt";
 
-		if( f_verbosity > 0 ) cout << "\t" << keylist << endl;
+        if( f_verbosity > 0 ) cout << "\t" << keylist << endl;
 
-		ReadRunData( keylist );
-	}
+        ReadRunData( keylist );
+    }
 
-	if( f_verbosity > 0 )
-	{
-		cout << "Detector LiveTimes: " << endl;
+    if( f_verbosity > 0 )
+    {
+        cout << "Detector LiveTimes: " << endl;
 
-		for( unsigned int d = 0; d < f_ndets; d++ )
-		{
-			string det = f_j_detconf["detectors"][d].asString();
-			cout << "\t" << det << ": " << f_DetectorLiveTime[det] << endl;
-		}
-	}
+        for( unsigned int d = 0; d < f_ndets; d++ )
+        {
+            string det = f_j_detconf["detectors"][d].asString();
+            cout << "\t" << det << ": " << f_DetectorLiveTime[det] << endl;
+        }
+    }
 
     WriteDataToFileForFastAccess( outfilename );
 
-	return 0;
+    return 0;
 }
 
 // ---------------------------------------------------------
@@ -428,123 +429,155 @@ int GPIIBackgroundAlpha::WriteDataToFileForFastAccess( string outfilename )
 // ---------------------------------------------------------
 int GPIIBackgroundAlpha::ReadRunData( string keylist )
 {
-	string GERDA_PHASEII_DATA = f_j_envconf["GERDA_PHASEII_DATA"].asString();
-	string MU_CAL = f_j_envconf["MU_CAL"].asString();
+    string GERDA_PHASEII_DATA = f_j_envconf["GERDA_PHASEII_DATA"].asString();
+    string MU_CAL = f_j_envconf["MU_CAL"].asString();
 
-	if( GERDA_PHASEII_DATA.empty() )
-	{
-		cout << "Environment variable GERDA_PHASEII_DATA not set" << endl;
-		exit(EXIT_FAILURE);
-	}
-	if( MU_CAL.empty() )
-	{
-		cout << "Environment variable MU_CAL not set" << endl;
-		cout << "LNGS: /nfs/gerda5/gerda-data/blind/active/meta/config/_aux/geruncfg" << endl;
-		cout << "MPIK: /lfs/l3/gerda/Daq/data-phaseII/blind/active/meta/config/_aux/geruncfg" << endl;
-		exit(EXIT_FAILURE);
-	}
+    if( GERDA_PHASEII_DATA.empty() )
+    {
+        cout << "Environment variable GERDA_PHASEII_DATA not set" << endl;
+        exit(EXIT_FAILURE);
+    }
+    if( MU_CAL.empty() )
+    {
+        cout << "Environment variable MU_CAL not set" << endl;
+        cout << "LNGS: /nfs/gerda5/gerda-data/blind/active/meta/config/_aux/geruncfg" << endl;
+        cout << "MPIK: /lfs/l3/gerda/Daq/data-phaseII/blind/active/meta/config/_aux/geruncfg" << endl;
+        exit(EXIT_FAILURE);
+    }
 
-	// initialize run configuration manager
-	GERunConfigurationManager * RunConfManager = new GERunConfigurationManager();
-	GETRunConfiguration * RunConf = 0;
-	RunConfManager -> AllowRunConfigurationSwitch(true);
-	RunConfManager -> SetVerbosity(1);
+    // initialize run configuration manager
+    GERunConfigurationManager * RunConfManager = new GERunConfigurationManager();
+    GETRunConfiguration * RunConf = 0;
+    RunConfManager -> AllowRunConfigurationSwitch(true);
+    RunConfManager -> SetVerbosity(1);
 
-	// Here the data loader could be included...
-	gada::FileMap myMap;
-	myMap.SetRootDir( GERDA_PHASEII_DATA );
-	myMap.BuildFromListOfKeys( keylist );
+    GADatasetManager * theDatasetManager = new GADatasetManager();
 
-	gada::DataLoader l;
-	l.AddFileMap(&myMap);
-	l.BuildTier3();
+    // Here the data loader could be included...
+    gada::FileMap myMap;
+    myMap.SetRootDir( GERDA_PHASEII_DATA );
+    myMap.BuildFromListOfKeys( keylist );
 
-	TChain * chain = l.GetSharedMasterChain();
-	int nentries = chain->GetEntries();
+    gada::DataLoader l;
+    l.AddFileMap(&myMap);
+    l.BuildTier3();
+    bool hasTier4 = l.BuildTier4();
 
-	cout << "Entries in Run: " << nentries << endl;
+    TChain * chain = l.GetSharedMasterChain();
+    int nentries = chain->GetEntries();
 
-	// set chain branches
-	int eventChannelNumber;
-	int multiplicity;
-	int isTP;
-	int isVetoedInTime;
-	unsigned long long timestamp;
-	vector<double> * energy = new vector<double>(f_ndets);
-	vector<int> * firedFlag = new vector<int>(f_ndets);
-	vector<int> * failedFlag = new vector<int>(f_ndets);
-	vector<int> * failedFlag_isPhysical = new vector<int>(f_ndets);
-	vector<int> * failedFlag_isSaturated = new vector<int>(f_ndets);
+    cout << "Entries in Run: " << nentries << endl;
 
-	chain -> SetBranchAddress("eventChannelNumber", &eventChannelNumber);
-	chain -> SetBranchAddress("multiplicity",&multiplicity);
-	chain -> SetBranchAddress("isTP",&isTP);
-	chain -> SetBranchAddress("isVetoedInTime", &isVetoedInTime);
-	chain -> SetBranchAddress("timestamp",&timestamp);
-	chain -> SetBranchAddress("rawEnergyGauss",&energy);
-	chain -> SetBranchAddress("firedFlag", &firedFlag);
-	chain -> SetBranchAddress("failedFlag",&failedFlag);
-	chain -> SetBranchAddress("failedFlag_isPhysical",&failedFlag_isPhysical);
-	chain -> SetBranchAddress("failedFlag_isSaturated",&failedFlag_isSaturated);
+    // set chain branches
+    // TIER3
+    int eventChannelNumber;
+    int multiplicity;
+    int isTP;
+    int isVetoedInTime;
+    unsigned long long timestamp;
+    vector<Double_t> * energy = new vector<double>(f_ndets);
+    vector<Int_t> * firedFlag = new vector<int>(f_ndets);
+    vector<Int_t> * failedFlag = new vector<int>(f_ndets);
+    vector<Int_t> * failedFlag_isPhysical = new vector<int>(f_ndets);
+    vector<Int_t> * failedFlag_isSaturated = new vector<int>(f_ndets);
+    // TIER4
+    bool hasPsdIsEval = true;
+    vector<Int_t> * psdIsEval = new vector<int>(f_ndets);
 
-	int nTP = 0;
-	double frequencyTP = 1./20.;
+    chain -> SetBranchAddress("eventChannelNumber", &eventChannelNumber);
+    chain -> SetBranchAddress("multiplicity",&multiplicity);
+    chain -> SetBranchAddress("isTP",&isTP);
+    chain -> SetBranchAddress("isVetoedInTime", &isVetoedInTime);
+    chain -> SetBranchAddress("timestamp",&timestamp);
+    chain -> SetBranchAddress("rawEnergyGauss",&energy);
+    chain -> SetBranchAddress("firedFlag", &firedFlag);
+    chain -> SetBranchAddress("failedFlag",&failedFlag);
+    chain -> SetBranchAddress("failedFlag_isPhysical",&failedFlag_isPhysical);
+    chain -> SetBranchAddress("failedFlag_isSaturated",&failedFlag_isSaturated);
+    if( hasTier4 )
+    {
+        if ( chain->GetBranchStatus("psdIsEval") )
+        {
+            chain->SetBranchAddress("psdIsEval",&psdIsEval);
+        }
+        else
+        {
+            hasPsdIsEval = false;
+            cout << "WARNING: psdIsEval branch not found" << endl;
+        }
+    }
+    else
+    {
+        cout << "WARNING: No tier4 file found. Assuming all BEGe data valid for PSD" << endl;
+    }
 
-	ProgressBar bar( nentries, '#', false );
+    int nTP = 0;
+    double frequencyTP = 1./20.;
 
-	// loop over all events
-	for (int e = 0; e < nentries; e++)
-	{
-		bar.Update();
+    ProgressBar bar( nentries, '#', false );
 
-		chain->GetEntry( e );
+    // loop over all events
+    for (int e = 0; e < nentries; e++)
+    {
+        bar.Update();
 
-		RunConf = RunConfManager -> GetRunConfiguration( timestamp );
+        chain->GetEntry( e );
 
-		if ( isTP )
-		{
-			nTP++;
-			for( unsigned int d = 0; d < f_ndets; d++ )
+        RunConf = RunConfManager -> GetRunConfiguration( timestamp );
+
+        if ( isTP )
+        {
+            nTP++;
+            for( unsigned int d = 0; d < f_ndets; d++ )
             {
                 string det = f_j_detconf["detectors"][d].asString();
                 if( IsOn( RunConf, det ) ) f_DetectorLiveTime[det] += 1./(frequencyTP*60.*60.*24.);
             }
-			continue;
-		}
-		if ( multiplicity > 1 ) continue;
-		if ( isVetoedInTime ) 	continue;
+            continue;
+        }
+        if ( multiplicity > 1 ) continue;
+        if ( isVetoedInTime )     continue;
 
-		for( unsigned int d = 0; d < f_ndets; d++  )
-		{
+        for( unsigned int d = 0; d < f_ndets; d++  )
+        {
             string det = f_j_detconf["detectors"][d].asString();
             if( !IsOn( RunConf, det ) ) continue;
 
-			int c = GetChannel( RunConf, det );
+            // 0,"EnrBEGe"
+            // 1,"EnrCoax"
+            // 2,"Runs47-49"
+            // 3,"Natural"
+            // 4,"EnrBEGeNoPSD"
+            int idataset = theDatasetManager->FindDataset( timestamp, d, hasPsdIsEval ? psdIsEval->at(d) : false );
+            if( idataset  < 0 ) continue; // not in any data set
+            if( idataset == 4 ) continue; // in EnrBEGeNoPSD data set
 
-			double en = energy->at(c);
+            int c = GetChannel( RunConf, det );
 
-			// fill energy spectra
-			if( ( multiplicity == 1 && !failedFlag_isPhysical->at(c) ) ||
-				!failedFlag_isSaturated->at(c) )
-			{
-				if( !failedFlag_isSaturated->at(c) ) en = 10000.;
+            double en = energy->at(c);
 
-				f_hdata[det] -> Fill( en );
-				f_hdataSum -> Fill( en );
-				f_hdataSum_fine -> Fill( en );
+            // fill energy spectra
+            if( ( multiplicity == 1 && !failedFlag_isPhysical->at(c) ) ||
+                !failedFlag_isSaturated->at(c) )
+            {
+                if( !failedFlag_isSaturated->at(c) ) en = 10000.;
+
+                f_hdata[det] -> Fill( en );
+                f_hdataSum -> Fill( en );
+                f_hdataSum_fine -> Fill( en );
                 f_hdataSum_all -> Fill( en );
-			}
-		}
-	}
+            }
+        }
+    }
 
-	double runLiveTimeInDays = nTP /( frequencyTP * 60. * 60. * 24. );
+    double runLiveTimeInDays = nTP /( frequencyTP * 60. * 60. * 24. );
 
-	// run live time in days
-	f_RunLiveTime.push_back( runLiveTimeInDays );
+    // run live time in days
+    f_RunLiveTime.push_back( runLiveTimeInDays );
 
-	if( f_verbosity > 0 ) cout << "Run Livetime: " << runLiveTimeInDays << endl;
+    if( f_verbosity > 0 ) cout << "Run Livetime: " << runLiveTimeInDays << endl;
 
-	return 0;
+    return 0;
 }
 
 // ---------------------------------------------------------
@@ -577,39 +610,39 @@ int GPIIBackgroundAlpha::FillDataArray()
 
 int GPIIBackgroundAlpha::InitializeMCHistograms()
 {
-//	int nParametersSkipped = 0;
+//    int nParametersSkipped = 0;
 
-	for( unsigned int p = 0; p < f_npars; p++ )
-	{
-//		if( SkipParameter(p) ) nParametersSkipped++; continue;
+    for( unsigned int p = 0; p < f_npars; p++ )
+    {
+//        if( SkipParameter(p) ) nParametersSkipped++; continue;
 
-		string pname = ParameterName(p);
-		int ncorrelations = NumberOfCorrelatedHistos(p);
+        string pname = ParameterName(p);
+        int ncorrelations = NumberOfCorrelatedHistos(p);
 
-		for( int c = 0; c < ncorrelations; c++ )
-		{
-			string hname = f_j_parconf["parameters"][p]["mc"][c]["histoname"].asString();
-			string fname = f_j_parconf["parameters"][p]["mc"][c]["filename"].asString();
+        for( int c = 0; c < ncorrelations; c++ )
+        {
+            string hname = f_j_parconf["parameters"][p]["mc"][c]["histoname"].asString();
+            string fname = f_j_parconf["parameters"][p]["mc"][c]["filename"].asString();
 
-			string name = pname; name += "_n"; name += to_string(c);
-			string name_fine = name; name_fine += "_fine";
-			string name_all = name; name_all += "_all";
-			string title = fname; title += " : "; title += hname;
-			int bins = (int)f_hemax-f_hemin;
+            string name = pname; name += "_n"; name += to_string(c);
+            string name_fine = name; name_fine += "_fine";
+            string name_all = name; name_all += "_all";
+            string title = fname; title += " : "; title += hname;
+            int bins = (int)f_hemax-f_hemin;
 
-			TH1D * hmc = new TH1D( name.c_str(), title.c_str(), f_hnumbins, f_hemin, f_hemax);
-			TH1D * hmc_fine = new TH1D( name_fine.c_str(), title.c_str(), bins, f_hemin, f_hemax);
-			TH1D * hmc_all = new TH1D( name_all.c_str(), title.c_str(), 7500, 0., 7500.);
+            TH1D * hmc = new TH1D( name.c_str(), title.c_str(), f_hnumbins, f_hemin, f_hemax);
+            TH1D * hmc_fine = new TH1D( name_fine.c_str(), title.c_str(), bins, f_hemin, f_hemax);
+            TH1D * hmc_all = new TH1D( name_all.c_str(), title.c_str(), 7500, 0., 7500.);
 
-			f_MC.push_back( hmc );
-			f_MC_fine.push_back( hmc_fine );
-			f_MC_all.push_back( hmc_all );
-		}
-	}
+            f_MC.push_back( hmc );
+            f_MC_fine.push_back( hmc_fine );
+            f_MC_all.push_back( hmc_all );
+        }
+    }
 
     BCLog::OutSummary( "MC histograms initialized"  );
 
-	return 0;
+    return 0;
 }
 
 
@@ -623,53 +656,53 @@ int GPIIBackgroundAlpha::ReadMC()
 
     BCLog::OutSummary( "Read MC pdfs" );
 
-	string GERDA_MC_PDFS = f_j_envconf["GERDA_MC_PDFS"].asString();
+    string GERDA_MC_PDFS = f_j_envconf["GERDA_MC_PDFS"].asString();
 
-	if( GERDA_MC_PDFS.empty() )
-	{
-		cout << "ERROR: environment variable GERDA_MC_PDFS not set!" << endl;
-		return -1;
-	}
+    if( GERDA_MC_PDFS.empty() )
+    {
+        cout << "ERROR: environment variable GERDA_MC_PDFS not set!" << endl;
+        return -1;
+    }
 
-	// loop over parameters
-	int index = 0;
+    // loop over parameters
+    int index = 0;
     int nParametersSkipped = 0;
 
-	for( unsigned int p = 0; p < f_npars; p++ )
-	{
+    for( unsigned int p = 0; p < f_npars; p++ )
+    {
         // skip parameter if requested
         if( SkipParameter(p) ) { nParametersSkipped++; continue; }
 
-		int ncorr = NumberOfCorrelatedHistos(p);
+        int ncorr = NumberOfCorrelatedHistos(p);
 
-		for( int c = 0; c < ncorr; c++ )
-		{
-			string histoname = f_j_parconf["parameters"][p]["mc"][c]["histoname"].asString();
-			string filename = GERDA_MC_PDFS; filename += "/";
-			filename += f_j_parconf["parameters"][p]["mc"][c]["filename"].asString();
+        for( int c = 0; c < ncorr; c++ )
+        {
+            string histoname = f_j_parconf["parameters"][p]["mc"][c]["histoname"].asString();
+            string filename = GERDA_MC_PDFS; filename += "/";
+            filename += f_j_parconf["parameters"][p]["mc"][c]["filename"].asString();
 
-			ReadSingleMC( p, c, index, histoname, filename );
+            ReadSingleMC( p, c, index, histoname, filename );
 
-			index++;
-		}
-	}
+            index++;
+        }
+    }
 /*
-	// Reading MC histograms with a binning of 1keV
-	//-------------
-	// Po210_pPlus
-	//-------------
-	f_MC_FileName += "/histograms_Po210_onPplusSurface.root";
+    // Reading MC histograms with a binning of 1keV
+    //-------------
+    // Po210_pPlus
+    //-------------
+    f_MC_FileName += "/histograms_Po210_onPplusSurface.root";
     f_MC_FileName += "/histograms_Ra226_onPplusSurface.root";
     f_MC_FileName += "/histograms_Rn222_onPplusSurface.root";
     f_MC_FileName += "/Ra226chain_inLArBH_PhaseI.root";
-//	AddMCSingle("Ra226_pPlus","h_Ra226_onPplusSurface");
-//	AddMCSingle("Rn222_pPlus","h_Rn222_onPplusSurface");
-//	AddMCSingle("Po214_pPlus","h_Po214_onPplusSurface");
-//	AddMCSingle("Po218_pPlus","h_Po218_onPplusSurface");
+//    AddMCSingle("Ra226_pPlus","h_Ra226_onPplusSurface");
+//    AddMCSingle("Rn222_pPlus","h_Rn222_onPplusSurface");
+//    AddMCSingle("Po214_pPlus","h_Po214_onPplusSurface");
+//    AddMCSingle("Po218_pPlus","h_Po218_onPplusSurface");
 */
-	FillMCArrays();
+    FillMCArrays();
 
-	return 0;
+    return 0;
 }
 
 // ---------------------------------------------------------
@@ -683,17 +716,17 @@ int GPIIBackgroundAlpha::ReadSingleMC( int par_index, int local_index, int globa
     BCLog::OutSummary(  Form( "Histogram: %s", histoname.c_str() ) );
 
     // open file
-	TFile * MCfile = new TFile( filename.c_str() );
+    TFile * MCfile = new TFile( filename.c_str() );
 
     // get histogram [7500|0:7500]
     TH1D * MChisto = (TH1D*) MCfile->Get( histoname.c_str() );
 
     int nbins = MChisto->GetNbinsX();
 
-	for( int b = 1; b <= nbins; b++ )
-	{
-		double bincontent = MChisto->GetBinContent( b );
-		double bincenter = MChisto->GetBinCenter( b );
+    for( int b = 1; b <= nbins; b++ )
+    {
+        double bincontent = MChisto->GetBinContent( b );
+        double bincenter = MChisto->GetBinCenter( b );
 
         f_MC[global_index]      -> Fill( bincenter, bincontent );
         f_MC_fine[global_index] -> Fill( bincenter, bincontent );
@@ -703,7 +736,7 @@ int GPIIBackgroundAlpha::ReadSingleMC( int par_index, int local_index, int globa
     MCfile->Close();
 
     // scale histograms with number of primaries
-	double primaries = GeneratedPrimaries(par_index,local_index);
+    double primaries = GeneratedPrimaries(par_index,local_index);
 
     BCLog::OutSummary( Form( "Primaries: %.0f", primaries ) );
 
@@ -720,26 +753,26 @@ int GPIIBackgroundAlpha::ReadSingleMC( int par_index, int local_index, int globa
 
     BCLog::OutSummary( "--------------------------------------------" );
 
-	return 0;
+    return 0;
 }
 
 // ---------------------------------------------------------
 int GPIIBackgroundAlpha::FillMCArrays()
 {
-	int nMC = f_MC.size();
+    int nMC = f_MC.size();
 
-  	for( int iMC = 0; iMC < nMC; iMC++ )
-  	{
-    	for( int ibin = 1; ibin <= f_fitbins; ibin++ )
-      	{
-    	  	double value = f_MC[iMC]->GetBinContent( ibin );
-    	  	f_vMC.push_back(value);
-      	}
-  	}
+      for( int iMC = 0; iMC < nMC; iMC++ )
+      {
+        for( int ibin = 1; ibin <= f_fitbins; ibin++ )
+          {
+              double value = f_MC[iMC]->GetBinContent( ibin );
+              f_vMC.push_back(value);
+          }
+      }
 
     BCLog::OutSummary( "MC arrays filled" );
 
-  	return 0;
+      return 0;
 }
 
 // ---------------------------------------------------------
@@ -770,10 +803,10 @@ double GPIIBackgroundAlpha::LogLikelihood(const vector <double> & parameters)
             for( int c = 0; c < ncorrelations; c++ )
             {
                 double weight = WeightOfHistogram(p,c);
-		        lambda += parameters[index] * weight * f_vMC[ nHistosRead * f_fitbins + ibin ];
+                lambda += parameters[index] * weight * f_vMC[ nHistosRead * f_fitbins + ibin ];
                 nHistosRead++;
             }
-	  }
+      }
 
       int bincontent = (int)f_vdata[ibin];
 
@@ -1102,7 +1135,7 @@ void GPIIBackgroundAlpha::DumpHistosAndInfo( string rootfilename )
         p_MC.at(index)->GetYaxis()->SetTitle( Form("cts/(%d keV)",binning) );
         legend->AddEntry(p_MC.at(index),Form("%s",name.c_str()),"l");
 
-	// fix me
+    // fix me
         p_MC.at(index)->Write(Form("%s",name.c_str()));
     }
 
@@ -1199,45 +1232,45 @@ int GPIIBackgroundAlpha::UpdateParameters( string filename, double nerror )
 // ---------------------------------------------------------
 Json::Value GPIIBackgroundAlpha::GetJsonValueFromFile( string filename )
 {
-	ifstream file( filename, ifstream::binary );
+    ifstream file( filename, ifstream::binary );
 
-	if( !file.is_open() )
-	{
-		cout << "Cannot open file " << filename << endl;
-		exit(EXIT_FAILURE);
-	}
+    if( !file.is_open() )
+    {
+        cout << "Cannot open file " << filename << endl;
+        exit(EXIT_FAILURE);
+    }
 
-	if( f_verbosity > 0 ) cout << "Reading JSON file:" << filename << endl;
+    if( f_verbosity > 0 ) cout << "Reading JSON file:" << filename << endl;
 
-	Json::Value val;
+    Json::Value val;
 
-	file >> val;
+    file >> val;
 
-	file.close();
+    file.close();
 
-	if( f_verbosity > 0 ) cout << val << "\n";
+    if( f_verbosity > 0 ) cout << val << "\n";
 
-	return val;
+    return val;
 }
 
 // ---------------------------------------------------------
 bool GPIIBackgroundAlpha::IsOn( GETRunConfiguration * RunConf, string det )
 {
-	int c = GetChannel( RunConf, det );
+    int c = GetChannel( RunConf, det );
 
         if( RunConf -> IsOn( c ) )
-		return true;
+        return true;
 
-	return false;
+    return false;
 }
 
 // ---------------------------------------------------------
 int GPIIBackgroundAlpha::GetChannel( GETRunConfiguration * RunConf, string det )
 {
-	GEChannel * channel = RunConf -> GetChannel( det.c_str() );
+    GEChannel * channel = RunConf -> GetChannel( det.c_str() );
         int c = channel -> GetChannelNumber();
 
-	return c;
+    return c;
 }
 
 // dir structure
