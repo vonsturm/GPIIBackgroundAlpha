@@ -763,7 +763,7 @@ void  RA_PoiStat::Plot_w3ProbLines(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale
   mc_copy->DrawCopy(mcOpt+"hist");
   hProb_1l->DrawCopy(mcOpt+"hist");
   hProb_2l->DrawCopy(mcOpt+"hist");
-  hProb_3l->DrawCopy(mcOpt+"hist"+"pfc");
+  hProb_3l->DrawCopy(mcOpt+"hist"+"f");
 
   da_copy->DrawCopy("Sameep");
   da_copy->DrawCopy("SameAxis");
