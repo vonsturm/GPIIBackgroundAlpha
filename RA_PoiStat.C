@@ -399,7 +399,7 @@ int * RA_PoiStat::Smallest_ProbSet( double nu, double alpha, double s, double er
 
           if(error > 0.)
           {
-              ProbCentral_up_i = cal_P_obs_nu_s_sigmaS(obs_up_i, nu, s, error);
+              Prob_up_i = cal_P_obs_nu_s_sigmaS(obs_up_i, nu, s, error);
               if(obs_low > 0) Prob_low_i = cal_P_obs_nu_s_sigmaS(obs_low_i, nu, s, error);
           }
           else
@@ -444,7 +444,7 @@ int * RA_PoiStat::Smallest_ProbSet( double nu, double alpha, double s, double er
 
 // Katharina
 void  RA_PoiStat::Plot_Cumulative(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale , Double_t Percent_error,
-		Double_t Prob1, Double_t Prob2, Double_t Prob3, TString MCopt)
+		TString ProbSet, Double_t Prob1, Double_t Prob2, Double_t Prob3, TString MCopt)
 {
     h_mc->Scale(1./Lumi_scale);
 
@@ -507,13 +507,13 @@ void  RA_PoiStat::Plot_Cumulative(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale 
       int C_data   = cal_cumu( N_obs, N_exp, Lumi_scale, Percent_error, MCopt );
       int C_mc     = cal_cumu( N_exp, N_exp, Lumi_scale, Percent_error, MCopt );
 
-      hProb_1->SetBinContent( i+1, C_1i_Prob[1] );
-      hProb_2->SetBinContent( i+1, C_2i_Prob[1] );
-      hProb_3->SetBinContent( i+1, C_3i_Prob[1] );
+      hProb_1->SetBinContent( i+1, C_1i_prob[1] );
+      hProb_2->SetBinContent( i+1, C_2i_prob[1] );
+      hProb_3->SetBinContent( i+1, C_3i_prob[1] );
 
-      hProb_1l->SetBinContent( i+1, C_1i_Prob[0] );
-      hProb_2l->SetBinContent( i+1, C_2i_Prob[0] );
-      hProb_3l->SetBinContent( i+1, C_3i_Prob[0] );
+      hProb_1l->SetBinContent( i+1, C_1i_prob[0] );
+      hProb_2l->SetBinContent( i+1, C_2i_prob[0] );
+      hProb_3l->SetBinContent( i+1, C_3i_prob[0] );
 
       da_copy->SetBinContent( i+1, C_data );
       mc_copy->SetBinContent( i+1, C_mc );
