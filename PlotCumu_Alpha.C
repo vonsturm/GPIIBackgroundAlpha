@@ -65,7 +65,7 @@ void PlotCumu_Alpha( string filename, string outfilename )
   // //   tl.DrawLatex(620., 3764, "golden data set");
   //   tl.DrawLatex(1850., 50., "BEGe sum data set");
 
-    pad2->cd(); pad2->SetTickx(1); pad2->SetBottomMargin(0.25); pad2->SetTopMargin(0);
+    pad2->cd(); pad2->SetTickx(1); pad2->SetBottomMargin(0); pad2->SetTopMargin(0);
     h2_ -> Plot_w3ProbLines( h_mc, h_data, 1., 0., "Smallest", 0.683, 0.954, 0.997, "infinite" );
 
     pad3->cd(); pad3->SetTickx(1); pad3->SetBottomMargin(0.25); pad3->SetTopMargin(0);
