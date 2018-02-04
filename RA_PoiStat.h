@@ -61,9 +61,9 @@ class RA_PoiStat : public TObject
   int cal_n(double limit,double nu, double s, TString MCopt); // poisson with s(>=0)
   int cal_n_obs_nu_s_sigmaS(double limit,double nu,double s,double error);//poisson with error on MC
 
-  // Katharina
+  // Katharina: Cumulative Brazilian Plot
   int cal_cumu( double obs, double nu, double s, double error, TString MCopt );
-
+  void Plot_Cumulative(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale , Double_t Percent_error, Double_t Prob1, Double_t Prob2, Double_t Prob3, TString MCopt)
 
   // finding the Probability intervals
   int * Central_ProbSet(double nu, double prob, double s, double error, TString MCopt);
