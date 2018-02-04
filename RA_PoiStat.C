@@ -740,19 +740,19 @@ void  RA_PoiStat::Plot_w3ProbLines(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale
   da_copy->SetMinimum(0.01);
 
   hProb_1->SetLineWidth(myLineWidth*2.0);
-  hProb_1->SetLineColor(kGreen-7);
-  hProb_2->SetLineColor(kYellow-7);
-  hProb_3->SetLineColor(kRed-7);
-  hProb_1l->SetLineColor(kGreen-7);
-  hProb_2l->SetLineColor(kYellow-7);
-  hProb_3l->SetLineColor(kRed-7);
+  // hProb_1->SetLineColor(kGreen-7);
+  // hProb_2->SetLineColor(kYellow-7);
+  // hProb_3->SetLineColor(kRed-7);
+  // hProb_1l->SetLineColor(kGreen-7);
+  // hProb_2l->SetLineColor(kYellow-7);
+  // hProb_3l->SetLineColor(kRed-7);
 
   hProb_1->SetFillColor(kGreen-7);
   hProb_2->SetFillColor(kYellow-7);
   hProb_3->SetFillColor(kRed-7);
-  hProb_1l->SetFillColor(kGreen-7);
-  hProb_2l->SetFillColor(kYellow-7);
-  hProb_3l->SetFillColor(kRed-7);
+  hProb_1l->SetFillColor(kYellow-7);
+  hProb_2l->SetFillColor(kRed-7);
+  hProb_3l->SetFillColor(kWhite);
 
   TString mcOpt = "same";
 
