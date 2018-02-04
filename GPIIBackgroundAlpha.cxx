@@ -535,7 +535,7 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist )
             continue;
         }
         if ( multiplicity > 1 ) continue;
-        if ( isVetoedInTime )     continue;
+        if ( isVetoedInTime )   continue;
 
         for( unsigned int d = 0; d < f_ndets; d++  )
         {
@@ -547,7 +547,7 @@ int GPIIBackgroundAlpha::ReadRunData( string keylist )
             // 2,"Runs47-49"
             // 3,"Natural"
             // 4,"EnrBEGeNoPSD"
-            int idataset = theDatasetManager->FindDataset( timestamp, d, hasPsdIsEval ? psdIsEval->at(d) : false );
+            int idataset  = theDatasetManager->FindDataset( timestamp, d, hasPsdIsEval ? psdIsEval->at(d) : false );
             if( idataset  < 0 ) continue; // not in any data set
             if( idataset == 4 ) continue; // in EnrBEGeNoPSD data set
 
