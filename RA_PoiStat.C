@@ -43,6 +43,28 @@ int RA_PoiStat::cal_n( double limit, double nu, double s, TString MCopt )
 }
 
 
+// Katharina
+// cumulative value at obs
+int RA_PoiStat::cal_cumu( double obs, double nu, double s, double error, TString MCopt )
+{
+  double f_i = 0.;
+  int i_limit = int(obs);
+
+  if( error <= 0. )
+  {
+      for( int i = 0; i <= i_limit; i++ )
+        f_i += cal_P_obs_nu( i, nu, s, MCopt );
+  }
+  else
+  {
+      for( int i = 0; i <= i_limit; i++ )
+        f_i += cal_P_obs_nu_s_sigmaS( i, nu, s, error );
+  }
+
+  return f_i;
+}
+
+
 // n above gauss cumulative
 int * RA_PoiStat::cal_n_gauss( double limit, double nu )
 {
@@ -281,9 +303,8 @@ int RA_PoiStat::cal_n_obs_nu_s_sigmaS(double limit,double nu,double s,double err
 int * RA_PoiStat::Central_ProbSet( double nu, double alpha, double s, double error, TString MCopt )
 {
   // to have a set which has alpha % central probability
-
   double alphaby2  = (1-alpha) / 2.;
-  double prob_down = alphaby2 ;
+  double prob_down = alphaby2;
   double prob_up   = 1. - alphaby2;
 
   int o_star     = (nu + 0.5)/s; // 2nd change here
@@ -421,10 +442,138 @@ int * RA_PoiStat::Smallest_ProbSet( double nu, double alpha, double s, double er
 }
 
 
+// Katharina
+void  RA_PoiStat::Plot_Cumulative(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale , Double_t Percent_error,
+		Double_t Prob1, Double_t Prob2, Double_t Prob3, TString MCopt)
+{
+    h_mc->Scale(1./Lumi_scale);
+
+    Int_t myLineWidth=1;
+
+    TH1D * hProb_1 = new TH1D(); h_mc->Copy(*hProb_1);
+    TH1D * hProb_2 = new TH1D(); h_mc->Copy(*hProb_2);
+    TH1D * hProb_3 = new TH1D(); h_mc->Copy(*hProb_3);
+
+    TH1D * hProb_1l = new TH1D(); h_mc->Copy(*hProb_1l);
+    TH1D * hProb_2l = new TH1D(); h_mc->Copy(*hProb_2l);
+    TH1D * hProb_3l = new TH1D(); h_mc->Copy(*hProb_3l);
+
+    TH1D * da_copy = new TH1D(); h_data->Copy(*da_copy);
+    TH1D * mc_copy = new TH1D(); h_mc->Copy(*mc_copy);
+
+    da_copy->SetMarkerStyle(23);
+    da_copy->SetMarkerSize(1.5);
+    da_copy->SetMarkerColor(kBlack);
+
+    mc_copy->SetFillColor(kWhite);
+
+    Int_t nBin = h_data->GetNbinsX();
+    cout << " Nbins in this hist : " << nBin << endl;
+    int * N_1i_prob = new int[2];
+    int * N_2i_prob = new int[2];
+    int * N_3i_prob = new int[2];
+
+    for( Int_t i = 0; i < nBin; i++ )
+    {
+      double N_obs = h_data->GetBinContent(i+1);
+      double N_exp = h_mc->GetBinContent(i+1);
+
+      if(ProbSet == "Central")
+      {
+          N_1i_prob = Central_ProbSet(N_exp, Prob1, Lumi_scale, Percent_error, MCopt);
+          N_2i_prob = Central_ProbSet(N_exp, Prob2, Lumi_scale, Percent_error, MCopt);
+          N_3i_prob = Central_ProbSet(N_exp, Prob3, Lumi_scale, Percent_error, MCopt);
+      }
+      else if(ProbSet == "Smallest")
+      {
+          N_1i_prob = Smallest_ProbSet(N_exp, Prob1, Lumi_scale, Percent_error, MCopt);
+          N_2i_prob = Smallest_ProbSet(N_exp, Prob2, Lumi_scale, Percent_error, MCopt);
+          N_3i_prob = Smallest_ProbSet(N_exp, Prob3, Lumi_scale, Percent_error, MCopt);
+      }
+
+      // translate interval in cumulatvice space
+      int * C_1i_prob = new int[2];
+      int * C_2i_prob = new int[2];
+      int * C_3i_prob = new int[2];
+
+      C_1i_prob[0] = cal_cumu( N_1i_prob[0], N_exp, Lumi_scale, Percent_error, MCopt );
+      C_2i_prob[0] = cal_cumu( N_2i_prob[0], N_exp, Lumi_scale, Percent_error, MCopt );
+      C_3i_prob[0] = cal_cumu( N_3i_prob[0], N_exp, Lumi_scale, Percent_error, MCopt );
+
+      C_1i_prob[1] = cal_cumu( N_1i_prob[1], N_exp, Lumi_scale, Percent_error, MCopt );
+      C_3i_prob[1] = cal_cumu( N_3i_prob[1], N_exp, Lumi_scale, Percent_error, MCopt );
+      C_2i_prob[1] = cal_cumu( N_2i_prob[1], N_exp, Lumi_scale, Percent_error, MCopt );
+
+      int C_data   = cal_cumu( N_obs, N_exp, Lumi_scale, Percent_error, MCopt );
+      int C_mc     = cal_cumu( N_exp, N_exp, Lumi_scale, Percent_error, MCopt );
+
+      hProb_1->SetBinContent( i+1, C_1i_Prob[1] );
+      hProb_2->SetBinContent( i+1, C_2i_Prob[1] );
+      hProb_3->SetBinContent( i+1, C_3i_Prob[1] );
+
+      hProb_1l->SetBinContent( i+1, C_1i_Prob[0] );
+      hProb_2l->SetBinContent( i+1, C_2i_Prob[0] );
+      hProb_3l->SetBinContent( i+1, C_3i_Prob[0] );
+
+      da_copy->SetBinContent( i+1, C_data );
+      mc_copy->SetBinContent( i+1, C_mc );
+
+      cout << "Nmc = " << N_exp << endl;
+      cout << "C_" << int(Prob1*100) << " = [ " << C_1i_Prob[0] << " : " << C_1i_Prob[1] << " ]" << endl;
+      cout << "C_" << int(Prob2*100) << " = [ " << C_2i_Prob[0] << " : " << C_2i_Prob[1] << " ]" << endl;
+      cout << "C_" << int(Prob3*100) << " = [ " << C_3i_Prob[0] << " : " << C_3i_Prob[1] << " ]" << endl;
+      cout << "C_mc(" << N_exp << ") = " << C_mc << endl;
+      cout << "C_data(" << N_obs << ") = " << C_data << endl;
+    }
+
+    da_copy->SetStats(0);
+    da_copy->SetMarkerStyle(20);
+    da_copy->SetMarkerSize(0.7);
+    da_copy->SetMaximum(1.1);
+
+    hProb_1->SetLineWidth(myLineWidth*2.0);
+    hProb_1->SetLineColor(kGreen-7);
+    hProb_2->SetLineColor(kYellow-7);
+    hProb_3->SetLineColor(kRed-7);
+    hProb_1l->SetLineColor(kGreen-7);
+    hProb_2l->SetLineColor(kYellow-7);
+    hProb_3l->SetLineColor(kRed-7);
+
+    hProb_1->SetFillColor(kGreen-7);
+    hProb_2->SetFillColor(kYellow-7);
+    hProb_3->SetFillColor(kRed-7);
+    hProb_1l->SetFillColor(kYellow-7);
+    hProb_2l->SetFillColor(kYellow-7);
+    hProb_3l->SetFillColor(kRed-7);
+
+    mc_copy->SetLineColor(kBlack);
+    mc_copy->SetLineWidth(myLineWidth*2.0);
+
+    TString mcOpt = "same";
+
+    da_copy->SetTitle("");
+    da_copy->DrawCopy("p");
+
+    hProb_3->DrawCopy(mcOpt+"hist");
+    hProb_2->DrawCopy(mcOpt+"hist");
+    hProb_1->DrawCopy(mcOpt+"hist");
+    hProb_1l->DrawCopy(mcOpt+"hist");
+    hProb_2l->DrawCopy(mcOpt+"hist");
+    hProb_3l->DrawCopy(mcOpt+"hist");
+
+//    da_copy->DrawCopy("Sameep");
+//    da_copy->DrawCopy("SameAxis");
+    mc_copy->DrawCopy(mcOpt+"hist");
+    da_copy->DrawCopy("Same p");
+
+    return;
+}
+
+
 void  RA_PoiStat::Plot_w1ProbLine(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale , Double_t Percent_error,
 		TString ProbSet, Double_t Prob, TString MCopt)
 {
-  h_mc->Scale(Lumi_scale);
+  h_mc->Scale(1./Lumi_scale);
 
   Int_t myLineWidth=1;
 
@@ -579,7 +728,7 @@ void  RA_PoiStat::Plot_w3ProbLines(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale
     cout << "Nmc = "                         << N_exp
          << " N_" << int(Prob1*100) << " = " << N_1Prob
          << " N_" << int(Prob2*100) << " = " << N_2Prob
-         << " N_" << int(Prob2*100) << " = " << N_3Prob << endl;
+         << " N_" << int(Prob3*100) << " = " << N_3Prob << endl;
 
     // trick to have some representation for 0 data events.......
     if(N_obs > 0) da_copy->SetBinContent(i+1,0.);
@@ -634,7 +783,7 @@ void  RA_PoiStat::Plot_w3ProbLines(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale
 
 // ratio plot
 void  RA_PoiStat::Plot_w3ProbLines_ratio(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale,Double_t Percent_error,
-    TString ProbSet , Double_t Prob1, Double_t Prob2,  Double_t Prob3, TString MCopt)
+    TString ProbSet, Double_t Prob1, Double_t Prob2, Double_t Prob3, TString MCopt)
 {
   h_mc->Scale(1./Lumi_scale);
 
@@ -702,12 +851,12 @@ void  RA_PoiStat::Plot_w3ProbLines_ratio(TH1D* h_mc ,TH1D* h_data, Double_t Lumi
     cout << "Nmc = "                         << N_exp
          << " N_" << int(Prob1*100) << " = " << N_1Prob
          << " N_" << int(Prob2*100) << " = " << N_2Prob
-         << " N_" << int(Prob2*100) << " = " << N_3Prob << endl;
+         << " N_" << int(Prob3*100) << " = " << N_3Prob << endl;
 
     cout << "Nmc = "                         << N_exp
          << " N_" << int(Prob1*100) << " = " << N_1lProb
          << " N_" << int(Prob2*100) << " = " << N_2lProb
-         << " N_" << int(Prob2*100) << " = " << N_3lProb << endl;
+         << " N_" << int(Prob3*100) << " = " << N_3lProb << endl;
   }
 
   tmpMaxData = h_data->GetBinContent( h_data->GetMaximumBin() );
@@ -827,7 +976,7 @@ void  RA_PoiStat::Plot_w3ProbLines_lin(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_s
     cout << "Nmc = "                         << N_exp
          << " N_" << int(Prob1*100) << " = " << N_1Prob
          << " N_" << int(Prob2*100) << " = " << N_2Prob
-         << " N_" << int(Prob2*100) << " = " << N_3Prob << endl;
+         << " N_" << int(Prob3*100) << " = " << N_3Prob << endl;
   }
 
   h_data->SetStats(0);

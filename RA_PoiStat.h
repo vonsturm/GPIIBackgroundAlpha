@@ -61,6 +61,10 @@ class RA_PoiStat : public TObject
   int cal_n(double limit,double nu, double s, TString MCopt); // poisson with s(>=0)
   int cal_n_obs_nu_s_sigmaS(double limit,double nu,double s,double error);//poisson with error on MC
 
+  // Katharina
+  int cal_cumu( double obs, double nu, double s, double error, TString MCopt );
+
+
   // finding the Probability intervals
   int * Central_ProbSet(double nu, double prob, double s, double error, TString MCopt);
   int * Smallest_ProbSet(double nu, double alpha, double s, double error, TString MCopt);
