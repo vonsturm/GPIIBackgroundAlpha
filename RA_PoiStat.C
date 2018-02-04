@@ -461,12 +461,6 @@ void  RA_PoiStat::Plot_Cumulative(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale 
     TH1D * da_copy = new TH1D(); h_data->Copy(*da_copy);
     TH1D * mc_copy = new TH1D(); h_mc->Copy(*mc_copy);
 
-    da_copy->SetMarkerStyle(23);
-    da_copy->SetMarkerSize(1.5);
-    da_copy->SetMarkerColor(kBlack);
-
-    mc_copy->SetFillColor(kYellow-10);
-
     Int_t nBin = h_data->GetNbinsX();
     cout << " Nbins in this hist : " << nBin << endl;
     int * N_1i_prob = new int[2];
@@ -548,10 +542,10 @@ void  RA_PoiStat::Plot_Cumulative(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale 
     hProb_1l->SetFillColor(kYellow-7);
     hProb_2l->SetFillColor(kRed-9);
     hProb_3l->SetFillColor(kYellow-10);
-    hProb_3l->SetFillStyle(1001);
 
     mc_copy->SetLineColor(kBlack);
     mc_copy->SetLineWidth(myLineWidth*2.0);
+    mc_copy->SetFillStyle(0);
 
     TString mcOpt = "same";
 
@@ -674,10 +668,6 @@ void  RA_PoiStat::Plot_w3ProbLines(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale
   TH1D * da_copy = new TH1D(); h_data->Copy(*da_copy);
   TH1D * mc_copy = new TH1D(); h_mc->Copy(*mc_copy);
 
-  da_copy->SetMarkerStyle(23);
-  da_copy->SetMarkerSize(1.5);
-  da_copy->SetMarkerColor(kBlack);
-
   Int_t nBin = h_data->GetNbinsX();
   cout << " Nbins in this hist : " << nBin << endl;
   int * N_1i_prob = new int[2];
@@ -735,7 +725,6 @@ void  RA_PoiStat::Plot_w3ProbLines(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale
   da_copy->SetMarkerStyle(20);
   da_copy->SetMarkerSize(0.7);
   da_copy->SetMaximum(1.5*tmpMaxData);
-
   da_copy->SetMinimum(0.01);
 
   hProb_1->SetLineWidth(myLineWidth*2.0);
@@ -751,8 +740,11 @@ void  RA_PoiStat::Plot_w3ProbLines(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale
   hProb_3->SetFillColor(kRed-9);
   hProb_1l->SetFillColor(kYellow-7);
   hProb_2l->SetFillColor(kRed-9);
-  hProb_3l->SetFillColor(kYellow-10);
-  hProb_3l->SetFillStyle(1001);
+  hProb_3l->SetFillColor(kWhite);
+
+  mc_copy->SetLineColor(kBlack);
+  mc_copy->SetLineWidth(myLineWidth*2.0);
+  mc_copy->SetFillStyle(0);
 
   TString mcOpt = "same";
 
@@ -762,11 +754,11 @@ void  RA_PoiStat::Plot_w3ProbLines(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale
   hProb_3->DrawCopy(mcOpt+"hist");
   hProb_2->DrawCopy(mcOpt+"hist");
   hProb_1->DrawCopy(mcOpt+"hist");
-  mc_copy->DrawCopy(mcOpt+"hist");
   hProb_1l->DrawCopy(mcOpt+"hist");
   hProb_2l->DrawCopy(mcOpt+"hist");
   hProb_3l->DrawCopy(mcOpt+"hist");
 
+  mc_copy->DrawCopy(mcOpt+"hist");
   da_copy->DrawCopy("Sameep");
   da_copy->DrawCopy("SameAxis");
 
@@ -900,7 +892,7 @@ void  RA_PoiStat::Plot_w3ProbLines_ratio(TH1D* h_mc ,TH1D* h_data, Double_t Lumi
 
 
 // linear plot
-void  RA_PoiStat::Plot_w3ProbLines_lin(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale, Double_t Percent_error,
+void RA_PoiStat::Plot_w3ProbLines_lin(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale, Double_t Percent_error,
     TString ProbSet , Double_t Prob1, Double_t Prob2,  Double_t Prob3, TString opt, TString MCopt)
 {
   h_mc->Scale(1./Lumi_scale);
