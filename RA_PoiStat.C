@@ -465,7 +465,7 @@ void  RA_PoiStat::Plot_Cumulative(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale 
     da_copy->SetMarkerSize(1.5);
     da_copy->SetMarkerColor(kBlack);
 
-    mc_copy->SetFillColor(kWhite);
+    mc_copy->SetFillColor(kYellow-10);
 
     Int_t nBin = h_data->GetNbinsX();
     cout << " Nbins in this hist : " << nBin << endl;
@@ -537,17 +537,17 @@ void  RA_PoiStat::Plot_Cumulative(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale 
     hProb_1->SetLineWidth(myLineWidth*2.0);
     hProb_1->SetLineColor(kGreen-7);
     hProb_2->SetLineColor(kYellow-7);
-    hProb_3->SetLineColor(kRed-7);
+    hProb_3->SetLineColor(kRed-9);
     hProb_1l->SetLineColor(kYellow-7);
-    hProb_2l->SetLineColor(kRed-7);
-    hProb_3l->SetLineColor(kRed-7);
+    hProb_2l->SetLineColor(kRed-9);
+    hProb_3l->SetLineColor(kRed-9);
 
     hProb_1->SetFillColor(kGreen-7);
     hProb_2->SetFillColor(kYellow-7);
-    hProb_3->SetFillColor(kRed-7);
+    hProb_3->SetFillColor(kRed-9);
     hProb_1l->SetFillColor(kYellow-7);
-    hProb_2l->SetFillColor(kRed-7);
-    hProb_3l->SetFillColor(kWhite);
+    hProb_2l->SetFillColor(kRed-9);
+    hProb_3l->SetFillColor(kYellow-10);
     hProb_3l->SetFillStyle(1001);
 
     mc_copy->SetLineColor(kBlack);
@@ -741,17 +741,17 @@ void  RA_PoiStat::Plot_w3ProbLines(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale
   hProb_1->SetLineWidth(myLineWidth*2.0);
   hProb_1->SetLineColor(kGreen-7);
   hProb_2->SetLineColor(kYellow-7);
-  hProb_3->SetLineColor(kRed-7);
+  hProb_3->SetLineColor(kRed-9);
   hProb_1l->SetLineColor(kYellow-7);
-  hProb_2l->SetLineColor(kRed-7);
-  hProb_3l->SetLineColor(kRed-7);
+  hProb_2l->SetLineColor(kRed-9);
+  hProb_3l->SetLineColor(kRed-9);
 
   hProb_1->SetFillColor(kGreen-7);
   hProb_2->SetFillColor(kYellow-7);
-  hProb_3->SetFillColor(kRed-7);
+  hProb_3->SetFillColor(kRed-9);
   hProb_1l->SetFillColor(kYellow-7);
-  hProb_2l->SetFillColor(kRed-7);
-  hProb_3l->SetFillColor(kWhite);
+  hProb_2l->SetFillColor(kRed-9);
+  hProb_3l->SetFillColor(kYellow-10);
   hProb_3l->SetFillStyle(1001);
 
   TString mcOpt = "same";
@@ -864,17 +864,17 @@ void  RA_PoiStat::Plot_w3ProbLines_ratio(TH1D* h_mc ,TH1D* h_data, Double_t Lumi
   hProb_1->SetLineWidth(myLineWidth*2.0);
   hProb_1->SetLineColor(kGreen-7);
   hProb_2->SetLineColor(kYellow-7);
-  hProb_3->SetLineColor(kRed-7);
+  hProb_3->SetLineColor(kRed-9);
   hProb_1l->SetLineColor(kYellow-7);
-  hProb_2l->SetLineColor(kRed-7);
-  hProb_3l->SetLineColor(kRed-7);
+  hProb_2l->SetLineColor(kRed-9);
+  hProb_3l->SetLineColor(kRed-9);
 
   hProb_1->SetFillColor(kGreen-7);
   hProb_2->SetFillColor(kYellow-7);
-  hProb_3->SetFillColor(kRed-7);
+  hProb_3->SetFillColor(kRed-9);
   hProb_1l->SetFillColor(kYellow-7);
-  hProb_2l->SetFillColor(kRed-7);
-  hProb_3l->SetFillColor(kWhite);
+  hProb_2l->SetFillColor(kRed-9);
+  hProb_3l->SetFillColor(kYellow-10);
   hProb_3l->SetFillStyle(1001);
 
   h_mc->SetLineColor(kBlack);
@@ -982,17 +982,17 @@ void  RA_PoiStat::Plot_w3ProbLines_lin(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_s
   hProb_1->SetLineWidth(myLineWidth*2.0);
   hProb_1->SetLineColor(kGreen-7);
   hProb_2->SetLineColor(kYellow-7);
-  hProb_3->SetLineColor(kRed-7);
+  hProb_3->SetLineColor(kRed-9);
   hProb_1l->SetLineColor(kYellow-7);
-  hProb_2l->SetLineColor(kRed-7);
-  hProb_3l->SetLineColor(kRed-7);
+  hProb_2l->SetLineColor(kRed-9);
+  hProb_3l->SetLineColor(kRed-9);
 
   hProb_1->SetFillColor(kGreen-7);
   hProb_2->SetFillColor(kYellow-7);
-  hProb_3->SetFillColor(kRed-7);
+  hProb_3->SetFillColor(kRed-9);
   hProb_1l->SetFillColor(kYellow-7);
-  hProb_2l->SetFillColor(kRed-7);
-  hProb_3l->SetFillColor(kWhite);
+  hProb_2l->SetFillColor(kRed-9);
+  hProb_3l->SetFillColor(kYellow-10);
   hProb_3l->SetFillStyle(1001);
 
   h_mc->SetLineColor(kBlack);
