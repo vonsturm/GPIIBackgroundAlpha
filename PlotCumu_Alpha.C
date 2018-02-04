@@ -75,7 +75,7 @@ void PlotCumu_Alpha( string filename, string outfilename )
     pad2->SetTopMargin(0);
 
     RA_PoiStat * h2_ = new RA_PoiStat();
-    h2_ -> Plot_Cumulative( h_mc, h_data, 1., 0., 0.683, 0.954, 0.997, "infinite" )
+    h2_ -> Plot_Cumulative( h_mc, h_data, 1., 0., "Smallest", 0.683, 0.954, 0.997, "infinite" );
 
     // Draw Legend
     TLegend * myLeg11 = new TLegend(0.15,0.83,0.25,0.96,"");
