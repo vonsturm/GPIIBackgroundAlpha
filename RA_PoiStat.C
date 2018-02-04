@@ -518,12 +518,15 @@ void  RA_PoiStat::Plot_Cumulative(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale 
       da_copy->SetBinContent( i+1, C_data );
       mc_copy->SetBinContent( i+1, C_mc );
 
+      da_copy->SetBinError( i+1, 0. );
+
       cout << setprecision(4) << "Nmc = " << N_exp << "\n"
            << "C_" << int(Prob1*100) << " = [ " << C_1i_prob[0] << " : " << C_1i_prob[1] << " ]" << "\n"
            << "C_" << int(Prob2*100) << " = [ " << C_2i_prob[0] << " : " << C_2i_prob[1] << " ]" << "\n"
            << "C_" << int(Prob3*100) << " = [ " << C_3i_prob[0] << " : " << C_3i_prob[1] << " ]" << "\n"
            << "C_mc(" << N_exp << ") = " << C_mc << "\n"
            << "C_data(" << N_obs << ") = " << C_data << endl;
+
     }
 
     da_copy->SetStats(0);
