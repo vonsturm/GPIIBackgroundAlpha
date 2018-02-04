@@ -45,7 +45,7 @@ int RA_PoiStat::cal_n( double limit, double nu, double s, TString MCopt )
 
 // Katharina
 // cumulative value at obs
-int RA_PoiStat::cal_cumu( double obs, double nu, double s, double error, TString MCopt )
+double RA_PoiStat::cal_cumu( double obs, double nu, double s, double error, TString MCopt )
 {
   double f_i = 0.;
   int i_limit = int(obs);
@@ -492,9 +492,9 @@ void  RA_PoiStat::Plot_Cumulative(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale 
       }
 
       // translate interval in cumulatvice space
-      int * C_1i_prob = new int[2];
-      int * C_2i_prob = new int[2];
-      int * C_3i_prob = new int[2];
+      double * C_1i_prob = new int[2];
+      double * C_2i_prob = new int[2];
+      double * C_3i_prob = new int[2];
 
       C_1i_prob[0] = cal_cumu( N_1i_prob[0], N_exp, Lumi_scale, Percent_error, MCopt );
       C_2i_prob[0] = cal_cumu( N_2i_prob[0], N_exp, Lumi_scale, Percent_error, MCopt );
@@ -504,8 +504,8 @@ void  RA_PoiStat::Plot_Cumulative(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale 
       C_3i_prob[1] = cal_cumu( N_3i_prob[1], N_exp, Lumi_scale, Percent_error, MCopt );
       C_2i_prob[1] = cal_cumu( N_2i_prob[1], N_exp, Lumi_scale, Percent_error, MCopt );
 
-      int C_data   = cal_cumu( N_obs, N_exp, Lumi_scale, Percent_error, MCopt );
-      int C_mc     = cal_cumu( N_exp, N_exp, Lumi_scale, Percent_error, MCopt );
+      double C_data   = cal_cumu( N_obs, N_exp, Lumi_scale, Percent_error, MCopt );
+      double C_mc     = cal_cumu( N_exp, N_exp, Lumi_scale, Percent_error, MCopt );
 
       hProb_1->SetBinContent( i+1, C_1i_prob[1] );
       hProb_2->SetBinContent( i+1, C_2i_prob[1] );
@@ -518,12 +518,12 @@ void  RA_PoiStat::Plot_Cumulative(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale 
       da_copy->SetBinContent( i+1, C_data );
       mc_copy->SetBinContent( i+1, C_mc );
 
-      cout << "Nmc = " << N_exp << endl;
-      cout << "C_" << int(Prob1*100) << " = [ " << C_1i_prob[0] << " : " << C_1i_prob[1] << " ]" << endl;
-      cout << "C_" << int(Prob2*100) << " = [ " << C_2i_prob[0] << " : " << C_2i_prob[1] << " ]" << endl;
-      cout << "C_" << int(Prob3*100) << " = [ " << C_3i_prob[0] << " : " << C_3i_prob[1] << " ]" << endl;
-      cout << "C_mc(" << N_exp << ") = " << C_mc << endl;
-      cout << "C_data(" << N_obs << ") = " << C_data << endl;
+      cout << setprecision(4) "Nmc = " << N_exp << "\n";
+           << "C_" << int(Prob1*100) << " = [ " << C_1i_prob[0] << " : " << C_1i_prob[1] << " ]" << "\n";
+           << "C_" << int(Prob2*100) << " = [ " << C_2i_prob[0] << " : " << C_2i_prob[1] << " ]" << "\n";
+           << "C_" << int(Prob3*100) << " = [ " << C_3i_prob[0] << " : " << C_3i_prob[1] << " ]" << "\n";
+           << "C_mc(" << N_exp << ") = " << C_mc << "\n";
+           << "C_data(" << N_obs << ") = " << C_data << "\n";
     }
 
     da_copy->SetStats(0);

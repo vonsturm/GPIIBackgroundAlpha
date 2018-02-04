@@ -62,7 +62,7 @@ class RA_PoiStat : public TObject
   int cal_n_obs_nu_s_sigmaS(double limit,double nu,double s,double error);//poisson with error on MC
 
   // Katharina: Cumulative Brazilian Plot
-  int cal_cumu( double obs, double nu, double s, double error, TString MCopt );
+  double cal_cumu( double obs, double nu, double s, double error, TString MCopt );
   void Plot_Cumulative(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale , Double_t Percent_error, TString ProbSet, Double_t Prob1, Double_t Prob2, Double_t Prob3, TString MCopt);
 
   // finding the Probability intervals
