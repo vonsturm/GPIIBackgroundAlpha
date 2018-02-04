@@ -1,6 +1,7 @@
 *.o
 *.d
 *.txt
+*.json
 
 *_article*
 
