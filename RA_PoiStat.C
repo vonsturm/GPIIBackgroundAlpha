@@ -735,17 +735,17 @@ void  RA_PoiStat::Plot_w3ProbLines(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale
   da_copy->SetStats(0);
   da_copy->SetMarkerStyle(20);
   da_copy->SetMarkerSize(0.7);
-  da_copy->SetMaximum(4.7*tmpMaxData);
+  da_copy->SetMaximum(1.1*tmpMaxData);
 
   da_copy->SetMinimum(0.01);
 
   hProb_1->SetLineWidth(myLineWidth*2.0);
-  // hProb_1->SetLineColor(kGreen-7);
-  // hProb_2->SetLineColor(kYellow-7);
-  // hProb_3->SetLineColor(kRed-7);
-  // hProb_1l->SetLineColor(kGreen-7);
-  // hProb_2l->SetLineColor(kYellow-7);
-  // hProb_3l->SetLineColor(kRed-7);
+  hProb_1->SetLineColor(kGreen-7);
+  hProb_2->SetLineColor(kYellow-7);
+  hProb_3->SetLineColor(kRed-7);
+  hProb_1l->SetLineColor(kGreen-7);
+  hProb_2l->SetLineColor(kYellow-7);
+  hProb_3l->SetLineColor(kRed-7);
 
   hProb_1->SetFillColor(kGreen-7);
   hProb_2->SetFillColor(kYellow-7);
