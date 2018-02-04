@@ -501,7 +501,6 @@ void  RA_PoiStat::Plot_w1ProbLine(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale 
 }
 
 
-//
 void  RA_PoiStat::Plot_w3ProbLines(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale,Double_t Percent_error,
 		TString ProbSet , Double_t Prob1, Double_t Prob2,  Double_t Prob3, TString MCopt)
 {
@@ -554,18 +553,18 @@ void  RA_PoiStat::Plot_w3ProbLines(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale
         N_3i_prob = Smallest_ProbSet(N_exp, Prob3, Lumi_scale, Percent_error, MCopt);
     }
 
-    double N_1Prob = N_1i_prob[1] + 0.5;
+    double N_1Prob  = N_1i_prob[1] + 0.5;
     double N_1lProb = N_1i_prob[0] + 0.5;
 
-    double N_2Prob = N_2i_prob[1] + 0.5;
-    double N_2lProb =  N_2i_prob[0] + 0.5;
+    double N_2Prob  = N_2i_prob[1] + 0.5;
+    double N_2lProb = N_2i_prob[0] + 0.5;
 
-    double N_3Prob = N_3i_prob[1] + 0.5;
-    double N_3lProb =N_3i_prob[0] + 0.5;
+    double N_3Prob  = N_3i_prob[1] + 0.5;
+    double N_3lProb = N_3i_prob[0] + 0.5;
 
-    if( N_1i_prob[0] == 0)N_1lProb = 0.1;
-    if( N_2i_prob[0] == 0)N_2lProb = 0.1;
-    if(N_3i_prob[0] == 0)N_3lProb = 0.1;
+    if( N_1i_prob[0] == 0) N_1lProb = 0.1;
+    if( N_2i_prob[0] == 0) N_2lProb = 0.1;
+    if( N_3i_prob[0] == 0) N_3lProb = 0.1;
 
     hProb_1->SetBinContent(i+1,N_1Prob);
     hProb_2->SetBinContent(i+1,N_2Prob);
@@ -801,6 +800,7 @@ void  RA_PoiStat::Plot_w3ProbLines_lin(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_s
         N_3i_prob = Smallest_ProbSet(N_exp, Prob3, Lumi_scale, Percent_error, MCopt);
     }
 
+    // see paper plot half a bin more
     double N_1Prob  = N_1i_prob[1] + 0.5;
     double N_1lProb = N_1i_prob[0] + 0.5;
 
