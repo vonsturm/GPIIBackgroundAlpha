@@ -540,7 +540,7 @@ void  RA_PoiStat::Plot_Cumulative(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale 
     hProb_3->SetLineColor(kRed-7);
     hProb_1l->SetLineColor(kYellow-7);
     hProb_2l->SetLineColor(kRed-7);
-    hProb_3l->SetLineColor(kWhite);
+    hProb_3l->SetLineColor(kRed-7);
 
     hProb_1->SetFillColor(kGreen-7);
     hProb_2->SetFillColor(kYellow-7);
@@ -743,7 +743,7 @@ void  RA_PoiStat::Plot_w3ProbLines(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale
   hProb_3->SetLineColor(kRed-7);
   hProb_1l->SetLineColor(kYellow-7);
   hProb_2l->SetLineColor(kRed-7);
-  hProb_3l->SetLineColor(kWhite);
+  hProb_3l->SetLineColor(kRed-7);
 
   hProb_1->SetFillColor(kGreen-7);
   hProb_2->SetFillColor(kYellow-7);
@@ -865,7 +865,7 @@ void  RA_PoiStat::Plot_w3ProbLines_ratio(TH1D* h_mc ,TH1D* h_data, Double_t Lumi
   hProb_3->SetLineColor(kRed-7);
   hProb_1l->SetLineColor(kYellow-7);
   hProb_2l->SetLineColor(kRed-7);
-  hProb_3l->SetLineColor(kWhite);
+  hProb_3l->SetLineColor(kRed-7);
 
   hProb_1->SetFillColor(kGreen-7);
   hProb_2->SetFillColor(kYellow-7);
@@ -982,7 +982,7 @@ void  RA_PoiStat::Plot_w3ProbLines_lin(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_s
   hProb_3->SetLineColor(kRed-7);
   hProb_1l->SetLineColor(kYellow-7);
   hProb_2l->SetLineColor(kRed-7);
-  hProb_3l->SetLineColor(kWhite);
+  hProb_3l->SetLineColor(kRed-7);
 
   hProb_1->SetFillColor(kGreen-7);
   hProb_2->SetFillColor(kYellow-7);
