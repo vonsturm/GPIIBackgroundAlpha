@@ -29,6 +29,8 @@ void PlotCumu_Alpha( string filename, string outfilename )
 {
     load_style();
 
+    RA_PoiStat * h2_ = new RA_PoiStat();
+
     TFile * fitfile = new TFile( filename.c_str() );
 
     TH1D* h_data = (TH1D*) fitfile -> Get("hSum");
@@ -37,21 +39,15 @@ void PlotCumu_Alpha( string filename, string outfilename )
 
     TH1D* h_mc   = (TH1D*) fitfile -> Get("hMC");
 
-    TCanvas * c1= new TCanvas("c1", "c1", 5, 5, 600, 500);
-    TPad *pad1 = new TPad("pad1",
-    "The pad with the function",0.02,0.40,0.98,0.98);
-    TPad *pad2 = new TPad("pad2",
-    "The pad with the histogram",0.02,0.02,0.98,0.40);
-    pad1->Draw();
-    pad2->Draw();
+    TCanvas * c1= new TCanvas("c1", "c1", 5, 5, 600, 750);
+    TPad *pad1 = new TPad("pad1", "The pad with the data",0.02,0.50,0.98,0.98);
+    TPad *pad2 = new TPad("pad2", "The pad with the brazilian plot",0.02,0.25,0.98,0.50);
+    TPad *pad3 = new TPad("pad3", "The pad with the cumulative brazilian plot",0.02,0.02,0.98,0.25);
+    pad1->Draw(); pad2->Draw(); pad3->Draw();
 
-    pad1->cd();
-    pad1->SetTickx(1);
-    pad1->SetLogy(1);
-    pad1->SetTopMargin(0.05);
-    pad1->SetBottomMargin(0);
+    pad1->cd(); pad1->SetTickx(1); pad1->SetLogy(1); pad1->SetTopMargin(0.05); pad1->SetBottomMargin(0);
 
-    h_data-> Draw("p");
+    h_data -> Draw("p");
     h_mc   -> Draw("histsame");
 
     TLegend * myLeg1 = new TLegend(0.31,0.75,0.42,0.91,"");
@@ -69,12 +65,10 @@ void PlotCumu_Alpha( string filename, string outfilename )
   // //   tl.DrawLatex(620., 3764, "golden data set");
   //   tl.DrawLatex(1850., 50., "BEGe sum data set");
 
-    pad2->cd();
-    pad2->SetTickx(1);
-    pad2->SetBottomMargin(0.25);
-    pad2->SetTopMargin(0);
+    pad2->cd(); pad2->SetTickx(1); pad2->SetBottomMargin(0.25); pad2->SetTopMargin(0);
+    h2_ -> Plot_w3ProbLines( h_mc, h_data, 1., 0., "Smallest", 0.683, 0.954, 0.997, "infinite" );
 
-    RA_PoiStat * h2_ = new RA_PoiStat();
+    pad3->cd(); pad3->SetTickx(1); pad3->SetBottomMargin(0.25); pad3->SetTopMargin(0);
     h2_ -> Plot_Cumulative( h_mc, h_data, 1., 0., "Smallest", 0.683, 0.954, 0.997, "infinite" );
 
     // Draw Legend
@@ -109,10 +103,10 @@ void PlotCumu_Alpha( string filename, string outfilename )
     TH1D * h3 = new TH1D(); h3->SetFillColor(kRed-7);
     myLeg14->AddEntry(h3,"3#sigma","F");
 
-    myLeg11->Draw();
-    myLeg12->Draw();
-    myLeg13->Draw();
-    myLeg14->Draw();
+//    myLeg11->Draw();
+//    myLeg12->Draw();
+//    myLeg13->Draw();
+//    myLeg14->Draw();
 
     TFile * file = new TFile( outfilename.c_str() , "RECREATE");
     c1->Write();

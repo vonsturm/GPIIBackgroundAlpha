@@ -70,10 +70,10 @@ class RA_PoiStat : public TObject
   int * Smallest_ProbSet(double nu, double alpha, double s, double error, TString MCopt);
 
   // an example to use above functions and draw probablity bands
-  void Plot_w1ProbLine(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale,Double_t Percent_error, TString ProbSet, Double_t Prob, TString MCopt);
-  void Plot_w3ProbLines(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale,Double_t Percent_error, TString ProbSet , Double_t Prob1, Double_t Prob2,  Double_t Prob3, TString MCopt);
+  void Plot_w1ProbLine       (TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale,Double_t Percent_error, TString ProbSet, Double_t Prob, TString MCopt);
+  void Plot_w3ProbLines      (TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale,Double_t Percent_error, TString ProbSet , Double_t Prob1, Double_t Prob2,  Double_t Prob3, TString MCopt);
   void Plot_w3ProbLines_ratio(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale,Double_t Percent_error, TString ProbSet , Double_t Prob1, Double_t Prob2,  Double_t Prob3, TString MCopt);
-  void Plot_w3ProbLines_lin(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale,Double_t Percent_error, TString ProbSet , Double_t Prob1, Double_t Prob2,  Double_t Prob3, TString opt, TString MCopt);
+  void Plot_w3ProbLines_lin  (TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale,Double_t Percent_error, TString ProbSet , Double_t Prob1, Double_t Prob2,  Double_t Prob3, TString opt, TString MCopt);
 
   // this has to be the last line of the class definition
   ClassDef(RA_PoiStat,1);
