@@ -577,7 +577,7 @@ void  RA_PoiStat::Plot_w1ProbLine(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale 
 
   Int_t myLineWidth=1;
 
-  Double_t tmpMaxData = h_data->GetBinContent( h_data->GetMaxiLumi_scalemumBin() );
+  Double_t tmpMaxData = h_data->GetBinContent( h_data->GetMaximumBin() );
   Double_t tmpMaxMC   = h_mc->GetMaximum();
   Double_t tmpMax     = TMath::Max( (tmpMaxData+TMath::Sqrt(tmpMaxData)), tmpMaxMC );
 
