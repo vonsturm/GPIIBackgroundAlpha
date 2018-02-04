@@ -2,6 +2,8 @@
 *.d
 *.txt
 *.json
+*.root
+*.png
 
 *_article*
 
