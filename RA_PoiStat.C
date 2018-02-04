@@ -679,8 +679,6 @@ void  RA_PoiStat::Plot_w3ProbLines(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale
   da_copy->SetMarkerSize(1.5);
   da_copy->SetMarkerColor(kBlack);
 
-  mc_copy->SetFillColor(kWhite);
-
   Int_t nBin = h_data->GetNbinsX();
   cout << " Nbins in this hist : " << nBin << endl;
   int * N_1i_prob = new int[2];
@@ -726,24 +724,20 @@ void  RA_PoiStat::Plot_w3ProbLines(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale
     hProb_2l->SetBinContent(i+1,N_2lProb);
     hProb_3l->SetBinContent(i+1,N_3lProb);
 
-    h_data->SetBinError( i+1, 0. );
+    da_copy->SetBinError( i+1, 0. );
 
     cout << "Nmc = "                         << N_exp
          << " N_" << int(Prob1*100) << " = " << N_1Prob
          << " N_" << int(Prob2*100) << " = " << N_2Prob
          << " N_" << int(Prob3*100) << " = " << N_3Prob << endl;
-
-    // trick to have some representation for 0 data events.......
-    if(N_obs > 0) da_copy->SetBinContent(i+1,0.);
-    else          da_copy->SetBinContent(i+1,0.11);
   }
 
-  h_data->SetStats(0);
-  h_data->SetMarkerStyle(20);
-  h_data->SetMarkerSize(0.7);
-  h_data->SetMaximum(4.7*tmpMaxData);
+  da_copy->SetStats(0);
+  da_copy->SetMarkerStyle(20);
+  da_copy->SetMarkerSize(0.7);
+  da_copy->SetMaximum(4.7*tmpMaxData);
 
-  h_data->SetMinimum(0.10);
+  da_copy->SetMinimum(0.01);
 
   hProb_1->SetLineWidth(myLineWidth*2.0);
   hProb_1->SetLineColor(kGreen-7);
@@ -756,31 +750,25 @@ void  RA_PoiStat::Plot_w3ProbLines(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale
   hProb_1->SetFillColor(kGreen-7);
   hProb_2->SetFillColor(kYellow-7);
   hProb_3->SetFillColor(kRed-7);
-  h_mc->SetFillColor(kGreen-7);
-  hProb_1l->SetFillColor(kYellow-7);
+  hProb_1l->SetFillColor(kGreen-7);
   hProb_2l->SetFillColor(kYellow-7);
   hProb_3l->SetFillColor(kRed-7);
 
-  h_mc->SetLineColor(kBlack);
-  h_mc->SetLineWidth(myLineWidth*2.0);
-
   TString mcOpt = "same";
 
-  h_data->SetTitle("");
-  h_data->DrawCopy("p");
+  da_copy->SetTitle("");
+  da_copy->DrawCopy("p");
 
   hProb_3->DrawCopy(mcOpt+"hist");
   hProb_2->DrawCopy(mcOpt+"hist");
   hProb_1->DrawCopy(mcOpt+"hist");
-  h_mc->DrawCopy(mcOpt+"hist");
+  mc_copy->DrawCopy(mcOpt+"hist");
   hProb_1l->DrawCopy(mcOpt+"hist");
   hProb_2l->DrawCopy(mcOpt+"hist");
   hProb_3l->DrawCopy(mcOpt+"hist");
 
-  h_data->DrawCopy("Sameep");
-  h_data->DrawCopy("SameAxis");
-  mc_copy->DrawCopy(mcOpt+"hist");
-  da_copy->DrawCopy("Same p");
+  da_copy->DrawCopy("Sameep");
+  da_copy->DrawCopy("SameAxis");
 }
 
 
