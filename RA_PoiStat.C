@@ -1,6 +1,6 @@
 #define RA_POISTAT_CXX
 
-#include <RA_PoiStat.h>
+#include "RA_PoiStat.h"
 
 
 // log factorial

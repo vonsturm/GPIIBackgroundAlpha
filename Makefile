@@ -47,19 +47,16 @@ LIBS += $(shell mgdo-config --libs)
 CXXFLAGS += $(shell gelatio-config --cflags)
 LIBS += $(shell gelatio-config --libs)
 
-# ProgressBar
-CXXFLAGS += -I$(PROGRESS_BAR_DIR)
-LIBS += -L$(PROGRESS_BAR_DIR) -lProgressBar
-
 # jsoncpp
+JSONCPP_BASE_DIR = /lfs/l2/gerda/sturm/sw/.install/jsoncpp/linux-scientific-7.3-x86_64/1.8.4
 CXXFLAGS += -I$(JSONCPP_BASE_DIR)/include/
-LIBS += -L$(JSONCPP_BASE_DIR)/lib -ljsoncpp
+LIBS += -L$(JSONCPP_BASE_DIR)/lib64 -ljsoncpp
 
 # List of all classes (models) used in the program
 # Add classes to the end. Backslash indicates continuation
 # on the next line
 CXXSRCS      = \
-	GPIIBackgroundAlpha.cxx
+	GPIIBackgroundAlpha.cxx ProgressBar.cxx
 
 # ----------------------------------------------------------------------
 # don't change lines below unless you know what you're doing
