@@ -526,8 +526,8 @@ void  RA_PoiStat::Plot_Cumulative(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale 
     da_copy->SetStats(0);
     da_copy->SetMarkerStyle(20);
     da_copy->SetMarkerSize(0.7);
-    da_copy->SetMinimum(1.);
-    da_copy->SetMaximum(0.);
+    da_copy->SetMaximum(1.0);
+    da_copy->SetRangeUser(0.,1.);
 
     hProb_1->SetLineWidth(myLineWidth*2.0);
     hProb_1->SetLineColor(kGreen-7);
