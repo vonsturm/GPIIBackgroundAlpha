@@ -519,9 +519,9 @@ void  RA_PoiStat::Plot_Cumulative(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale 
       mc_copy->SetBinContent( i+1, C_mc );
 
       cout << "Nmc = " << N_exp << endl;
-      cout << "C_" << int(Prob1*100) << " = [ " << C_1i_Prob[0] << " : " << C_1i_Prob[1] << " ]" << endl;
-      cout << "C_" << int(Prob2*100) << " = [ " << C_2i_Prob[0] << " : " << C_2i_Prob[1] << " ]" << endl;
-      cout << "C_" << int(Prob3*100) << " = [ " << C_3i_Prob[0] << " : " << C_3i_Prob[1] << " ]" << endl;
+      cout << "C_" << int(Prob1*100) << " = [ " << C_1i_prob[0] << " : " << C_1i_prob[1] << " ]" << endl;
+      cout << "C_" << int(Prob2*100) << " = [ " << C_2i_prob[0] << " : " << C_2i_prob[1] << " ]" << endl;
+      cout << "C_" << int(Prob3*100) << " = [ " << C_3i_prob[0] << " : " << C_3i_prob[1] << " ]" << endl;
       cout << "C_mc(" << N_exp << ") = " << C_mc << endl;
       cout << "C_data(" << N_obs << ") = " << C_data << endl;
     }
