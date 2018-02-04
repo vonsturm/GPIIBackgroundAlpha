@@ -538,16 +538,16 @@ void  RA_PoiStat::Plot_Cumulative(TH1D* h_mc ,TH1D* h_data, Double_t Lumi_scale 
     hProb_1->SetLineColor(kGreen-7);
     hProb_2->SetLineColor(kYellow-7);
     hProb_3->SetLineColor(kRed-7);
-    hProb_1l->SetLineColor(kGreen-7);
-    hProb_2l->SetLineColor(kYellow-7);
-    hProb_3l->SetLineColor(kRed-7);
+    hProb_1l->SetLineColor(kYellow-7);
+    hProb_2l->SetLineColor(kRed-7);
+    hProb_3l->SetLineColor(kWhite);
 
     hProb_1->SetFillColor(kGreen-7);
     hProb_2->SetFillColor(kYellow-7);
     hProb_3->SetFillColor(kRed-7);
     hProb_1l->SetFillColor(kYellow-7);
-    hProb_2l->SetFillColor(kYellow-7);
-    hProb_3l->SetFillColor(kRed-7);
+    hProb_2l->SetFillColor(kRed-7);
+    hProb_3l->SetFillColor(kWhite);
 
     mc_copy->SetLineColor(kBlack);
     mc_copy->SetLineWidth(myLineWidth*2.0);
